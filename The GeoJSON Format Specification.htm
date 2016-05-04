@@ -1,0 +1,641 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0036) -->
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="generator" content="Docutils 0.4: http://docutils.sourceforge.net/">
+<title>The GeoJSON Format Specification</title>
+<meta name="authors" content="Howard Butler (Hobu Inc.)  Martin Daly (Cadcorp)  Allan Doyle (MIT)  Sean Gillies (UNC-Chapel Hill)  Tim Schaub (OpenGeo)  Christopher Schmidt (MetaCarta)">
+<meta name="date" content="16 June 2008">
+<meta name="copyright" content="Copyright © 2008 by the Authors. This work is licensed under a Creative Commons Attribution 3.0 United States License.">
+<style type="text/css">
+
+/* css */
+
+body {
+  font: 90% 'Lucida Grande', Verdana, Geneva, Lucida, Arial, Helvetica, sans-serif;
+  background: #ffffff;
+  color: black;
+  margin: 2em;
+  padding: 2em;
+}
+
+a[href] {
+  color: #436976;
+  background-color: transparent;
+}
+
+a.toc-backref {
+  text-decoration: none;
+}
+
+h1 a[href] {
+  text-decoration: none;
+  color: #fcb100;
+  background-color: transparent;
+}
+
+a.strong {
+  font-weight: bold;
+}
+
+img {
+  margin: 0;
+  border: 0;
+}
+
+p {
+  margin: 0.5em 0 1em 0;
+  line-height: 1.5em;
+}
+p a {
+  text-decoration: underline;
+}
+p a:visited {
+  color: purple;
+  background-color: transparent;
+}
+p a:active {
+  color: red;
+  background-color: transparent;
+}
+a:hover {
+  text-decoration: none;
+}
+p img {
+  border: 0;
+  margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #003a6b;
+  background-color: transparent;
+  font: 100% 'Lucida Grande', Verdana, Geneva, Lucida, Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding-top: 0.5em;
+}
+
+h1 {
+  font-size: 160%;
+  margin-bottom: 0.5em;
+  border-bottom: 1px solid #fcb100;
+}
+h2 {
+  font-size: 140%;
+  margin-bottom: 0.5em;
+  border-bottom: 1px solid #aaa;
+}
+h3 {
+  font-size: 130%;
+  margin-bottom: 0.5em;
+  text-decoration: underline;
+}
+h4,  {
+  font-size: 110%;
+  font-weight: bold;
+}
+h5 {
+  font-size: 100%;
+  font-weight: bold;
+}
+h6 {
+  font-size: 80%;
+  font-weight: bold;
+}
+
+ul a, ol a {
+  text-decoration: underline;
+}
+
+dt {
+  font-weight: bold;
+}
+dt a {
+  text-decoration: none;
+}
+
+dd {
+  line-height: 1.5em;
+  margin-bottom: 1em;
+}
+
+legend {
+  background: #ffffff;
+  padding: 0.5em;
+}
+
+form {
+  margin: 0;
+}
+
+
+dl.form {
+  margin: 0;
+  padding: 1em;
+}
+
+dl.form dt {
+  width: 30%;
+  float: left;
+  margin: 0;
+  padding: 0 0.5em 0.5em 0;
+  text-align: right;
+}
+
+input {
+  font: 100% 'Lucida Grande', Verdana, Geneva, Lucida, Arial, Helvetica, sans-serif;
+  color: black;
+  background-color: white;
+  vertical-align: middle;
+}
+
+abbr, acronym, .explain {
+  color: black;
+  background-color: transparent;
+}
+
+q, blockquote {
+}
+
+code, pre {
+  font-family: monospace;
+  font-size: 1.2em;
+  display: block;
+  padding: 10px;
+  border: 1px solid #838183;
+  background-color: #eee;
+  color: #000;
+  overflow: auto;
+  margin: 0.5em 1em;
+}
+
+tt.docutils {
+  background-color: #eeeeee;
+}
+
+.docinfo {
+  text-align: left;
+}
+
+.topic-title {
+  font-weight: bold
+}
+
+div.highlight {
+  margin-left: 2em ;
+  margin-right: 2em ;
+  background-color: #eeeeee
+  }
+
+</style><style type="text/css"></style>
+</head>
+<body>
+<div class="document" id="the-geojson-format-specification">
+<h1 class="title">The GeoJSON Format Specification</h1>
+<table class="docinfo" frame="void" rules="none">
+<colgroup><col class="docinfo-name">
+<col class="docinfo-content">
+</colgroup><tbody valign="top">
+<tr><th class="docinfo-name">Authors:</th>
+<td>Howard Butler (Hobu Inc.)
+<br>Martin Daly (Cadcorp)
+<br>Allan Doyle (MIT)
+<br>Sean Gillies (UNC-Chapel Hill)
+<br>Tim Schaub (OpenGeo)
+<br>Christopher Schmidt (MetaCarta)</td></tr>
+<tr><th class="docinfo-name">Revision:</th>
+<td>1.0</td></tr>
+<tr><th class="docinfo-name">Date:</th>
+<td>16 June 2008</td></tr>
+<tr><th class="docinfo-name">Copyright:</th>
+<td>Copyright © 2008 by the Authors. This work is licensed under a <a class="reference" href="http://creativecommons.org/licenses/by/3.0/us/">Creative Commons Attribution 3.0
+United States License</a>.</td></tr>
+</tbody>
+</table>
+<div class="abstract topic">
+<p class="topic-title first">Abstract</p>
+<p>GeoJSON is a geospatial data interchange format based on JavaScript Object
+Notation (JSON).</p>
+</div>
+<div class="contents topic">
+<p class="topic-title first"><a id="contents" name="contents">Contents</a></p>
+<ul class="simple">
+<li><a class="reference" href="#introduction" id="id8" name="id8">1. Introduction</a><ul>
+<li><a class="reference" href="#examples" id="id9" name="id9">1.1. Examples</a></li>
+<li><a class="reference" href="#definitions" id="id10" name="id10">1.2. Definitions</a></li>
+</ul>
+</li>
+<li><a class="reference" href="#geojson-objects" id="id11" name="id11">2. GeoJSON Objects</a><ul>
+<li><a class="reference" href="#geometry-objects" id="id12" name="id12">2.1 Geometry Objects</a><ul>
+<li><a class="reference" href="#positions" id="id13" name="id13">2.1.1. Positions</a></li>
+<li><a class="reference" href="#point" id="id14" name="id14">2.1.2. Point</a></li>
+<li><a class="reference" href="#multipoint" id="id15" name="id15">2.1.3. MultiPoint</a></li>
+<li><a class="reference" href="#linestring" id="id16" name="id16">2.1.4. LineString</a></li>
+<li><a class="reference" href="#multilinestring" id="id17" name="id17">2.1.5. MultiLineString</a></li>
+<li><a class="reference" href="#polygon" id="id18" name="id18">2.1.6. Polygon</a></li>
+<li><a class="reference" href="#multipolygon" id="id19" name="id19">2.1.7. MultiPolygon</a></li>
+<li><a class="reference" href="#geometry-collection" id="id20" name="id20">2.1.8 Geometry Collection</a></li>
+</ul>
+</li>
+<li><a class="reference" href="#feature-objects" id="id21" name="id21">2.2. Feature Objects</a></li>
+<li><a class="reference" href="#feature-collection-objects" id="id22" name="id22">2.3. Feature Collection Objects</a></li>
+</ul>
+</li>
+<li><a class="reference" href="#coordinate-reference-system-objects" id="id23" name="id23">3. Coordinate Reference System Objects</a><ul>
+<li><a class="reference" href="#named-crs" id="id24" name="id24">3.1. Named CRS</a></li>
+<li><a class="reference" href="#linked-crs" id="id25" name="id25">3.2. Linked CRS</a><ul>
+<li><a class="reference" href="#link-objects" id="id26" name="id26">3.2.1. Link Objects</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference" href="#bounding-boxes" id="id27" name="id27">4. Bounding Boxes</a></li>
+<li><a class="reference" href="#appendix-a-geometry-examples" id="id28" name="id28">Appendix A. Geometry Examples</a><ul>
+<li><a class="reference" href="#id2" id="id29" name="id29">Point</a></li>
+<li><a class="reference" href="#id3" id="id30" name="id30">LineString</a></li>
+<li><a class="reference" href="#id4" id="id31" name="id31">Polygon</a></li>
+<li><a class="reference" href="#id5" id="id32" name="id32">MultiPoint</a></li>
+<li><a class="reference" href="#id6" id="id33" name="id33">MultiLineString</a></li>
+<li><a class="reference" href="#id7" id="id34" name="id34">MultiPolygon</a></li>
+<li><a class="reference" href="#geometrycollection" id="id35" name="id35">GeometryCollection</a></li>
+</ul>
+</li>
+<li><a class="reference" href="#appendix-b-contributors" id="id36" name="id36">Appendix B. Contributors</a></li>
+</ul>
+</div>
+<div class="section">
+<h1><a class="toc-backref" href="#id8" id="introduction" name="introduction">1. Introduction</a></h1>
+<p>
+GeoJSON is a format for encoding a variety of geographic data structures.  A
+GeoJSON object may represent a geometry, a feature, or a collection of
+features.  GeoJSON supports the following geometry types: Point, LineString,
+Polygon, MultiPoint, MultiLineString, MultiPolygon, and GeometryCollection.
+Features in GeoJSON contain a geometry object and additional properties, and a
+feature collection represents a list of features.
+</p>
+<p>A complete GeoJSON data structure is always an object (in JSON terms). In
+GeoJSON, an object consists of a collection of name/value pairs -- also called
+members. For each member, the name is always a string. Member values are either
+a string, number, object, array or one of the literals: "true", "false", and
+"null". An array consists of elements where each element is a value as
+described above.</p>
+<div class="section">
+<h2><a class="toc-backref" href="#id9" id="examples" name="examples">1.1. Examples</a></h2>
+<p>A GeoJSON feature collection:</p>
+<pre class="literal-block">{ "type": "FeatureCollection",
+  "features": [
+    { "type": "Feature",
+      "geometry": {"type": "Point", "coordinates": [102.0, 0.5]},
+      "properties": {"prop0": "value0"}
+      },
+    { "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [102.0, 0.0], [103.0, 1.0], [104.0, 0.0], [105.0, 1.0]
+          ]
+        },
+      "properties": {
+        "prop0": "value0",
+        "prop1": 0.0
+        }
+      },
+    { "type": "Feature",
+       "geometry": {
+         "type": "Polygon",
+         "coordinates": [
+           [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0],
+             [100.0, 1.0], [100.0, 0.0] ]
+           ]
+       },
+       "properties": {
+         "prop0": "value0",
+         "prop1": {"this": "that"}
+         }
+       }
+     ]
+   }
+</pre>
+</div>
+<div class="section">
+<h2><a class="toc-backref" href="#id10" id="definitions" name="definitions">1.2. Definitions</a></h2>
+<ul class="simple">
+<li>JavaScript Object Notation (JSON), and the terms object, name, value, array,
+and number, are defined in IETF RTC 4627, at
+<a class="reference" href="http://www.ietf.org/rfc/rfc4627.txt">http://www.ietf.org/rfc/rfc4627.txt</a>.</li>
+<li>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD",
+"SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be
+interpreted as described in IETF RFC 2119, at
+<a class="reference" href="http://www.ietf.org/rfc/rfc2119.txt">http://www.ietf.org/rfc/rfc2119.txt</a>.</li>
+</ul>
+</div>
+</div>
+<div class="section">
+<h1><a class="toc-backref" href="#id11" id="geojson-objects" name="geojson-objects">2. GeoJSON Objects</a></h1>
+<p>GeoJSON always consists of a single object. This object (referred to as the
+GeoJSON object below) represents a geometry, feature, or collection of
+features.</p>
+<ul class="simple">
+<li>The GeoJSON object may have any number of members (name/value pairs).</li>
+<li>The GeoJSON object must have a member with the name "type". This member's
+value is a string that determines the type of the GeoJSON object.</li>
+<li>The value of the type member must be one of: "Point", "MultiPoint",
+"LineString", "MultiLineString", "Polygon", "MultiPolygon",
+"GeometryCollection", "Feature", or "FeatureCollection". The case of the type
+member values must be as shown here.</li>
+<li>A GeoJSON object may have an optional "crs" member, the value of which must
+be a coordinate reference system object (see <a class="reference" href="#coordinate-reference-system-objects">3. Coordinate Reference System
+Objects</a>).</li>
+<li>A GeoJSON object may have a "bbox" member, the value of which must be a
+bounding box array (see <a class="reference" href="#bounding-boxes">4. Bounding Boxes</a>).</li>
+</ul>
+<div class="section">
+<h2><a class="toc-backref" href="#id12" id="geometry-objects" name="geometry-objects">2.1 Geometry Objects</a></h2>
+<p>A geometry is a GeoJSON object where the type member's value is one of the
+following strings: "Point", "MultiPoint", "LineString", "MultiLineString",
+"Polygon", "MultiPolygon", or "GeometryCollection".</p>
+<p>A GeoJSON geometry object of any type other than "GeometryCollection" must have
+a member with the name "coordinates". The value of the coordinates member is
+always an array. The structure for the elements in this array is determined by
+the type of geometry.</p>
+<div class="section">
+<h3><a class="toc-backref" href="#id13" id="positions" name="positions">2.1.1. Positions</a></h3>
+<p>A position is the fundamental geometry construct. The "coordinates" member of a
+geometry object is composed of one position (in the case of a Point geometry),
+an array of positions (LineString or MultiPoint geometries), an array of arrays
+of positions (Polygons, MultiLineStrings), or a multidimensional array of
+positions (MultiPolygon).</p>
+<p>A position is represented by an array of numbers. There must be at least two
+elements, and may be more. The order of elements must follow x, y, z order
+(easting, northing, altitude for coordinates in a projected coordinate
+reference system, or longitude, latitude, altitude for coordinates in a
+geographic coordinate reference system). Any number of additional elements are
+allowed -- interpretation and meaning of additional elements is beyond the
+scope of this specification.</p>
+<p>Examples of positions and geometries are provided in <a class="reference" href="#appendix-a-geometry-examples">Appendix A. Geometry
+Examples</a>.</p>
+</div>
+<div class="section">
+<h3><a class="toc-backref" href="#id14" id="point" name="point">2.1.2. Point</a></h3>
+<p>For type "Point", the "coordinates" member must be a single position.</p>
+</div>
+<div class="section">
+<h3><a class="toc-backref" href="#id15" id="multipoint" name="multipoint">2.1.3. MultiPoint</a></h3>
+<p>For type "MultiPoint", the "coordinates" member must be an array of positions.</p>
+</div>
+<div class="section">
+<h3><a class="toc-backref" href="#id16" id="linestring" name="linestring">2.1.4. LineString</a></h3>
+<p>For type "LineString", the "coordinates" member must be an array of two or more
+positions.</p>
+<p>A LinearRing is closed LineString with 4 or more positions. The first and last
+positions are equivalent (they represent equivalent points). Though a
+LinearRing is not explicitly represented as a GeoJSON geometry type, it is
+referred to in the Polygon geometry type definition.</p>
+</div>
+<div class="section">
+<h3><a class="toc-backref" href="#id17" id="multilinestring" name="multilinestring">2.1.5. MultiLineString</a></h3>
+<p>For type "MultiLineString", the "coordinates" member must be an array of
+LineString coordinate arrays.</p>
+</div>
+<div class="section">
+<h3><a class="toc-backref" href="#id18" id="polygon" name="polygon">2.1.6. Polygon</a></h3>
+<p>For type "Polygon", the "coordinates" member must be an array of LinearRing
+coordinate arrays. For Polygons with multiple rings, the first must be the
+exterior ring and any others must be interior rings or holes.</p>
+</div>
+<div class="section">
+<h3><a class="toc-backref" href="#id19" id="multipolygon" name="multipolygon">2.1.7. MultiPolygon</a></h3>
+<p>For type "MultiPolygon", the "coordinates" member must be an array of Polygon
+coordinate arrays.</p>
+</div>
+<div class="section">
+<h3><a class="toc-backref" href="#id20" id="geometry-collection" name="geometry-collection">2.1.8 Geometry Collection</a></h3>
+<p>A GeoJSON object with type "GeometryCollection" is a geometry object which
+represents a collection of geometry objects.</p>
+<p>A geometry collection must have a member with the name "geometries". The value
+corresponding to "geometries" is an array. Each element in this array is a
+GeoJSON geometry object.</p>
+</div>
+</div>
+<div class="section">
+<h2><a class="toc-backref" href="#id21" id="feature-objects" name="feature-objects">2.2. Feature Objects</a></h2>
+<p>A GeoJSON object with the type "Feature" is a feature object.</p>
+<ul class="simple">
+<li>A feature object must have a member with the name "geometry". The value of
+the geometry member is a geometry object as defined above or a JSON null
+value.</li>
+<li>A feature object must have a member with the name "properties". The value of
+the properties member is an object (any JSON object or a JSON null value).</li>
+<li>If a feature has a commonly used identifier, that identifier should be
+included as a member of the feature object with the name "id".</li>
+</ul>
+</div>
+<div class="section">
+<h2><a class="toc-backref" href="#id22" id="feature-collection-objects" name="feature-collection-objects">2.3. Feature Collection Objects</a></h2>
+<p>A GeoJSON object with the type "FeatureCollection" is a feature collection
+object.</p>
+<p>An object of type "FeatureCollection" must have a member with the name
+"features". The value corresponding to "features" is an array. Each element in
+the array is a feature object as defined above.</p>
+</div>
+</div>
+<div class="section">
+<h1><a class="toc-backref" href="#id23" id="coordinate-reference-system-objects" name="coordinate-reference-system-objects">3. Coordinate Reference System Objects</a></h1>
+<p>The coordinate reference system (CRS) of a GeoJSON object is determined by its
+"crs" member (referred to as the CRS object below). If an object has no crs
+member, then its parent or grandparent object's crs member may be acquired. If
+no crs member can be so acquired, the default CRS shall apply to the GeoJSON
+object.</p>
+<ul class="simple">
+<li>The default CRS is a geographic coordinate reference system, using the WGS84
+datum, and with longitude and latitude units of decimal degrees.</li>
+<li>The value of a member named "crs" must be a JSON object (referred to as the
+CRS object below) or JSON null. If the value of CRS is null, no CRS can be
+assumed.</li>
+<li>The crs member should be on the top-level GeoJSON object in a hierarchy (in
+feature collection, feature, geometry order) and should not be repeated or
+overridden on children or grandchildren of the object.</li>
+<li>A non-null CRS object has two mandatory members: "type" and "properties".</li>
+<li>The value of the type member must be a string, indicating the type of CRS
+object.</li>
+<li>The value of the properties member must be an object.</li>
+<li>CRS shall not change coordinate ordering (see <a class="reference" href="#positions">2.1.1. Positions</a>).</li>
+</ul>
+<div class="section">
+<h2><a class="toc-backref" href="#id24" id="named-crs" name="named-crs">3.1. Named CRS</a></h2>
+<p>A CRS object may indicate a coordinate reference system by name. In this case,
+the value of its "type" member must be the string "name". The value of its
+"properties" member must be an object containing a "name" member. The value of
+that "name" member must be a string identifying a coordinate reference system.
+OGC CRS URNs such as "urn:ogc:def:crs:OGC:1.3:CRS84" shall be preferred over
+legacy identifiers such as "EPSG:4326":</p>
+<pre class="literal-block">"crs": {
+  "type": "name",
+  "properties": {
+    "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  }
+</pre>
+</div>
+<div class="section">
+<h2><a class="toc-backref" href="#id25" id="linked-crs" name="linked-crs">3.2. Linked CRS</a></h2>
+<p>A CRS object may link to CRS parameters on the Web. In this case, the value of
+its "type" member must be the string "link", and the value of its "properties"
+member must be a Link object (see <a class="reference" href="#link-objects">3.2.1. Link Objects</a>).</p>
+<div class="section">
+<h3><a class="toc-backref" href="#id26" id="link-objects" name="link-objects">3.2.1. Link Objects</a></h3>
+<p>A link object has one required member: "href", and one optional member: "type".</p>
+<p>The value of the required "href" member must be a dereferenceable URI.</p>
+<p>The value of the optional "type" member must be a string that hints at the
+format used to represent CRS parameters at the provided URI. Suggested values
+are: "proj4", "ogcwkt", "esriwkt", but others can be used:</p>
+<pre class="literal-block">"crs": {
+  "type": "link",
+  "properties": {
+    "href": "http://example.com/crs/42",
+    "type": "proj4"
+    }
+  }
+</pre>
+<p>Relative links may be used to direct processors to CRS parameters in an
+auxiliary file:</p>
+<pre class="literal-block">"crs": {
+  "type": "link",
+  "properties": {
+    "href": "data.crs",
+    "type": "ogcwkt"
+    }
+  }
+</pre>
+</div>
+</div>
+</div>
+<div class="section">
+<h1><a class="toc-backref" href="#id27" id="bounding-boxes" name="bounding-boxes">4. Bounding Boxes</a></h1>
+<p>To include information on the coordinate range for geometries, features, or
+feature collections, a GeoJSON object may have a member named "bbox". The value
+of the bbox member must be a 2*n array where n is the number of dimensions
+represented in the contained geometries, with the lowest values for all axes
+followed by the highest values. The axes order of a bbox follows the axes order
+of geometries. In addition, the coordinate reference system for the bbox is
+assumed to match the coordinate reference system of the GeoJSON object of which
+it is a member.</p>
+<p>Example of a bbox member on a feature:</p>
+<pre class="literal-block">{ "type": "Feature",
+  "bbox": [-180.0, -90.0, 180.0, 90.0],
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[
+      [-180.0, 10.0], [20.0, 90.0], [180.0, -5.0], [-30.0, -90.0]
+      ]]
+    }
+  ...
+  }
+</pre>
+<p>Example of a bbox member on a feature collection:</p>
+<pre class="literal-block">{ "type": "FeatureCollection",
+  "bbox": [100.0, 0.0, 105.0, 1.0],
+  "features": [
+    ...
+    ]
+  }
+</pre>
+</div>
+<div class="section">
+<h1><a class="toc-backref" href="#id28" id="appendix-a-geometry-examples" name="appendix-a-geometry-examples">Appendix A. Geometry Examples</a></h1>
+<p>Each of the examples below represents a complete GeoJSON object. Note that
+unquoted whitespace is not significant in JSON. Whitespace is used in the
+examples to help illustrate the data structures, but is not required.</p>
+<div class="section">
+<h2><a class="toc-backref" href="#id29" id="id2" name="id2">Point</a></h2>
+<p>Point coordinates are in x, y order (easting, northing for projected
+coordinates, longitude, latitude for geographic coordinates):</p>
+<pre class="literal-block">{ "type": "Point", "coordinates": [100.0, 0.0] }
+</pre>
+</div>
+<div class="section">
+<h2><a class="toc-backref" href="#id30" id="id3" name="id3">LineString</a></h2>
+<p>Coordinates of LineString are an array of positions (see <a class="reference" href="#positions">2.1.1. Positions</a>):</p>
+<pre class="literal-block">{ "type": "LineString",
+  "coordinates": [ [100.0, 0.0], [101.0, 1.0] ]
+  }
+</pre>
+</div>
+<div class="section">
+<h2><a class="toc-backref" href="#id31" id="id4" name="id4">Polygon</a></h2>
+<p>Coordinates of a Polygon are an array of LinearRing coordinate arrays. The
+first element in the array represents the exterior ring. Any subsequent
+elements represent interior rings (or holes).</p>
+<p>No holes:</p>
+<pre class="literal-block">{ "type": "Polygon",
+  "coordinates": [
+    [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0] ]
+    ]
+ }
+</pre>
+<p>With holes:</p>
+<pre class="literal-block">{ "type": "Polygon",
+  "coordinates": [
+    [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0] ],
+    [ [100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2] ]
+    ]
+ }
+</pre>
+</div>
+<div class="section">
+<h2><a class="toc-backref" href="#id32" id="id5" name="id5">MultiPoint</a></h2>
+<p>Coordinates of a MultiPoint are an array of positions:</p>
+<pre class="literal-block">{ "type": "MultiPoint",
+  "coordinates": [ [100.0, 0.0], [101.0, 1.0] ]
+  }
+</pre>
+</div>
+<div class="section">
+<h2><a class="toc-backref" href="#id33" id="id6" name="id6">MultiLineString</a></h2>
+<p>Coordinates of a MultiLineString are an array of LineString coordinate arrays:</p>
+<pre class="literal-block">{ "type": "MultiLineString",
+  "coordinates": [
+      [ [100.0, 0.0], [101.0, 1.0] ],
+      [ [102.0, 2.0], [103.0, 3.0] ]
+    ]
+  }
+</pre>
+</div>
+<div class="section">
+<h2><a class="toc-backref" href="#id34" id="id7" name="id7">MultiPolygon</a></h2>
+<p>Coordinates of a MultiPolygon are an array of Polygon coordinate arrays:</p>
+<pre class="literal-block">{ "type": "MultiPolygon",
+  "coordinates": [
+    [[[102.0, 2.0], [103.0, 2.0], [103.0, 3.0], [102.0, 3.0], [102.0, 2.0]]],
+    [[[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]],
+     [[100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2]]]
+    ]
+  }
+</pre>
+</div>
+<div class="section">
+<h2><a class="toc-backref" href="#id35" id="geometrycollection" name="geometrycollection">GeometryCollection</a></h2>
+<p>Each element in the geometries array of a GeometryCollection is one of the
+geometry objects described above:</p>
+<pre class="literal-block">{ "type": "GeometryCollection",
+  "geometries": [
+    { "type": "Point",
+      "coordinates": [100.0, 0.0]
+      },
+    { "type": "LineString",
+      "coordinates": [ [101.0, 0.0], [102.0, 1.0] ]
+      }
+  ]
+}
+</pre>
+</div>
+</div>
+<div class="section">
+<h1><a class="toc-backref" href="#id36" id="appendix-b-contributors" name="appendix-b-contributors">Appendix B. Contributors</a></h1>
+<p>The GeoJSON format specification is the product of discussion on the GeoJSON
+list:</p>
+<p><a class="reference" href="http://lists.geojson.org/listinfo.cgi/geojson-geojson.org">http://lists.geojson.org/listinfo.cgi/geojson-geojson.org</a></p>
+</div>
+</div>
+
+
+</body></html>
