@@ -234,7 +234,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\..\..\VMShare\Visual Studio 2010\Projects\OSMLibrary\OSMLibrary\OSMLibrary.vbproj">
+    <ProjectReference Include="..\OSMLibrary\OSMLibrary.vbproj">
       <Project>{7ade5f36-4971-453a-b062-956a12f0b125}</Project>
       <Name>OSMLibrary</Name>
     </ProjectReference>
