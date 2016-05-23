@@ -227,7 +227,7 @@ Public Class BoundaryDB
     Public Class BoundaryItem
         Private _bdb As BoundaryDB
         Private _xNode As XmlElement
-        Public Name As String
+        Public Property Name As String
         Public Name2 As String
         Public Enum BoundaryTypes
             BT_Unknown
@@ -249,6 +249,7 @@ Public Class BoundaryDB
             BT_PrincipalArea
             BT_ScotCouncil
             BT_NIreDistrict
+            BT_ParishGroup
         End Enum
         Public Enum CouncilStyles
             CS_Default
@@ -282,7 +283,7 @@ Public Class BoundaryDB
         Public ParishType As ParishTypes
         Public CouncilStyle As CouncilStyles
         Public BoundaryType As BoundaryTypes
-        Public ONSCode As String
+        Public Property ONSCode As String
         Public ParentCode As String
         Public OSMRelation As Long
         Public AdminLevel As Integer
@@ -301,6 +302,12 @@ Public Class BoundaryDB
             _bdb = bdb
             LoadFromXML(xBnd)
         End Sub
+        Public Shadows ReadOnly Property ToString As String
+            Get
+                Return Name
+            End Get
+        End Property
+
         Public ReadOnly Property TypeCode As String
             Get
                 Return _btcode
@@ -372,6 +379,9 @@ Public Class BoundaryDB
                 Case "n_ireland_district"
                     BoundaryType = BoundaryTypes.BT_NIreDistrict
                     _btcode = "NID"
+                Case "parish_group"
+                    BoundaryType = BoundaryTypes.BT_ParishGroup
+                    _btcode = "PGRP"
                 Case Else
                     MsgBox("unimplemented boundary type " & sTmp)
                     BoundaryType = BoundaryTypes.BT_Nation
@@ -443,6 +453,7 @@ Public Class BoundaryDB
                 Case "country" : BoundaryType = BoundaryTypes.BT_Country
                 Case "community" : BoundaryType = BoundaryTypes.BT_Community
                 Case "n_ireland_district" : BoundaryType = BoundaryTypes.BT_NIreDistrict
+                Case "parish_group" : BoundaryType = BoundaryTypes.BT_ParishGroup
                 Case Else
                     MsgBox("unrecognised boundary type " & s)
                     BoundaryType = BoundaryTypes.BT_Unknown
@@ -517,6 +528,7 @@ Public Class BoundaryDB
                 Case BoundaryTypes.BT_PrincipalArea : sTmp = "wales_district"
                 Case BoundaryTypes.BT_ScotCouncil : sTmp = "scotland_district"
                 Case BoundaryTypes.BT_NIreDistrict : sTmp = "n_ireland_district"
+                Case BoundaryTypes.BT_ParishGroup : sTmp = "parish_group"
                 Case Else
                     sTmp = ""
             End Select
@@ -595,6 +607,12 @@ Public Class BoundaryDB
             f.xItem = Me
             If f.ShowDialog() = DialogResult.OK Then
                 NormName = BoundaryDB.Normalise(Name)
+                If _xNode Is Nothing Then
+                    _xNode = _bdb.xDoc.CreateElement("boundary")
+                    _bdb.xDoc.DocumentElement.AppendChild(_xNode)
+                    SetValue(_xNode, "par_new", ParentCode)
+                    SetValue(_xNode, "par_name", Parent.Name)
+                End If
                 UpdateXML()
                 If _bdb.bChanges Then
                     _bdb.Save()

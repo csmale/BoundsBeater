@@ -85,6 +85,7 @@
     <Compile Include="OSMObject.vb" />
     <Compile Include="OSMPolygon.vb" />
     <Compile Include="OSMRelation.vb" />
+    <Compile Include="OSMRetriever.vb" />
     <Compile Include="OSMUser.vb" />
     <Compile Include="OSMWay.vb" />
   </ItemGroup>

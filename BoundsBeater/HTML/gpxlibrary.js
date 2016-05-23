@@ -49,88 +49,119 @@ relOptions = {
 
   var levelOptions;
 
-levelOptions = [
-    {   // level 0, not used
-        color: 'green',
-        weight: 5,
-        fillColor: '#0f3',
-        fillOpacity: 0.3,
-        pointToLayer: labelRelation
-    },
-    {   // level 1, not used
-         color: 'green',
-         weight: 5,
-         fillColor: '#0f3',
-         fillOpacity: 0.3,
-         pointToLayer: labelRelation
-    },
-    {   // level 2, country
-         color: 'BlueViolet',
-         weight: 5,
-        fill: false,
-         pointToLayer: labelRelation
-    },
-    {   // level 3, not used
-         color: 'green',
-         weight: 5,
-         fillColor: '#0f3',
-         fillOpacity: 0.3,
-         pointToLayer: labelRelation
-    },
-    {   // level 4, nation
-         color: 'green',
-         weight: 5,
-        fill: false,
-         pointToLayer: labelRelation
-    },
-    {   // level 5, region
-         color: 'green',
-         weight: 5,
-        fill: false,
-         pointToLayer: labelRelation
-    },
-    {   // level 6, county / unitary
-        color: 'Blue',
-        weight: 5,
-         fillColor: 'Blue',
-         fillOpacity: 0.3,
-         pointToLayer: labelRelation
-    },
-    {   // level 7, not used
-        color: 'green',
-        weight: 5,
-        fill: false,
-         pointToLayer: labelRelation
-    },
-    {   // level 8, district / borough
-        color: 'Green',
-        weight: 6,
-         fillColor: 'Green',
-         fillOpacity: 0.2,
-         pointToLayer: labelRelation
-    },
-    {   // level 9, not used
-        color: 'green',
-        weight: 5,
-         fillColor: '#0f3',
-         fillOpacity: 0.2,
-         pointToLayer: labelRelation
-    },
-    {   // level 10, parish
-        color: 'Red',
-        weight: 2,
-        fillColor: 'Aqua',
-        fillOpacity: 0.3,
-        pointToLayer: labelRelation
-    },
-    {   // level 11, not used
-        color: 'OrangeRed',
-        weight: 2,
-         fillColor: 'Orange',
-         fillOpacity: 0.3,
-         pointToLayer: labelRelation
-     }
-]
+  levelOptions = [
+      {
+          // level 0, not used
+          color: 'green',
+          weight: 5,
+          fillColor: '#0f3',
+          fillOpacity: 0.3,
+          pointToLayer: labelRelation
+      },
+      {
+          // level 1, not used
+          color: 'green',
+          weight: 5,
+          fillColor: '#0f3',
+          fillOpacity: 0.3,
+          pointToLayer: labelRelation
+      },
+      {
+          // level 2, country
+          color: 'BlueViolet',
+          weight: 5,
+          fill: false,
+          pointToLayer: labelRelation
+      },
+      {
+          // level 3, not used
+          color: 'green',
+          weight: 5,
+          fillColor: '#0f3',
+          fillOpacity: 0.3,
+          pointToLayer: labelRelation
+      },
+      {
+          // level 4, nation
+          color: 'green',
+          weight: 5,
+          fill: false,
+          pointToLayer: labelRelation
+      },
+      {
+          // level 5, region
+          color: 'green',
+          weight: 5,
+          fill: false,
+          pointToLayer: labelRelation
+      },
+      {
+          // level 6, county / unitary
+          color: 'Blue',
+          weight: 5,
+          fillColor: 'Blue',
+          fillOpacity: 0.15,
+          pointToLayer: labelRelation
+      },
+      {
+          // level 7, not used
+          color: 'green',
+          weight: 5,
+          fill: false,
+          pointToLayer: labelRelation
+      },
+      {
+          // level 8, district / borough
+          color: 'Green',
+          weight: 6,
+          fillColor: 'Green',
+          fillOpacity: 0.15,
+          pointToLayer: labelRelation
+      },
+      {
+          // level 9, not used
+          color: 'green',
+          weight: 5,
+          fillColor: '#0f3',
+          fillOpacity: 0.2,
+          pointToLayer: labelRelation
+      },
+      {
+          // level 10, parish
+          color: 'Red',
+          weight: 2,
+          fillColor: 'Aqua',
+          fillOpacity: 0.3,
+          pointToLayer: labelRelation
+      },
+      {
+          // level 11, not used
+          color: 'OrangeRed',
+          weight: 2,
+          fillColor: 'Orange',
+          fillOpacity: 0.3,
+          pointToLayer: labelRelation
+      }
+  ];
+var townOptions = {
+      color: 'Teal',
+      fillColor: 'Teal',
+      fillOpacity: 0.3,
+      pointToLayer: labelRelation
+};
+  var cityOptions = {
+      color: 'Orange',
+      fillColor: 'Orange',
+      fillOpacity: 0.3,
+      pointToLayer: labelRelation
+  };
+  var groupOptions = {
+      color: 'Red',
+      fill: false,
+      pointToLayer: labelRelation
+  };
+
+
 
 if (useTiles == 'osm') {
     mapUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -296,6 +327,19 @@ function drawJSON(j, id) {
             adminLevel = 0;
         }
         opts = levelOptions[adminLevel];
+        if (adminLevel == 10) {
+            if (arg.properties.council_style == "town") {
+                opts = townOptions;
+            } else if (arg.properties.council_style == "city") {
+                opts = cityOptions;
+            } else if (arg.properties.parish_type == "joint_parish_council") {
+                opts = groupOptions;
+            }
+        } else if (adminLevel == 8 || adminLevel == 6) {
+            if (arg.properties.council_style == "city") {
+                opts = cityOptions;
+            }
+        }
     } else {
         opts = relOptions;
     }

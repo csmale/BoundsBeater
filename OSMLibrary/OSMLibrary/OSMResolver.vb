@@ -401,6 +401,8 @@ Public Class OSMResolver
     Public Mode As ResolverMode = ResolverMode.Polygon
     Public Rings As New LinkedList(Of Ring)
     Public Nodes As New List(Of OSMNode)
+    Public Ways As New List(Of OSMWay)
+    Public IgnoreWays As New List(Of OSMWay)
 
     Public Sub New()
         MyBase.New()
@@ -418,15 +420,33 @@ Public Class OSMResolver
 
         If _relation Is Nothing Then _relation = rel
 
-        'first pass: zip through all the members and see what we have
+        ' pass 1: collect all ways which are not internal borders between any of the
+        ' relations merged in
+        For Each m As OSMRelationMember In rel.Members
+            If m.Type <> OSMObject.ObjectType.Way Then
+                Continue For
+            End If
+            If Ways.Contains(m.Member) Then
+                IgnoreWays.Add(m.Member)
+            Else
+                Ways.Add(m.Member)
+            End If
+        Next
+
+        ' pass 2: process node members
+        For Each m As OSMRelationMember In rel.Members
+            If m.Type = OSMObject.ObjectType.Node Then
+                If Not Nodes.Contains(m.Member) Then Nodes.Add(m.Member)
+            End If
+        Next
+
+        ' pass 3: starting from clean slate, process ways into (partial) rings
+        Rings.Clear()
         For Each m As OSMRelationMember In rel.Members
             sTmp = ""
-            If m.Type = OSMObject.ObjectType.Node Then
-                Nodes.Add(m.Member)
-            ElseIf m.Type = OSMObject.ObjectType.Relation Then
-                ' ignore nested relations
-            ElseIf m.Type = OSMObject.ObjectType.Way Then
+            If m.Type = OSMObject.ObjectType.Way Then
                 ' here be magic!
+                If IgnoreWays.Contains(m.Member) Then Continue For
                 bLinked = False
                 For Each r In Rings
                     If r.isClosed() Then
@@ -450,7 +470,7 @@ Public Class OSMResolver
             End If
         Next
 
-        ' second pass: see if we can link the partial rings together
+        ' pass 4: see if we can link the partial rings together
         Dim rn As LinkedListNode(Of Ring)
         Dim r2n As LinkedListNode(Of Ring)
 

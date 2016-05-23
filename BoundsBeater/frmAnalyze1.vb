@@ -3,6 +3,7 @@ Imports System.Environment
 Imports System.Runtime.InteropServices.ComTypes
 Imports Microsoft.VisualBasic.FileIO
 Imports ProtoBuf.Meta
+Imports System.ComponentModel
 
 Public Class frmAnalyze
     Private m_SortingColumn As ColumnHeader
@@ -150,9 +151,9 @@ Public Class frmAnalyze
         End If
 
         If xItem.OSMRelation > 0 Then
-                tvn.NodeFont = fntBold
-            Else
-                tvn.NodeFont = fntNormal
+            tvn.NodeFont = fntBold
+        Else
+            tvn.NodeFont = fntNormal
         End If
         tvn.Tag = xItem
         tvn.ContextMenuStrip = cmsNode
@@ -221,9 +222,10 @@ Public Class frmAnalyze
 
         Application.DoEvents()
 
-        iThisTotal += 1
-        If (Not xItem Is Nothing) AndAlso xItem.OSMRelation > 0 Then iThisCount += 1
-
+        If (Not xItem Is Nothing) AndAlso xItem.BoundaryType <> BoundaryDB.BoundaryItem.BoundaryTypes.BT_ParishGroup Then
+            iThisTotal += 1
+            If (Not xItem Is Nothing) AndAlso xItem.OSMRelation > 0 Then iThisCount += 1
+        End If
         iTotal += iThisTotal
         iCount += iThisCount
     End Sub
@@ -412,19 +414,27 @@ Public Class frmAnalyze
             sURL = "http://overpass-api.de/api/xapi?relation[type=boundary][bbox=" _
                 & bBox.MinLon & "," & bBox.MinLat & "," & bBox.MaxLon & "," & bBox.MaxLat _
                 & "][@meta]"
+            'sURL = "http://overpass-api.de/api/interpreter?data=[bbox];rel[type=boundary];[bbox];out+meta;&bbox=" _
+            '         & bBox.MinLon & "," & bBox.MinLat & "," & bBox.MaxLon & "," & bBox.MaxLat _
+            '    & ""
         Else
             sURL = "http://overpass-api.de/api/xapi?relation[type=boundary][admin_level=" & sAdminLevel & "][bbox=" _
                 & bBox.MinLon & "," & bBox.MinLat & "," & bBox.MaxLon & "," & bBox.MaxLat _
                 & "][@meta]"
         End If
 
-        tsStatus.Tag = "Retrieving " & sURL
-        Application.DoEvents()
-        oDoc = xRetriever.API.GetOSM(sURL)
-        If IsNothing(oDoc) Then
-            tsStatus.Tag = "Query failed or returned no data"
+        Try
+            tsStatus.Tag = "Retrieving " & sURL
+            Application.DoEvents()
+            oDoc = xRetriever.API.GetOSM(sURL)
+            If IsNothing(oDoc) Then
+                tsStatus.Tag = "Query failed or returned no data"
+                Exit Sub
+            End If
+        Catch
+            MsgBox($"Unable to retrieve {sURL}")
             Exit Sub
-        End If
+        End Try
 
         tsStatus.Text = "Merging new data with library..."
         Application.DoEvents()
@@ -586,6 +596,7 @@ Public Class frmAnalyze
             End If
         End If
     End Sub
+
     Function GetMapBBox(ByRef b As BBox) As Boolean
         If Not bMapInitDone Then Return False
         Dim xbb As Object
@@ -687,6 +698,49 @@ Public Class frmAnalyze
             OpenBrowserAt(sFile)
         End If
     End Sub
+
+    Private Sub tsmiAddChild_Click(sender As Object, e As EventArgs) Handles tsmiAddChild.Click
+        Dim x As TreeNode = tvList.SelectedNode
+        Dim p As BoundaryDB.BoundaryItem
+        p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        Dim iRel As Long = p.OSMRelation
+
+        Dim xItem As New BoundaryDB.BoundaryItem(xDB)
+        xItem.Parent = p
+        xItem.ParentCode = p.ONSCode
+        If xItem.Edit() Then
+            xDB.Items.Add(xItem.ONSCode, xItem)
+            MsgBox("edit successful")
+        End If
+    End Sub
+
+    Private Sub SetParishGroup(ByVal sender As Object, ByVal e As EventArgs)
+        Dim myItem As ToolStripMenuItem
+        Dim xGroupItem As BoundaryDB.BoundaryItem
+        Dim xParishItem As BoundaryDB.BoundaryItem
+
+        ' Extract the tag value from the item received.
+        myItem = CType(sender, ToolStripMenuItem)
+        xGroupItem = CType(myItem.Tag, BoundaryDB.BoundaryItem)
+
+        ' get the node to operate on
+        Dim x As TreeNode = tvList.SelectedNode
+        xParishItem = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+
+        ' set its parish group name into CouncilName
+        If xParishItem.BoundaryType <> BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish Then
+            Return
+        End If
+        If xParishItem.ParishType <> BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil Then
+            Return
+        End If
+        xParishItem.CouncilName = xGroupItem.Name
+        xParishItem.CouncilName2 = xGroupItem.Name2
+        xDB.ChangedItems.Add(xParishItem)
+
+        ' move the check mark
+        myItem.Checked = True
+    End Sub
 End Class
 Public Class ListViewComparer
     Implements IComparer
@@ -705,9 +759,9 @@ Public Class ListViewComparer
     Public Function Compare(ByVal x As Object, ByVal y As _
         Object) As Integer Implements _
         System.Collections.IComparer.Compare
-        Dim item_x As ListViewItem = DirectCast(x,  _
+        Dim item_x As ListViewItem = DirectCast(x,
             ListViewItem)
-        Dim item_y As ListViewItem = DirectCast(y,  _
+        Dim item_y As ListViewItem = DirectCast(y,
             ListViewItem)
 
         ' Get the sub-item values.

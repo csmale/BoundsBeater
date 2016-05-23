@@ -234,12 +234,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\OSMLibrary\OSMLibrary.vbproj">
-      <Project>{7ade5f36-4971-453a-b062-956a12f0b125}</Project>
-      <Name>OSMLibrary</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
@@ -261,7 +255,12 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\OSMLibrary\OSMLibrary\OSMLibrary.vbproj">
+      <Project>{7ade5f36-4971-453a-b062-956a12f0b125}</Project>
+      <Name>OSMLibrary</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Content Include="HTML\Bing.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -294,6 +293,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="HTML\index.htm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="HTML\labelStyles.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="HTML\leaflet-src.js">

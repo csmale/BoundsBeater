@@ -45,6 +45,8 @@ Partial Class frmEdit
         Me.chkCity = New System.Windows.Forms.CheckBox()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.txtNotes = New System.Windows.Forms.TextBox()
+        Me.cbGroup = New System.Windows.Forms.ComboBox()
+        Me.btnNewGroup = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'btnOK
@@ -252,11 +254,31 @@ Partial Class frmEdit
         Me.txtNotes.Size = New System.Drawing.Size(368, 90)
         Me.txtNotes.TabIndex = 23
         '
+        'cbGroup
+        '
+        Me.cbGroup.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cbGroup.FormattingEnabled = True
+        Me.cbGroup.Location = New System.Drawing.Point(276, 206)
+        Me.cbGroup.Name = "cbGroup"
+        Me.cbGroup.Size = New System.Drawing.Size(121, 21)
+        Me.cbGroup.TabIndex = 24
+        '
+        'btnNewGroup
+        '
+        Me.btnNewGroup.Location = New System.Drawing.Point(351, 70)
+        Me.btnNewGroup.Name = "btnNewGroup"
+        Me.btnNewGroup.Size = New System.Drawing.Size(75, 23)
+        Me.btnNewGroup.TabIndex = 25
+        Me.btnNewGroup.Text = "New Group"
+        Me.btnNewGroup.UseVisualStyleBackColor = True
+        '
         'frmEdit
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(433, 386)
+        Me.Controls.Add(Me.btnNewGroup)
+        Me.Controls.Add(Me.cbGroup)
         Me.Controls.Add(Me.txtNotes)
         Me.Controls.Add(Me.Label4)
         Me.Controls.Add(Me.chkCity)
@@ -310,4 +332,6 @@ Partial Class frmEdit
     Friend WithEvents chkCity As CheckBox
     Friend WithEvents Label4 As Label
     Friend WithEvents txtNotes As TextBox
+    Friend WithEvents cbGroup As ComboBox
+    Friend WithEvents btnNewGroup As Button
 End Class

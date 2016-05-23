@@ -1,9 +1,9 @@
-﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
+﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
 Partial Class frmAnalyze
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
-    <System.Diagnostics.DebuggerNonUserCode()> _
+    <System.Diagnostics.DebuggerNonUserCode()>
     Protected Overrides Sub Dispose(ByVal disposing As Boolean)
         Try
             If disposing AndAlso components IsNot Nothing Then
@@ -20,7 +20,7 @@ Partial Class frmAnalyze
     'NOTE: The following procedure is required by the Windows Form Designer
     'It can be modified using the Windows Form Designer.  
     'Do not modify it using the code editor.
-    <System.Diagnostics.DebuggerStepThrough()> _
+    <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
         Me.btnClose = New System.Windows.Forms.Button()
@@ -53,6 +53,7 @@ Partial Class frmAnalyze
         Me.tsmiShowAll = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiJSON = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiReport = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAddChild = New System.Windows.Forms.ToolStripMenuItem()
         Me.txtAdminLevel = New System.Windows.Forms.TextBox()
         Me.btnHist = New System.Windows.Forms.Button()
         Me.cmsChild = New System.Windows.Forms.ContextMenuStrip(Me.components)
@@ -185,11 +186,12 @@ Partial Class frmAnalyze
         'colCouncilStyle
         '
         Me.colCouncilStyle.Text = "Style"
-        Me.colCouncilStyle.Width = 200
+        Me.colCouncilStyle.Width = 120
         '
         'colParishType
         '
         Me.colParishType.Text = "Parish Type"
+        Me.colParishType.Width = 120
         '
         'colCouncilName
         '
@@ -263,9 +265,9 @@ Partial Class frmAnalyze
         '
         'cmsNode
         '
-        Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport})
+        Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiAddChild})
         Me.cmsNode.Name = "ContextMenuStrip1"
-        Me.cmsNode.Size = New System.Drawing.Size(166, 136)
+        Me.cmsNode.Size = New System.Drawing.Size(166, 158)
         '
         'tsmiFlush
         '
@@ -297,6 +299,12 @@ Partial Class frmAnalyze
         Me.tsmiReport.Size = New System.Drawing.Size(165, 22)
         Me.tsmiReport.Text = "Report"
         '
+        'tsmiAddChild
+        '
+        Me.tsmiAddChild.Name = "tsmiAddChild"
+        Me.tsmiAddChild.Size = New System.Drawing.Size(165, 22)
+        Me.tsmiAddChild.Text = "Add child"
+        '
         'txtAdminLevel
         '
         Me.txtAdminLevel.Location = New System.Drawing.Point(530, 15)
@@ -322,13 +330,13 @@ Partial Class frmAnalyze
         'tsmiChildEdit
         '
         Me.tsmiChildEdit.Name = "tsmiChildEdit"
-        Me.tsmiChildEdit.Size = New System.Drawing.Size(152, 22)
+        Me.tsmiChildEdit.Size = New System.Drawing.Size(109, 22)
         Me.tsmiChildEdit.Text = "Edit"
         '
         'tsmiChildReport
         '
         Me.tsmiChildReport.Name = "tsmiChildReport"
-        Me.tsmiChildReport.Size = New System.Drawing.Size(152, 22)
+        Me.tsmiChildReport.Size = New System.Drawing.Size(109, 22)
         Me.tsmiChildReport.Text = "Report"
         '
         'btnOSM
@@ -419,4 +427,5 @@ Partial Class frmAnalyze
     Friend WithEvents btnClear As Button
     Friend WithEvents tsmiReport As ToolStripMenuItem
     Friend WithEvents tsmiChildReport As ToolStripMenuItem
+    Friend WithEvents tsmiAddChild As ToolStripMenuItem
 End Class
