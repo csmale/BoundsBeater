@@ -2,11 +2,11 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="My" GeneratedClassName="MySettings" UseMySettingsClassName="true">
   <Profiles />
   <Settings>
-    <Setting Name="BoundaryXML" Type="System.String" Scope="User">
-      <Value Profile="(Default)">C:\Users\Colin\Google Drive\BoundsBeater\UKBoundaries.xml</Value>
-    </Setting>
     <Setting Name="OSMCache" Type="System.String" Scope="User">
       <Value Profile="(Default)">T:\BoundsBeater\OSMCache.osm</Value>
+    </Setting>
+    <Setting Name="BoundaryXML" Type="System.String" Scope="User">
+      <Value Profile="(Default)">%USERPROFILE%\Google Drive\BoundsBeater\UKBoundaries.xml</Value>
     </Setting>
   </Settings>
 </SettingsFile>

@@ -56,18 +56,6 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("C:\Users\Colin\Google Drive\BoundsBeater\UKBoundaries.xml")>  _
-        Public Property BoundaryXML() As String
-            Get
-                Return CType(Me("BoundaryXML"),String)
-            End Get
-            Set
-                Me("BoundaryXML") = value
-            End Set
-        End Property
-        
-        <Global.System.Configuration.UserScopedSettingAttribute(),  _
-         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.Configuration.DefaultSettingValueAttribute("T:\BoundsBeater\OSMCache.osm")>  _
         Public Property OSMCache() As String
             Get
@@ -75,6 +63,18 @@ Namespace My
             End Get
             Set
                 Me("OSMCache") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("%USERPROFILE%\Google Drive\BoundsBeater\UKBoundaries.xml")>  _
+        Public Property BoundaryXML() As String
+            Get
+                Return CType(Me("BoundaryXML"),String)
+            End Get
+            Set
+                Me("BoundaryXML") = value
             End Set
         End Property
     End Class
