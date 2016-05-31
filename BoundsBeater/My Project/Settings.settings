@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="BoundaryXML" Type="System.String" Scope="User">
-      <Value Profile="(Default)">T:\BoundsBeater\UKBoundaries.xml</Value>
+      <Value Profile="(Default)">C:\Users\Colin\Google Drive\BoundsBeater\UKBoundaries.xml</Value>
     </Setting>
     <Setting Name="OSMCache" Type="System.String" Scope="User">
       <Value Profile="(Default)">T:\BoundsBeater\OSMCache.osm</Value>

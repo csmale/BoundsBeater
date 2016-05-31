@@ -237,19 +237,25 @@ Public Class frmAnalyze
             SetTreeItems2(tvi, iTotal, iCount)
         Next
     End Sub
+    Private Function FindBoundaryDB() As String
+        Dim sDB As String = ""
+
+        sDB = System.Environment.ExpandEnvironmentVariables(My.Settings.BoundaryXML)
+        If System.IO.File.Exists(sDB) Then Return sDB
+
+        sDB = GetFolderPath(SpecialFolder.ApplicationData) & "\BoundsBeater\UKBoundaries.xml"
+        If System.IO.File.Exists(sDB) Then Return sDB
+
+        sDB = System.IO.Path.GetDirectoryName(Application.ExecutablePath) & "\UKBoundaries.xml"
+        If System.IO.File.Exists(sDB) Then Return sDB
+
+        Return ""
+    End Function
+
     Private Sub btnGo_Click(sender As Object, e As EventArgs) Handles btnGo.Click
         Dim sDB As String
 
-        sDB = System.Environment.ExpandEnvironmentVariables(My.Settings.BoundaryXML)
-        If Not System.IO.File.Exists(sDB) Then
-            sDB = GetFolderPath(SpecialFolder.ApplicationData) & "\BoundsBeater\UKBoundaries.xml"
-            If Not System.IO.File.Exists(sDB) Then
-                sDB = System.IO.Path.GetDirectoryName(Application.ExecutablePath) & "\UKBoundaries.xml"
-                If Not System.IO.File.Exists(sDB) Then
-                    sDB = ""
-                End If
-            End If
-        End If
+        sDB = FindBoundaryDB()
 
         If Len(sDB) = 0 Then
             MsgBox("No Boundary XML file defined")
