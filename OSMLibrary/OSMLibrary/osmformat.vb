@@ -10,8 +10,8 @@ Public Partial Class HeaderBlock
 	End Sub
     
     Private _bbox As HeaderBBox =Nothing
-    <Global.ProtoBuf.ProtoMember(1, IsRequired:=False, Name:="bbox", DataFormat:=Global.ProtoBuf.DataFormat.Default)> _ 
-    <Global.System.ComponentModel.DefaultValue(CType(Nothing, HeaderBBox))> _ 
+        <Global.ProtoBuf.ProtoMember(1, IsRequired:=False, Name:="bbox", DataFormat:=Global.ProtoBuf.DataFormat.Default)>
+        <Global.System.ComponentModel.DefaultValue(CType(Nothing, HeaderBBox))> _ 
     Public Property bbox As HeaderBBox
 		Get 
 			Return _bbox
