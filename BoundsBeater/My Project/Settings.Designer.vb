@@ -56,7 +56,7 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("T:\BoundsBeater\UKBoundaries.xml")>  _
+         Global.System.Configuration.DefaultSettingValueAttribute("C:\Users\Colin\Google Drive\BoundsBeater\UKBoundaries.xml")>  _
         Public Property BoundaryXML() As String
             Get
                 Return CType(Me("BoundaryXML"),String)
