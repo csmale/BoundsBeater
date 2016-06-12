@@ -25,6 +25,12 @@ Public Class frmAnalyze
         'Dim tm As New TypeModel()
         'Dim z As New ProtoBuf.ProtoReader(IStream, t, sc)
     End Sub
+
+    ''' <summary>
+    ''' Handles Click event on Close button
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
     Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
         If Len(sCache) > 0 Then
             tmpDoc.SaveXML(sCache)
@@ -32,6 +38,11 @@ Public Class frmAnalyze
         Me.Close()
     End Sub
 
+    ''' <summary>
+    ''' Handles Click event on Single Report button
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
     Private Sub btnSingle_Click(sender As Object, e As EventArgs) Handles btnSingle.Click
         Dim iRel As ULong
         Dim sTmp As String = Me.txtSingle.Text
@@ -54,6 +65,10 @@ Public Class frmAnalyze
         '        ShowRelation(iRel)
     End Sub
 
+    ''' <summary>
+    ''' Shows a boundary on the map, with some information in a text box
+    ''' </summary>
+    ''' <param name="iRel">The OSM ID of the selecte relation</param>
     Private Sub ShowRelation(iRel As ULong)
         Dim xRel As OSMRelation
         Dim xRes As OSMResolver
@@ -130,6 +145,8 @@ Public Class frmAnalyze
             & "][@meta]"
         txtReport.Text = txtReport.Text & vbCrLf & sTmp
     End Sub
+
+
     Private Sub LoadTreeView(tv As TreeView, xParentNode As TreeNode, xDB As BoundaryDB, xItem As BoundaryDB.BoundaryItem, ByRef iTotal As Integer, ByRef iCount As Integer)
         Dim tvn As TreeNode
         Dim xChild As BoundaryDB.BoundaryItem
@@ -149,7 +166,6 @@ Public Class frmAnalyze
         Else
             tvn = xParentNode.Nodes.Add(xItem.ONSCode, sName)
         End If
-
         If xItem.OSMRelation > 0 Then
             tvn.NodeFont = fntBold
         Else
@@ -157,15 +173,11 @@ Public Class frmAnalyze
         End If
         tvn.Tag = xItem
         tvn.ContextMenuStrip = cmsNode
-        Dim bChildren As Boolean = False
         Dim iThisCount As Integer = 0, iThisTotal As Integer = 0
-        For Each xChild In xDB.Items.Values
-            If xChild.Parent Is xItem Then
-                iThisTotal += 1
-                bChildren = True
-                If xChild.OSMRelation > 0 Then iThisCount += 1
-                LoadTreeView(tv, tvn, xDB, xChild, iThisTotal, iThisCount)
-            End If
+        For Each xChild In xItem.Children
+            iThisTotal += 1
+            If xChild.OSMRelation > 0 Then iThisCount += 1
+            LoadTreeView(tv, tvn, xDB, xChild, iThisTotal, iThisCount)
         Next
         '        If bChildren Then
         '        tvn.Text = tvn.Text & " [" & iThisCount.ToString & "/" & iThisTotal.ToString & "]"
@@ -292,13 +304,11 @@ Public Class frmAnalyze
         Application.DoEvents()
         Dim i As Integer = 0
         Dim iCount As Integer = 0, iTotal As Integer = 0
-        For Each xItem In x.Items.Values
+        For Each xItem In x.Root.Children
             i = i + 1
             tsProgress.Value = i
             Application.DoEvents()
-            If IsNothing(xItem.Parent) Then
-                LoadTreeView(tvList, Nothing, x, xItem, iTotal, iCount)
-            End If
+            LoadTreeView(tvList, Nothing, x, xItem, iTotal, iCount)
         Next
 
         SetTreeItems(tvList)

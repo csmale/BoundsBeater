@@ -10,6 +10,7 @@ Public Class BoundaryDB
     Public Items As New Dictionary(Of String, BoundaryItem)
     Dim ss() As String
     Dim bChanges As Boolean
+    Private _root As BoundaryItem
     Private _ChangedItems As List(Of BoundaryItem)
 
     Public ReadOnly Property ChangedItems As List(Of BoundaryItem)
@@ -18,10 +19,19 @@ Public Class BoundaryDB
         End Get
     End Property
     Public Sub New()
+        _root = New BoundaryItem(Me)
+        _root.Parent = Nothing
     End Sub
     Public Sub New(sFile As String)
+        _root = New BoundaryItem(Me)
+        _root.Parent = Nothing
         LoadFromFile(sFile)
     End Sub
+    Public ReadOnly Property Root As BoundaryItem
+        Get
+            Return _root
+        End Get
+    End Property
     Public Function LoadFromFile(sFile As String) As Boolean
         xDoc = New XmlDocument
         ' xDoc.PreserveWhitespace = True
@@ -41,8 +51,9 @@ Public Class BoundaryDB
         For Each xBnd As XmlElement In xDoc.SelectNodes("/boundaries/boundary")
             xItem = New BoundaryItem(Me, xBnd)
             Items.Add(xItem.ONSCode, xItem)
+            xItem.Parent = _root
         Next
-        Items.Add("Unknown", xUnknown)
+        ' Items.Add("Unknown", xUnknown)
 
         For Each xItem In Items.Values
             If Len(xItem.ParentCode) > 0 Then
@@ -50,7 +61,6 @@ Public Class BoundaryDB
                     xItem.Parent = Items(xItem.ParentCode)
                 Else
                     If xItem.ParentCode <> "0" Then
-                        xItem.Parent = xUnknown
                         MsgBox("undefined parent referenced: " & xItem.ParentCode)
                     End If
                 End If
@@ -60,7 +70,7 @@ Public Class BoundaryDB
         Dim itmp As Integer
         For Each xItem In Items.Values
             If IsNothing(xItem.Parent) Then
-                If xItem.AdminLevel <> 2 AndAlso xItem IsNot xUnknown Then
+                If xItem.AdminLevel <> 2 AndAlso xItem IsNot Root Then
                     itmp = itmp + 1
                 End If
             End If
@@ -292,8 +302,9 @@ Public Class BoundaryDB
         Public IsRoyal As Boolean
         Public IsCity As Boolean
         Public Notes As String
-        Protected Friend Parent As BoundaryItem
+        Private _Parent As BoundaryItem
         Private _btcode As String
+        Private _Children As New List(Of BoundaryItem)
 
         Public Sub New(bdb As BoundaryDB)
             _bdb = bdb
@@ -307,7 +318,46 @@ Public Class BoundaryDB
                 Return Name
             End Get
         End Property
+        Public Property Parent As BoundaryItem
+            Get
+                If _bdb._root Is _Parent Then Return Nothing
+                Return _Parent
+            End Get
+            Set(value As BoundaryItem)
+                If Not IsNothing(_Parent) Then
+                    _Parent.Children.Remove(Me)
+                End If
+                If Not IsNothing(value) Then
+                    value.Children.Add(Me)
+                End If
+                _Parent = value
+            End Set
+        End Property
+        Public ReadOnly Property Children() As List(Of BoundaryItem)
+            Get
+                Return _Children
+            End Get
+        End Property
 
+        Public ReadOnly Property NumChildren() As Integer
+            Get
+                Dim count As Integer = Children.Count
+                For Each i In Children
+                    count += i.Children.Count
+                Next
+                Return count
+            End Get
+        End Property
+        Public ReadOnly Property NumKnownChildren() As Integer
+            Get
+                Dim count As Integer
+                For Each i In Children
+                    If i.OSMRelation > 0 Then count += 1
+                    count += i.NumKnownChildren
+                Next
+                Return count
+            End Get
+        End Property
         Public ReadOnly Property TypeCode As String
             Get
                 Return _btcode

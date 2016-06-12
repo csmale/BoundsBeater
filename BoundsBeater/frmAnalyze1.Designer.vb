@@ -109,7 +109,7 @@ Partial Class frmAnalyze
         Me.txtReport.Multiline = True
         Me.txtReport.Name = "txtReport"
         Me.txtReport.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.txtReport.Size = New System.Drawing.Size(355, 148)
+        Me.txtReport.Size = New System.Drawing.Size(355, 242)
         Me.txtReport.TabIndex = 6
         '
         'btnGo
@@ -244,7 +244,7 @@ Partial Class frmAnalyze
         'ssStatus
         '
         Me.ssStatus.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsProgress, Me.tsStatus})
-        Me.ssStatus.Location = New System.Drawing.Point(0, 554)
+        Me.ssStatus.Location = New System.Drawing.Point(0, 648)
         Me.ssStatus.Name = "ssStatus"
         Me.ssStatus.Size = New System.Drawing.Size(901, 22)
         Me.ssStatus.TabIndex = 14
@@ -267,7 +267,7 @@ Partial Class frmAnalyze
         '
         Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiAddChild})
         Me.cmsNode.Name = "ContextMenuStrip1"
-        Me.cmsNode.Size = New System.Drawing.Size(166, 158)
+        Me.cmsNode.Size = New System.Drawing.Size(166, 136)
         '
         'tsmiFlush
         '
@@ -361,7 +361,7 @@ Partial Class frmAnalyze
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(901, 576)
+        Me.ClientSize = New System.Drawing.Size(901, 670)
         Me.Controls.Add(Me.btnClear)
         Me.Controls.Add(Me.btnOSM)
         Me.Controls.Add(Me.btnHist)

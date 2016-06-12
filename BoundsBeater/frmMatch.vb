@@ -9,12 +9,22 @@ Public Class frmMatch
     Public oMatch As BoundaryDB.BoundaryItem
     Public sComment As String
 
+    ''' <summary>
+    ''' Handles Click event on Cancel button
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
     Private Sub btnCancel_Click(sender As Object, e As EventArgs) Handles btnCancel.Click
         Me.DialogResult = Windows.Forms.DialogResult.Cancel
         oMatch = Nothing
         Me.Close()
     End Sub
 
+    ''' <summary>
+    ''' Handles Click event on OK button
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
     Private Sub btnOK_Click(sender As Object, e As EventArgs) Handles btnOK.Click
         Dim sGSS As String
         If lvAreas.SelectedItems.Count <> 1 Then
@@ -32,6 +42,11 @@ Public Class frmMatch
         Me.Close()
     End Sub
 
+    ''' <summary>
+    ''' Handles Shown event on Match form
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
     Private Sub frmMatch_Shown(sender As Object, e As EventArgs) Handles Me.Shown
         Debug.Assert(Not (oOSMDoc Is Nothing))
         Debug.Assert(Not (oRel Is Nothing))
@@ -78,6 +93,11 @@ Public Class frmMatch
         End If
     End Sub
 
+    ''' <summary>
+    ''' Handles Click event on Abort button
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
     Private Sub btnAbort_Click(sender As Object, e As EventArgs) Handles btnAbort.Click
         Me.DialogResult = Windows.Forms.DialogResult.Ignore
         oMatch = Nothing
