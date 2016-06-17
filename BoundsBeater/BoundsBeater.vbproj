@@ -173,6 +173,12 @@
     <Compile Include="frmRelMgr.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="frmReview.Designer.vb">
+      <DependentUpon>frmReview.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmReview.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -210,6 +216,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmRelMgr.resx">
       <DependentUpon>frmRelMgr.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmReview.resx">
+      <DependentUpon>frmReview.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>

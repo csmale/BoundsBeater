@@ -757,6 +757,16 @@ Public Class frmAnalyze
         ' move the check mark
         myItem.Checked = True
     End Sub
+
+    Private Sub tsmiReview_Click(sender As Object, e As EventArgs) Handles tsmiReview.Click
+        Dim x As TreeNode = tvList.SelectedNode
+        If x Is Nothing Then Return
+        If x.Tag Is Nothing Then Return
+        Dim p As BoundaryDB.BoundaryItem
+        p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        Dim f As New frmReview(p)
+        f.ShowDialog(Me)
+    End Sub
 End Class
 Public Class ListViewComparer
     Implements IComparer

@@ -61,6 +61,7 @@ Partial Class frmAnalyze
         Me.tsmiChildReport = New System.Windows.Forms.ToolStripMenuItem()
         Me.btnOSM = New System.Windows.Forms.Button()
         Me.btnClear = New System.Windows.Forms.Button()
+        Me.tsmiReview = New System.Windows.Forms.ToolStripMenuItem()
         Me.tabDetail.SuspendLayout()
         Me.tbpChildren.SuspendLayout()
         Me.tbpMap.SuspendLayout()
@@ -265,9 +266,9 @@ Partial Class frmAnalyze
         '
         'cmsNode
         '
-        Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiAddChild})
+        Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiAddChild, Me.tsmiReview})
         Me.cmsNode.Name = "ContextMenuStrip1"
-        Me.cmsNode.Size = New System.Drawing.Size(166, 136)
+        Me.cmsNode.Size = New System.Drawing.Size(166, 180)
         '
         'tsmiFlush
         '
@@ -357,6 +358,12 @@ Partial Class frmAnalyze
         Me.btnClear.Text = "Clear"
         Me.btnClear.UseVisualStyleBackColor = True
         '
+        'tsmiReview
+        '
+        Me.tsmiReview.Name = "tsmiReview"
+        Me.tsmiReview.Size = New System.Drawing.Size(165, 22)
+        Me.tsmiReview.Text = "Review OSM"
+        '
         'frmAnalyze
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -428,4 +435,5 @@ Partial Class frmAnalyze
     Friend WithEvents tsmiReport As ToolStripMenuItem
     Friend WithEvents tsmiChildReport As ToolStripMenuItem
     Friend WithEvents tsmiAddChild As ToolStripMenuItem
+    Friend WithEvents tsmiReview As ToolStripMenuItem
 End Class
