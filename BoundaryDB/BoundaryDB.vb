@@ -272,6 +272,7 @@ Public Class BoundaryDB
             CS_County
             CS_Community
             CS_Village
+            CS_Neighbourhood
         End Enum
         Public Enum ParishTypes
             PT_ParishCouncil
@@ -522,6 +523,7 @@ Public Class BoundaryDB
                 Case CouncilStyles.CS_CityAndDistrict : sTmp = "city_and_district"
                 Case CouncilStyles.CS_County : sTmp = "county"
                 Case CouncilStyles.CS_Community : sTmp = "community"
+                Case CouncilStyles.CS_Neighbourhood : sTmp = "neighbourhood"
                 Case CouncilStyles.CS_Village : sTmp = "village"
                 Case Else
                     sTmp = ""
