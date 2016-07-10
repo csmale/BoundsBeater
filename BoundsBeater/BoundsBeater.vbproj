@@ -196,6 +196,7 @@
     </Compile>
     <Compile Include="myLogger.vb" />
     <Compile Include="RelationReport.vb" />
+    <Compile Include="Trie.vb" />
     <Compile Include="Utils.vb" />
   </ItemGroup>
   <ItemGroup>
