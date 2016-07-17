@@ -196,7 +196,7 @@
     </Compile>
     <Compile Include="myLogger.vb" />
     <Compile Include="RelationReport.vb" />
-    <Compile Include="Trie.vb" />
+    <Compile Include="RadixTree.vb" />
     <Compile Include="Utils.vb" />
   </ItemGroup>
   <ItemGroup>
