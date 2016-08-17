@@ -177,10 +177,15 @@
             .Name = Trim(txtName.Text)
             .Name2 = Trim(txtName2.Text)
             .ONSCode = Trim(txtGSS.Text)
-            .CouncilName = Trim(txtCouncilName.Text)
-            .CouncilName2 = Trim(txtCouncilName2.Text)
             .BoundaryType = CType(cbType.SelectedItem, GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)).Value
             .ParishType = CType(cbParishType.SelectedItem, GenericListItem(Of BoundaryDB.BoundaryItem.ParishTypes)).Value
+            If .BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish AndAlso .ParishType = BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil Then
+                .CouncilName = Trim(cbGroup.Text)
+                .CouncilName2 = Trim(cbGroup.Text)
+            Else
+                .CouncilName = Trim(txtCouncilName.Text)
+                .CouncilName2 = Trim(txtCouncilName2.Text)
+            End If
             .CouncilStyle = CType(cbStyle.SelectedItem, GenericListItem(Of BoundaryDB.BoundaryItem.CouncilStyles)).Value
             .IsBorough = chkBorough.Checked
             .IsRoyal = chkRoyal.Checked
