@@ -293,7 +293,36 @@ Public Class BoundaryDB
         Public CouncilName2 As String
         Public ParishType As ParishTypes
         Public CouncilStyle As CouncilStyles
-        Public BoundaryType As BoundaryTypes
+        Private _BoundaryType As BoundaryTypes
+        Public Property BoundaryType As BoundaryTypes
+            Get
+                Return _BoundaryType
+            End Get
+            Set(value As BoundaryTypes)
+                _BoundaryType = value
+                Select Case value
+                    Case BoundaryTypes.BT_Region : _btcode = "RGN"
+                    Case BoundaryTypes.BT_Unitary : _btcode = "UA"
+                    Case BoundaryTypes.BT_CivilParish : _btcode = "PAR"
+                    Case BoundaryTypes.BT_NonMetroCounty : _btcode = "CTY"
+                    Case BoundaryTypes.BT_NonMetroDistrict : _btcode = "NMD"
+                    Case BoundaryTypes.BT_MetroCounty : _btcode = "MCTY"
+                    Case BoundaryTypes.BT_MetroDistrict : _btcode = "MD"
+                    Case BoundaryTypes.BT_Nation : _btcode = "CTRY"
+                    Case BoundaryTypes.BT_CeremonialCounty : _btcode = "CCTY"
+                    Case BoundaryTypes.BT_SuiGeneris : _btcode = "SGEN"
+                    Case BoundaryTypes.BT_Liberty : _btcode = "LBTY"
+                    Case BoundaryTypes.BT_LondonBorough : _btcode = "LONB"
+                    Case BoundaryTypes.BT_PreservedCounty : _btcode = "PCTY"
+                    Case BoundaryTypes.BT_PrincipalArea : _btcode = "WPA"
+                    Case BoundaryTypes.BT_ScotCouncil : _btcode = "SCA"
+                    Case BoundaryTypes.BT_Country : _btcode = "UK"
+                    Case BoundaryTypes.BT_Community : _btcode = "COM"
+                    Case BoundaryTypes.BT_NIreDistrict : _btcode = "NID"
+                    Case BoundaryTypes.BT_ParishGroup : _btcode = "PGRP"
+                End Select
+            End Set
+        End Property
         Public Property ONSCode As String
         Public ParentCode As String
         Public OSMRelation As Long
@@ -378,61 +407,42 @@ Public Class BoundaryDB
             Select Case sTmp
                 Case "region"
                     BoundaryType = BoundaryTypes.BT_Region
-                    _btcode = "RGN"
                 Case "unitary"
                     BoundaryType = BoundaryTypes.BT_Unitary
-                    _btcode = "UA"
                 Case "civil_parish"
                     BoundaryType = BoundaryTypes.BT_CivilParish
-                    _btcode = "PAR"
                 Case "adm_county"
                     BoundaryType = BoundaryTypes.BT_NonMetroCounty
-                    _btcode = "CTY"
                 Case "non_metro_district"
                     BoundaryType = BoundaryTypes.BT_NonMetroDistrict
-                    _btcode = "NMD"
                 Case "metro_county"
                     BoundaryType = BoundaryTypes.BT_MetroCounty
-                    _btcode = "MCTY"
                 Case "metro_district"
                     BoundaryType = BoundaryTypes.BT_MetroDistrict
-                    _btcode = "MD"
                 Case "nation"
                     BoundaryType = BoundaryTypes.BT_Nation
-                    _btcode = "CTRY"
                 Case "ceremonial_county"
                     BoundaryType = BoundaryTypes.BT_CeremonialCounty
-                    _btcode = "CCTY"
                 Case "sui_generis"
                     BoundaryType = BoundaryTypes.BT_SuiGeneris
-                    _btcode = "SGEN"
                 Case "liberty"
                     BoundaryType = BoundaryTypes.BT_Liberty
-                    _btcode = "LBTY"
                 Case "london_borough"
                     BoundaryType = BoundaryTypes.BT_LondonBorough
-                    _btcode = "LONB"
                 Case "preserved_county"
                     BoundaryType = BoundaryTypes.BT_PreservedCounty
-                    _btcode = "PCTY"
                 Case "wales_district"
                     BoundaryType = BoundaryTypes.BT_PrincipalArea
-                    _btcode = "UA"
                 Case "scotland_district"
                     BoundaryType = BoundaryTypes.BT_ScotCouncil
-                    _btcode = "CA"
                 Case "country"
                     BoundaryType = BoundaryTypes.BT_Country
-                    _btcode = "UK"
                 Case "community"
                     BoundaryType = BoundaryTypes.BT_Community
-                    _btcode = "COM"
                 Case "n_ireland_district"
                     BoundaryType = BoundaryTypes.BT_NIreDistrict
-                    _btcode = "NID"
                 Case "parish_group"
                     BoundaryType = BoundaryTypes.BT_ParishGroup
-                    _btcode = "PGRP"
                 Case Else
                     MsgBox("unimplemented boundary type " & sTmp)
                     BoundaryType = BoundaryTypes.BT_Nation

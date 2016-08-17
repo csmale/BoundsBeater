@@ -148,4 +148,20 @@ Public Class RadixTree
         If Parent Is Nothing Then Return ""
         Return Parent.Path(sDelim) & sDelim & Key
     End Function
+
+    ''' <summary>
+    ''' '
+    ''' </summary>
+    ''' <param name="s1"></param>
+    ''' <param name="s2"></param>
+    ''' <returns></returns>
+    Private Shared Function FindCommonPrefix(s1 As String, s2 As String) As Integer
+        Dim iLen As Integer
+        Dim iMatchLen As Integer = Math.Min(Len(s1), Len(s2))
+        If iMatchLen = 0 Then Return 0
+        For iLen = 1 To iMatchLen
+            If Mid(s1, iLen, 1) <> Mid(s2, iLen, 1) Then Exit For
+        Next
+        Return iLen - 1
+    End Function
 End Class
