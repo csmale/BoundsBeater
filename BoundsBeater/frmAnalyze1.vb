@@ -431,8 +431,8 @@ Public Class frmAnalyze
                 & bBox.MinLon & "," & bBox.MinLat & "," & bBox.MaxLon & "," & bBox.MaxLat _
                 & "][@meta]"
             sURL = "http://overpass.osm.rambler.ru/cgi/xapi?relation[type=boundary][bbox=" _
-    & bBox.MinLon & "," & bBox.MinLat & "," & bBox.MaxLon & "," & bBox.MaxLat _
-    & "][@meta]"
+             & bBox.MinLon & "," & bBox.MinLat & "," & bBox.MaxLon & "," & bBox.MaxLat _
+             & "][@meta]"
 
             'sURL = "http://overpass-api.de/api/interpreter?data=[bbox];rel[type=boundary];[bbox];out+meta;&bbox=" _
             '         & bBox.MinLon & "," & bBox.MinLat & "," & bBox.MaxLon & "," & bBox.MaxLat _
