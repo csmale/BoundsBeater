@@ -294,33 +294,64 @@ Public Class BoundaryDB
         Public ParishType As ParishTypes
         Public CouncilStyle As CouncilStyles
         Private _BoundaryType As BoundaryTypes
+        Private Shared _mapBTString As Dictionary(Of BoundaryTypes, String)
+        Private Shared _mapStringBT As Dictionary(Of String, BoundaryTypes)
+
+        Public Sub New()
+            If _mapBTString Is Nothing Then
+                _mapBTString = New Dictionary(Of BoundaryTypes, String)
+                With _mapBTString
+                    .Add(BoundaryTypes.BT_Region, "RGN")
+                    .Add(BoundaryTypes.BT_Unitary, "UA")
+                    .Add(BoundaryTypes.BT_CivilParish, "PAR")
+                    .Add(BoundaryTypes.BT_NonMetroCounty, "CTY")
+                    .Add(BoundaryTypes.BT_NonMetroDistrict, "NMD")
+                    .Add(BoundaryTypes.BT_MetroCounty, "MCTY")
+                    .Add(BoundaryTypes.BT_MetroDistrict, "MD")
+                    .Add(BoundaryTypes.BT_Nation, "CTRY")
+                    .Add(BoundaryTypes.BT_CeremonialCounty, "CCTY")
+                    .Add(BoundaryTypes.BT_SuiGeneris, "SGEN")
+                    .Add(BoundaryTypes.BT_Liberty, "LBTY")
+                    .Add(BoundaryTypes.BT_LondonBorough, "LONB")
+                    .Add(BoundaryTypes.BT_PreservedCounty, "PCTY")
+                    .Add(BoundaryTypes.BT_PrincipalArea, "WPA")
+                    .Add(BoundaryTypes.BT_ScotCouncil, "SCA")
+                    .Add(BoundaryTypes.BT_Country, "UK")
+                    .Add(BoundaryTypes.BT_Community, "COM")
+                    .Add(BoundaryTypes.BT_NIreDistrict, "NID")
+                    .Add(BoundaryTypes.BT_ParishGroup, "PGRP")
+                End With
+                _mapStringBT = New Dictionary(Of String, BoundaryTypes)
+                With _mapStringBT
+                    .Add("region", BoundaryTypes.BT_Region)
+                    .Add("unitary", BoundaryTypes.BT_Unitary)
+                    .Add("civil_parish", BoundaryTypes.BT_CivilParish)
+                    .Add("adm_county", BoundaryTypes.BT_NonMetroCounty)
+                    .Add("non_metro_district", BoundaryTypes.BT_NonMetroDistrict)
+                    .Add("metro_county", BoundaryTypes.BT_MetroCounty)
+                    .Add("metro_district", BoundaryTypes.BT_MetroDistrict)
+                    .Add("nation", BoundaryTypes.BT_Nation)
+                    .Add("ceremonial_county", BoundaryTypes.BT_CeremonialCounty)
+                    .Add("sui_generis", BoundaryTypes.BT_SuiGeneris)
+                    .Add("liberty", BoundaryTypes.BT_Liberty)
+                    .Add("london_borough", BoundaryTypes.BT_LondonBorough)
+                    .Add("preserved_county", BoundaryTypes.BT_PreservedCounty)
+                    .Add("wales_district", BoundaryTypes.BT_PrincipalArea)
+                    .Add("scotland_district", BoundaryTypes.BT_ScotCouncil)
+                    .Add("country", BoundaryTypes.BT_Country)
+                    .Add("community", BoundaryTypes.BT_Community)
+                    .Add("n_ireland_district", BoundaryTypes.BT_NIreDistrict)
+                    .Add("parish_group", BoundaryTypes.BT_ParishGroup)
+                End With
+            End If
+        End Sub
         Public Property BoundaryType As BoundaryTypes
             Get
                 Return _BoundaryType
             End Get
             Set(value As BoundaryTypes)
                 _BoundaryType = value
-                Select Case value
-                    Case BoundaryTypes.BT_Region : _btcode = "RGN"
-                    Case BoundaryTypes.BT_Unitary : _btcode = "UA"
-                    Case BoundaryTypes.BT_CivilParish : _btcode = "PAR"
-                    Case BoundaryTypes.BT_NonMetroCounty : _btcode = "CTY"
-                    Case BoundaryTypes.BT_NonMetroDistrict : _btcode = "NMD"
-                    Case BoundaryTypes.BT_MetroCounty : _btcode = "MCTY"
-                    Case BoundaryTypes.BT_MetroDistrict : _btcode = "MD"
-                    Case BoundaryTypes.BT_Nation : _btcode = "CTRY"
-                    Case BoundaryTypes.BT_CeremonialCounty : _btcode = "CCTY"
-                    Case BoundaryTypes.BT_SuiGeneris : _btcode = "SGEN"
-                    Case BoundaryTypes.BT_Liberty : _btcode = "LBTY"
-                    Case BoundaryTypes.BT_LondonBorough : _btcode = "LONB"
-                    Case BoundaryTypes.BT_PreservedCounty : _btcode = "PCTY"
-                    Case BoundaryTypes.BT_PrincipalArea : _btcode = "WPA"
-                    Case BoundaryTypes.BT_ScotCouncil : _btcode = "SCA"
-                    Case BoundaryTypes.BT_Country : _btcode = "UK"
-                    Case BoundaryTypes.BT_Community : _btcode = "COM"
-                    Case BoundaryTypes.BT_NIreDistrict : _btcode = "NID"
-                    Case BoundaryTypes.BT_ParishGroup : _btcode = "PGRP"
-                End Select
+                _btcode = _mapBTString(value)
             End Set
         End Property
         Public Property ONSCode As String
@@ -337,9 +368,11 @@ Public Class BoundaryDB
         Private _Children As New List(Of BoundaryItem)
 
         Public Sub New(bdb As BoundaryDB)
+            Me.New()
             _bdb = bdb
         End Sub
         Public Sub New(bdb As BoundaryDB, xBnd As XmlElement)
+            Me.New()
             _bdb = bdb
             LoadFromXML(xBnd)
         End Sub
@@ -404,50 +437,13 @@ Public Class BoundaryDB
             CouncilName = NodeText(xBnd.SelectSingleNode("council_name"))
             CouncilName2 = NodeText(xBnd.SelectSingleNode("council_name2"))
             sTmp = NodeText(xBnd.SelectSingleNode("type"))
-            Select Case sTmp
-                Case "region"
-                    BoundaryType = BoundaryTypes.BT_Region
-                Case "unitary"
-                    BoundaryType = BoundaryTypes.BT_Unitary
-                Case "civil_parish"
-                    BoundaryType = BoundaryTypes.BT_CivilParish
-                Case "adm_county"
-                    BoundaryType = BoundaryTypes.BT_NonMetroCounty
-                Case "non_metro_district"
-                    BoundaryType = BoundaryTypes.BT_NonMetroDistrict
-                Case "metro_county"
-                    BoundaryType = BoundaryTypes.BT_MetroCounty
-                Case "metro_district"
-                    BoundaryType = BoundaryTypes.BT_MetroDistrict
-                Case "nation"
-                    BoundaryType = BoundaryTypes.BT_Nation
-                Case "ceremonial_county"
-                    BoundaryType = BoundaryTypes.BT_CeremonialCounty
-                Case "sui_generis"
-                    BoundaryType = BoundaryTypes.BT_SuiGeneris
-                Case "liberty"
-                    BoundaryType = BoundaryTypes.BT_Liberty
-                Case "london_borough"
-                    BoundaryType = BoundaryTypes.BT_LondonBorough
-                Case "preserved_county"
-                    BoundaryType = BoundaryTypes.BT_PreservedCounty
-                Case "wales_district"
-                    BoundaryType = BoundaryTypes.BT_PrincipalArea
-                Case "scotland_district"
-                    BoundaryType = BoundaryTypes.BT_ScotCouncil
-                Case "country"
-                    BoundaryType = BoundaryTypes.BT_Country
-                Case "community"
-                    BoundaryType = BoundaryTypes.BT_Community
-                Case "n_ireland_district"
-                    BoundaryType = BoundaryTypes.BT_NIreDistrict
-                Case "parish_group"
-                    BoundaryType = BoundaryTypes.BT_ParishGroup
-                Case Else
-                    MsgBox("unimplemented boundary type " & sTmp)
-                    BoundaryType = BoundaryTypes.BT_Nation
-                    _btcode = "?"
-            End Select
+            If _mapStringBT.ContainsKey(sTmp) Then
+                BoundaryType = _mapStringBT(sTmp)
+            Else
+                BoundaryType = BoundaryTypes.BT_Nation
+                _btcode = "?"
+            End If
+
             If BoundaryType = BoundaryTypes.BT_CivilParish Then
                 ParishType = ParishType_FromString(NodeText(xBnd.SelectSingleNode("parish_type")))
             Else
@@ -689,6 +685,7 @@ Public Class BoundaryDB
             SetValue(_xNode, "name2", Name2)
             SetValue(_xNode, "council_name", CouncilName)
             SetValue(_xNode, "council_name2", CouncilName2)
+            SetValue(_xNode, "osmid", If(OSMRelation = 0, "", CStr(OSMRelation)))
             SetValue(_xNode, "newcode", ONSCode)
             SetValue(_xNode, "type", BoundaryType_ToString(BoundaryType))
             SetValue(_xNode, "council_style", CouncilStyle_ToString(CouncilStyle))

@@ -1,7 +1,11 @@
-﻿Public Class frmEdit
+﻿Imports OSMLibrary
+
+Public Class frmEdit
     Public xItem As BoundaryDB.BoundaryItem
     Public xDB As BoundaryDB
     Public sOriginalGSS As String
+    Public Retriever As OSMRetriever
+    Public RelChangeAllowed As Boolean = True
     Private _groups As New List(Of BoundaryDB.BoundaryItem)
 
     Private Class GenericListItem(Of T)
@@ -101,6 +105,7 @@
         With xItem
             txtName.Text = .Name
             txtName2.Text = .Name2
+            txtRelID.Text = If(.OSMRelation = 0, "", CStr(.OSMRelation))
             txtGSS.Text = .ONSCode
             txtCouncilName.Text = .CouncilName
             txtCouncilName2.Text = .CouncilName2
@@ -146,6 +151,7 @@
     End Sub
 
     Private Sub btnOK_Click(sender As Object, e As EventArgs) Handles btnOK.Click
+        Dim lTmp As Long
         Dim sGSS As String = Trim(txtGSS.Text)
         If Len(cbType.Text) = 0 Then
             MsgBox("Please select a boundary type")
@@ -176,6 +182,7 @@
         With xItem
             .Name = Trim(txtName.Text)
             .Name2 = Trim(txtName2.Text)
+            If Long.TryParse(txtRelID.Text, lTmp) Then .OSMRelation = lTmp
             .ONSCode = Trim(txtGSS.Text)
             .BoundaryType = CType(cbType.SelectedItem, GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)).Value
             .ParishType = CType(cbParishType.SelectedItem, GenericListItem(Of BoundaryDB.BoundaryItem.ParishTypes)).Value
@@ -204,5 +211,23 @@
 
     Private Sub btnNewGroup_Click(sender As Object, e As EventArgs) Handles btnNewGroup.Click
         MsgBox("add new parish group")
+    End Sub
+
+    Private Sub txtRelID_KeyPress(sender As Object, e As KeyPressEventArgs) Handles txtRelID.KeyPress
+        If Char.IsDigit(e.KeyChar) OrElse e.KeyChar = vbBack OrElse e.KeyChar = Chr(127) Then
+            e.Handled = False
+        Else
+            e.Handled = True
+        End If
+    End Sub
+
+    Private Sub txtRelID_Leave(sender As Object, e As EventArgs) Handles txtRelID.Leave
+        ' validate relation id
+        Dim iRel As Long
+        If txtRelID.Text = "" Then Return
+        If Not Long.TryParse(txtRelID.Text, iRel) Then
+            MsgBox("Please enter a numeric relation ID")
+            txtRelID.Focus()
+        End If
     End Sub
 End Class

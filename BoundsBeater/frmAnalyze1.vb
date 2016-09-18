@@ -185,6 +185,31 @@ Public Class frmAnalyze
         iTotal += iThisTotal
         iCount += iThisCount
     End Sub
+    Private Sub FormatTreeItem(tv As TreeView, xParentNode As TreeNode, xItem As BoundaryDB.BoundaryItem)
+        Dim sName As String
+        Dim tvn As TreeNode
+
+        If IsNothing(fntBold) Then
+            fntNormal = tvList.Font
+            fntBold = New Font(tvList.Font, FontStyle.Bold)
+        End If
+
+        sName = xItem.TypeCode & " " & xItem.Name
+        If Len(xItem.Name2) > 0 And xItem.Name2 <> xItem.Name Then
+            sName = sName & " (" & xItem.Name2 & ")"
+        End If
+        If IsNothing(xParentNode) Then
+            tvn = tv.Nodes.Add(xItem.ONSCode, sName)
+        Else
+            tvn = xParentNode.Nodes.Add(xItem.ONSCode, sName)
+        End If
+        If xItem.OSMRelation > 0 Then
+            tvn.NodeFont = fntBold
+        Else
+            tvn.NodeFont = fntNormal
+        End If
+
+    End Sub
     Private Sub SetTreeItems2(tvi As TreeNode, ByRef iTotal As Integer, ByRef iCount As Integer)
         Dim iThisTotal As Integer = 0, iThisCount As Integer = 0
         Dim sName As String
@@ -197,11 +222,7 @@ Public Class frmAnalyze
             sName = tvi.Text
             fntRequired = fntNormal
         Else
-            sName = xItem.TypeCode & " " & xItem.Name
-            If Len(xItem.Name2) > 0 And xItem.Name2 <> xItem.Name Then
-                sName = $"{sName} ({xItem.Name2})"
-                ' sName = sName & " (" & xItem.Name2 & ")"
-            End If
+            sName = DisplayString(xItem)
             If xItem.OSMRelation = 0 Then
                 fntRequired = fntNormal
             Else
@@ -241,6 +262,15 @@ Public Class frmAnalyze
         iTotal += iThisTotal
         iCount += iThisCount
     End Sub
+    Private Function DisplayString(xItem As BoundaryDB.BoundaryItem) As String
+        Dim sName As String
+        sName = xItem.TypeCode & " " & xItem.Name
+        If Len(xItem.Name2) > 0 And xItem.Name2 <> xItem.Name Then
+            sName = $"{sName} ({xItem.Name2})"
+            ' sName = sName & " (" & xItem.Name2 & ")"
+        End If
+        Return sName
+    End Function
     Private Sub SetTreeItems(tv As TreeView)
         Dim iTotal As Integer, iCount As Integer
         For Each tvi As TreeNode In tv.Nodes
@@ -569,11 +599,27 @@ Public Class frmAnalyze
 
     Private Sub tsmiEdit_Click(sender As Object, e As EventArgs) Handles tsmiEdit.Click
         Dim x As TreeNode = tvList.SelectedNode
+        Dim sTmp As String, sName As String
+        Dim iBracket As Integer
         If IsNothing(x) Then Return
         Dim bi As BoundaryDB.BoundaryItem
         bi = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
         If bi.Edit() Then
-            ' reload current tv item name possibly
+            ' reload current tv item name possibly - no, definitely!
+            If bi.OSMRelation > 0 Then
+                x.NodeFont = fntBold
+            Else
+                x.NodeFont = fntNormal
+            End If
+            sName = x.Text
+            iBracket = InStr(sName, "[")
+            If iBracket > 0 Then
+                sTmp = Mid(sName, iBracket - 1)
+            Else
+                sTmp = ""
+            End If
+            sName = DisplayString(bi) & sTmp
+            If sName <> x.Text Then x.Text = sName
         End If
     End Sub
 

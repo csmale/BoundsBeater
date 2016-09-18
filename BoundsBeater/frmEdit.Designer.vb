@@ -47,12 +47,15 @@ Partial Class frmEdit
         Me.txtNotes = New System.Windows.Forms.TextBox()
         Me.cbGroup = New System.Windows.Forms.ComboBox()
         Me.btnNewGroup = New System.Windows.Forms.Button()
+        Me.Label10 = New System.Windows.Forms.Label()
+        Me.btnSelRelation = New System.Windows.Forms.Button()
+        Me.txtRelID = New System.Windows.Forms.TextBox()
         Me.SuspendLayout()
         '
         'btnOK
         '
         Me.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK
-        Me.btnOK.Location = New System.Drawing.Point(236, 358)
+        Me.btnOK.Location = New System.Drawing.Point(236, 392)
         Me.btnOK.Name = "btnOK"
         Me.btnOK.Size = New System.Drawing.Size(75, 23)
         Me.btnOK.TabIndex = 0
@@ -62,7 +65,7 @@ Partial Class frmEdit
         'btnCancel
         '
         Me.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel
-        Me.btnCancel.Location = New System.Drawing.Point(136, 358)
+        Me.btnCancel.Location = New System.Drawing.Point(136, 392)
         Me.btnCancel.Name = "btnCancel"
         Me.btnCancel.Size = New System.Drawing.Size(75, 23)
         Me.btnCancel.TabIndex = 1
@@ -81,7 +84,7 @@ Partial Class frmEdit
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(14, 99)
+        Me.Label2.Location = New System.Drawing.Point(14, 133)
         Me.Label2.Name = "Label2"
         Me.Label2.Size = New System.Drawing.Size(73, 13)
         Me.Label2.TabIndex = 3
@@ -90,7 +93,7 @@ Partial Class frmEdit
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(14, 77)
+        Me.Label3.Location = New System.Drawing.Point(14, 111)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(56, 13)
         Me.Label3.TabIndex = 4
@@ -99,7 +102,7 @@ Partial Class frmEdit
         'Label5
         '
         Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(14, 145)
+        Me.Label5.Location = New System.Drawing.Point(14, 179)
         Me.Label5.Name = "Label5"
         Me.Label5.Size = New System.Drawing.Size(68, 13)
         Me.Label5.TabIndex = 6
@@ -108,7 +111,7 @@ Partial Class frmEdit
         'Label6
         '
         Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(14, 168)
+        Me.Label6.Location = New System.Drawing.Point(14, 202)
         Me.Label6.Name = "Label6"
         Me.Label6.Size = New System.Drawing.Size(63, 13)
         Me.Label6.TabIndex = 7
@@ -126,7 +129,7 @@ Partial Class frmEdit
         'Label8
         '
         Me.Label8.AutoSize = True
-        Me.Label8.Location = New System.Drawing.Point(14, 56)
+        Me.Label8.Location = New System.Drawing.Point(14, 90)
         Me.Label8.Name = "Label8"
         Me.Label8.Size = New System.Drawing.Size(79, 13)
         Me.Label8.TabIndex = 9
@@ -135,7 +138,7 @@ Partial Class frmEdit
         'Label9
         '
         Me.Label9.AutoSize = True
-        Me.Label9.Location = New System.Drawing.Point(14, 121)
+        Me.Label9.Location = New System.Drawing.Point(14, 155)
         Me.Label9.Name = "Label9"
         Me.Label9.Size = New System.Drawing.Size(112, 13)
         Me.Label9.TabIndex = 10
@@ -157,14 +160,14 @@ Partial Class frmEdit
         '
         'txtCouncilName
         '
-        Me.txtCouncilName.Location = New System.Drawing.Point(136, 92)
+        Me.txtCouncilName.Location = New System.Drawing.Point(136, 126)
         Me.txtCouncilName.Name = "txtCouncilName"
         Me.txtCouncilName.Size = New System.Drawing.Size(290, 20)
         Me.txtCouncilName.TabIndex = 13
         '
         'txtCouncilName2
         '
-        Me.txtCouncilName2.Location = New System.Drawing.Point(136, 114)
+        Me.txtCouncilName2.Location = New System.Drawing.Point(136, 148)
         Me.txtCouncilName2.Name = "txtCouncilName2"
         Me.txtCouncilName2.Size = New System.Drawing.Size(290, 20)
         Me.txtCouncilName2.TabIndex = 14
@@ -173,7 +176,7 @@ Partial Class frmEdit
         '
         Me.cbStyle.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cbStyle.FormattingEnabled = True
-        Me.cbStyle.Location = New System.Drawing.Point(136, 137)
+        Me.cbStyle.Location = New System.Drawing.Point(136, 171)
         Me.cbStyle.Name = "cbStyle"
         Me.cbStyle.Size = New System.Drawing.Size(100, 21)
         Me.cbStyle.TabIndex = 15
@@ -182,7 +185,7 @@ Partial Class frmEdit
         '
         Me.cbParishType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cbParishType.FormattingEnabled = True
-        Me.cbParishType.Location = New System.Drawing.Point(136, 160)
+        Me.cbParishType.Location = New System.Drawing.Point(136, 194)
         Me.cbParishType.Name = "cbParishType"
         Me.cbParishType.Size = New System.Drawing.Size(121, 21)
         Me.cbParishType.TabIndex = 16
@@ -191,14 +194,14 @@ Partial Class frmEdit
         '
         Me.cbType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cbType.FormattingEnabled = True
-        Me.cbType.Location = New System.Drawing.Point(136, 48)
+        Me.cbType.Location = New System.Drawing.Point(136, 82)
         Me.cbType.Name = "cbType"
         Me.cbType.Size = New System.Drawing.Size(290, 21)
         Me.cbType.TabIndex = 17
         '
         'txtGSS
         '
-        Me.txtGSS.Location = New System.Drawing.Point(136, 70)
+        Me.txtGSS.Location = New System.Drawing.Point(136, 104)
         Me.txtGSS.Name = "txtGSS"
         Me.txtGSS.Size = New System.Drawing.Size(100, 20)
         Me.txtGSS.TabIndex = 18
@@ -207,7 +210,7 @@ Partial Class frmEdit
         '
         Me.chkBorough.AutoSize = True
         Me.chkBorough.CheckAlign = System.Drawing.ContentAlignment.MiddleRight
-        Me.chkBorough.Location = New System.Drawing.Point(28, 187)
+        Me.chkBorough.Location = New System.Drawing.Point(28, 221)
         Me.chkBorough.Name = "chkBorough"
         Me.chkBorough.Size = New System.Drawing.Size(121, 17)
         Me.chkBorough.TabIndex = 19
@@ -218,7 +221,7 @@ Partial Class frmEdit
         '
         Me.chkRoyal.AutoSize = True
         Me.chkRoyal.CheckAlign = System.Drawing.ContentAlignment.MiddleRight
-        Me.chkRoyal.Location = New System.Drawing.Point(41, 210)
+        Me.chkRoyal.Location = New System.Drawing.Point(41, 244)
         Me.chkRoyal.Name = "chkRoyal"
         Me.chkRoyal.Size = New System.Drawing.Size(108, 17)
         Me.chkRoyal.TabIndex = 20
@@ -229,7 +232,7 @@ Partial Class frmEdit
         '
         Me.chkCity.AutoSize = True
         Me.chkCity.CheckAlign = System.Drawing.ContentAlignment.MiddleRight
-        Me.chkCity.Location = New System.Drawing.Point(51, 233)
+        Me.chkCity.Location = New System.Drawing.Point(51, 267)
         Me.chkCity.Name = "chkCity"
         Me.chkCity.Size = New System.Drawing.Size(98, 17)
         Me.chkCity.TabIndex = 21
@@ -239,7 +242,7 @@ Partial Class frmEdit
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(17, 262)
+        Me.Label4.Location = New System.Drawing.Point(17, 296)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(35, 13)
         Me.Label4.TabIndex = 22
@@ -247,7 +250,7 @@ Partial Class frmEdit
         '
         'txtNotes
         '
-        Me.txtNotes.Location = New System.Drawing.Point(58, 262)
+        Me.txtNotes.Location = New System.Drawing.Point(58, 296)
         Me.txtNotes.Multiline = True
         Me.txtNotes.Name = "txtNotes"
         Me.txtNotes.ScrollBars = System.Windows.Forms.ScrollBars.Both
@@ -258,25 +261,53 @@ Partial Class frmEdit
         '
         Me.cbGroup.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
         Me.cbGroup.FormattingEnabled = True
-        Me.cbGroup.Location = New System.Drawing.Point(276, 206)
+        Me.cbGroup.Location = New System.Drawing.Point(276, 240)
         Me.cbGroup.Name = "cbGroup"
         Me.cbGroup.Size = New System.Drawing.Size(121, 21)
         Me.cbGroup.TabIndex = 24
         '
         'btnNewGroup
         '
-        Me.btnNewGroup.Location = New System.Drawing.Point(351, 70)
+        Me.btnNewGroup.Location = New System.Drawing.Point(351, 104)
         Me.btnNewGroup.Name = "btnNewGroup"
         Me.btnNewGroup.Size = New System.Drawing.Size(75, 23)
         Me.btnNewGroup.TabIndex = 25
         Me.btnNewGroup.Text = "New Group"
         Me.btnNewGroup.UseVisualStyleBackColor = True
         '
+        'Label10
+        '
+        Me.Label10.AutoSize = True
+        Me.Label10.Location = New System.Drawing.Point(15, 60)
+        Me.Label10.Name = "Label10"
+        Me.Label10.Size = New System.Drawing.Size(73, 13)
+        Me.Label10.TabIndex = 27
+        Me.Label10.Text = "OSM Relation"
+        '
+        'btnSelRelation
+        '
+        Me.btnSelRelation.Location = New System.Drawing.Point(390, 54)
+        Me.btnSelRelation.Name = "btnSelRelation"
+        Me.btnSelRelation.Size = New System.Drawing.Size(36, 23)
+        Me.btnSelRelation.TabIndex = 28
+        Me.btnSelRelation.Text = "..."
+        Me.btnSelRelation.UseVisualStyleBackColor = True
+        '
+        'txtRelID
+        '
+        Me.txtRelID.Location = New System.Drawing.Point(136, 54)
+        Me.txtRelID.Name = "txtRelID"
+        Me.txtRelID.Size = New System.Drawing.Size(248, 20)
+        Me.txtRelID.TabIndex = 29
+        '
         'frmEdit
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(433, 386)
+        Me.ClientSize = New System.Drawing.Size(433, 419)
+        Me.Controls.Add(Me.txtRelID)
+        Me.Controls.Add(Me.btnSelRelation)
+        Me.Controls.Add(Me.Label10)
         Me.Controls.Add(Me.btnNewGroup)
         Me.Controls.Add(Me.cbGroup)
         Me.Controls.Add(Me.txtNotes)
@@ -334,4 +365,7 @@ Partial Class frmEdit
     Friend WithEvents txtNotes As TextBox
     Friend WithEvents cbGroup As ComboBox
     Friend WithEvents btnNewGroup As Button
+    Friend WithEvents Label10 As Label
+    Friend WithEvents btnSelRelation As Button
+    Friend WithEvents txtRelID As TextBox
 End Class
