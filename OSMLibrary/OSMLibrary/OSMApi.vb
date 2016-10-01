@@ -8,6 +8,7 @@ Public Class OSMApi
     Public UserAgent As String = My.Settings.OSMLibUserAgent
     Public XapiBaseURL As String = My.Settings.OSMXapiBaseApiURL
     Private sLogFile As String = "OSMAPI.log"
+    Public LastError As String
 
     Public Sub New()
         MyBase.New()
@@ -135,13 +136,15 @@ Public Class OSMApi
         Dim iStartTime As Integer
         Dim iEndTime As Integer
 
+        LastError = ""
         Debug.Print("Retrieving " & sUrl)
         Try
             req = WebRequest.Create(sUrl)
             req.Method = "GET"
         Catch e As WebException
             Debug.Print(e.Message)
-            If IsNothing(req) Then Return Nothing
+            LastError = e.Message
+            Return Nothing
         End Try
 
         req.UserAgent = UserAgent
@@ -154,9 +157,11 @@ Public Class OSMApi
             Debug.Print(e.Message)
             'if the object has been deleted, we get a 410 Gone, plus a free WebException for our troubles.
             If IsNothing(resp) Then
+                LastError = e.Message
                 Throw New OSMWebException("Unknown error", e)
             Else
                 If resp.StatusCode = 410 Then
+                    LastError = "Deleted"
                     Throw New OSMWebException("Object deleted", e)
                 End If
             End If
@@ -166,11 +171,13 @@ Public Class OSMApi
         Debug.Print("HTTP status " & resp.StatusCode & "(" & resp.StatusDescription & ") in " & (iEndTime - iStartTime) & "ms")
         If resp.StatusCode <> 200 Then
             Debug.Print("HTTP status " & resp.StatusCode & "(" & resp.StatusDescription & ") on " & sUrl)
+            LastError = resp.StatusDescription
             Throw New OSMWebException("Bad HTTP Status " & resp.StatusCode.ToString())
             Return Nothing
         End If
         If Left(resp.ContentType, 8) <> "text/xml" And resp.ContentType <> "application/osm3s+xml" Then
             Debug.Print("HTTP returned content type " & resp.ContentType & " on " & sUrl)
+            LastError = "Unexpected content type " & resp.ContentType
             Throw New OSMWebException("Unexpected content type " & resp.ContentType)
             Return Nothing
         End If
@@ -185,6 +192,7 @@ Public Class OSMApi
         If xDoc.LoadXML(sResp) Then
             Return xDoc
         Else
+            LastError = "XML processing error"
             Return Nothing
         End If
     End Function

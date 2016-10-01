@@ -162,7 +162,7 @@ Partial Class frmMain
         '
         'colONS
         '
-        Me.colONS.Text = "ONS"
+        Me.colONS.Text = "GSS"
         '
         'chkOnline
         '

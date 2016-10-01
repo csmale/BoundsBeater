@@ -17,6 +17,7 @@ Public Class frmAnalyze
     Dim fntNormal As Font
     Dim fntBold As Font
     Dim bInRightClick As Boolean = False
+    Const DUMMY_MARKER As String = "dummy"
     Dim x As New System.Data.SQLite.SQLiteConnection()
 
     Private Sub testpbf()
@@ -316,6 +317,11 @@ Public Class frmAnalyze
         Dim x As New BoundaryDB(sDB)
         tsStatus.Text = "Loaded " & sDB
 
+        If IsNothing(fntBold) Then
+            fntNormal = tvList.Font
+            fntBold = New Font(tvList.Font, FontStyle.Bold)
+        End If
+
         ReloadTV(x)
 
         xDB = x
@@ -338,10 +344,11 @@ Public Class frmAnalyze
             i = i + 1
             tsProgress.Value = i
             Application.DoEvents()
-            LoadTreeView(tvList, Nothing, x, xItem, iTotal, iCount)
+            ' LoadTreeView(tvList, Nothing, x, xItem, iTotal, iCount)
+            LoadTreeNode(tvList, Nothing, xItem)
         Next
 
-        SetTreeItems(tvList)
+        ' SetTreeItems(tvList)
         Application.DoEvents()
         tvList.Sort()
         tvList.EndUpdate()
@@ -492,42 +499,43 @@ Public Class frmAnalyze
         If xDB.ChangedItems.Count > 0 Then
 
             Dim xExpanded As New List(Of BoundaryDB.BoundaryItem)
-            Dim xSelected As BoundaryDB.BoundaryItem = tvList.SelectedNode?.Tag
-            For Each xNode In tvList.Nodes
-                CollectExpanded(xNode, xExpanded)
-            Next
+            Dim xSelected As BoundaryDB.BoundaryItem = TryCast(tvList.SelectedNode?.Tag, BoundaryDB.BoundaryItem)
+            Dim selectedNodes(10) As String
+            Dim xTmp As BoundaryDB.BoundaryItem = xSelected
+            Dim i As Integer = 0
+            Do
+                If xTmp Is Nothing Then Exit Do
+                selectedNodes(i) = xTmp.ONSCode
+                xTmp = xTmp.Parent
+                i = i + 1
+            Loop
+
+            ' For Each xNode In tvList.Nodes
+            ' CollectExpanded(xNode, xExpanded)
+            ' Next
+
             tsStatus.Text = "Updating tree..."
             Application.DoEvents()
-            ReloadTV(xDB)
-            For Each xNode In tvList.Nodes
-                RestoreExpanded(xNode, xExpanded)
-            Next
+            ReloadTV(xDB) ' only reloads top level initially!
 
-#If False Then
-            ' tvList.BeginUpdate()
-            For Each xDBitem In xDB.ChangedItems
-                xNodes = tvList.Nodes.Find(xDBitem.ONSCode, True)
-                For Each xNode In xNodes
-                    If xDBitem.OSMRelation = 0 Then
-                        fntRequired = fntNormal
-                    Else
-                        fntRequired = fntBold
-                    End If
-                    If Not (xNode.NodeFont Is fntRequired) Then
-                        xNode.NodeFont = fntRequired
-                    End If
-                    ' force display bbox recalculation following font change
-                    ' xNode.Text = xNode.Text
-                Next
-            Next
-            ' tvList.EndUpdate()
-            Application.DoEvents()
-            ' tvList.BeginUpdate()
-            SetTreeItems(tvList)
-            ' tvList.EndUpdate()
-#End If
+            Dim j As Integer = i - 1
+            If j > 0 Then
+                xNode = tvList.Nodes(tvList.Nodes.IndexOfKey(selectedNodes(j)))
+                Do
+                    xNode.Expand()
+                    If j < 0 Then Exit Do
+                    j = j - 1
+                    xNode = xNode.Nodes(xNode.Nodes.IndexOfKey(selectedNodes(j)))
+                Loop
+            End If
+
+
+
+            ' For Each xNode In tvList.Nodes
+            ' RestoreExpanded(xNode, xExpanded)
+            ' Next
         End If
-        tsStatus.Text = "Update complete."
+            tsStatus.Text = "Update complete."
         MsgBox("Update complete.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information)
     End Sub
 
@@ -776,6 +784,7 @@ Public Class frmAnalyze
         xItem.ParentCode = p.ONSCode
         If xItem.Edit() Then
             xDB.Items.Add(xItem.ONSCode, xItem)
+            LoadTreeNode(tvList, x, xItem)
             MsgBox("edit successful")
         End If
     End Sub
@@ -816,6 +825,129 @@ Public Class frmAnalyze
         p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
         Dim f As New frmReview(p)
         f.ShowDialog(Me)
+    End Sub
+
+    Private Sub tsmiChildOverviewReport_Click(sender As Object, e As EventArgs) Handles tsmiChildOverviewReport.Click
+        Dim x As TreeNode = tvList.SelectedNode
+        If x Is Nothing Then Return
+        If x.Tag Is Nothing Then Return
+        Dim p As BoundaryDB.BoundaryItem
+        p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        DoChildOverviewReport(p, False)
+    End Sub
+
+    Private Sub DoChildOverviewReport(p As BoundaryDB.BoundaryItem, Optional bDeep As Boolean = False)
+        ' Type = boundary, boundary=administrative, admin_level, designation, name, name:en, Name: cy,
+        ' website, council_name, council_name: en, council_name: cy, council_style, parish_type, source,
+        ' ref: gss
+        Dim hdrs() As String = {"+status", "+dbname", "+dbtype", "+osmid", "+osmver", "type", "boundary", "admin_level", "designation", "name", "council_name", "council_style", "parish_type", "ref:gss"}
+
+        With sfdReports
+            .Filter = "CSV Files|*.csv|All files|*.*"
+            .FilterIndex = 0
+            .FileName = ""
+            .CheckPathExists = True
+            If .ShowDialog() = DialogResult.OK Then
+                Dim csv As New CSVWriter(.FileName)
+                csv.WriteLine(hdrs)
+                DoChildOverviewReportEx(hdrs, csv, p, bDeep)
+                csv.Close()
+            End If
+        End With
+    End Sub
+    Private Sub DoChildOverviewReportEx(hdrs() As String, csv As CSVWriter, p As BoundaryDB.BoundaryItem, bDeep As Boolean)
+        Dim cols(hdrs.Length) As String
+        Dim r As OSMRelation
+        Dim i As Integer
+        Dim status As String
+        For Each pr In p.Children
+            If pr.OSMRelation > 0 Then
+                r = TryCast(xRetriever.GetOSMObject(OSMObject.ObjectType.Relation, pr.OSMRelation), OSMRelation)
+                If Not r Is Nothing Then
+                    status = "ok"
+                Else
+                    status = "cannot retrieve"
+                End If
+            Else
+                r = Nothing
+                status = "unknown"
+            End If
+
+            For i = 0 To hdrs.Length - 1
+                If hdrs(i).Chars(1) = "+" Then
+                    Select Case hdrs(i)
+                        Case "+status"
+                            cols(i) = status
+                        Case "+dbtype"
+                            cols(i) = BoundaryDB.BoundaryItem.BoundaryType_ToString(pr.BoundaryType)
+                        Case "+osmid"
+                            cols(i) = pr.OSMRelation.ToString()
+                        Case "+dbname"
+                            cols(i) = pr.Name
+                        Case "+osmver"
+                            If r Is Nothing Then
+                                cols(i) = ""
+                            Else
+                                cols(i) = r.Version.ToString()
+                            End If
+                    End Select
+                Else
+                    If r Is Nothing Then
+                        cols(i) = ""
+                    Else
+                        cols(i) = r.Tag(hdrs(i))
+                    End If
+                End If
+            Next
+            csv.WriteLine(cols)
+        Next
+        If bDeep Then
+            For Each pr In p.Children
+                If pr.Children.Count > 0 Then
+                    DoChildOverviewReportEx(hdrs, csv, pr, bDeep)
+                End If
+            Next
+        End If
+    End Sub
+
+    Private Sub tsmiDeepChildReport_Click(sender As Object, e As EventArgs) Handles tsmiDeepChildReport.Click
+        Dim x As TreeNode = tvList.SelectedNode
+        If x Is Nothing Then Return
+        If x.Tag Is Nothing Then Return
+        Dim p As BoundaryDB.BoundaryItem
+        p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        DoChildOverviewReport(p, True)
+    End Sub
+
+    Private Sub tvList_BeforeExpand(sender As Object, e As TreeViewCancelEventArgs) Handles tvList.BeforeExpand
+        Dim n As TreeNode = e.Node
+        Dim xItem As BoundaryDB.BoundaryItem = DirectCast(n.Tag, BoundaryDB.BoundaryItem)
+        If n.Nodes.Count <> 1 Then Return
+        If n.Nodes(0).Text <> DUMMY_MARKER Then Return
+        n.Nodes(0).Remove()
+        LoadTreeNode(tvList, n, xItem)
+    End Sub
+    Private Sub LoadTreeNode(tv As TreeView, n As TreeNode, xItem As BoundaryDB.BoundaryItem)
+        Dim tvn As TreeNode
+        Dim sName As String
+        For Each xChild In xItem.Children
+            sName = DisplayString(xChild)
+            If n Is Nothing Then
+                tvn = tv.Nodes.Add(xChild.ONSCode, sName)
+            Else
+                tvn = n.Nodes.Add(xChild.ONSCode, sName)
+            End If
+            If xChild.OSMRelation > 0 Then
+                tvn.NodeFont = fntBold
+            Else
+                tvn.NodeFont = fntNormal
+            End If
+            tvn.Tag = xChild
+            tvn.ContextMenuStrip = cmsNode
+            If xChild.Children.Count > 0 Then
+                tvn.Nodes.Add(DUMMY_MARKER)
+            End If
+        Next
     End Sub
 End Class
 Public Class ListViewComparer

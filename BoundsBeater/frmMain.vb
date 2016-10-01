@@ -95,7 +95,7 @@ Public Class frmMain
                 .SubItems.Add(xRel.Tag("admin_level"))
                 .SubItems.Add(xRel.Name("en"))
                 .SubItems.Add(xRel.Tag("designation"))
-                .SubItems.Add(xRel.Tag("ons_code"))
+                .SubItems.Add(xRel.Tag("ref:gss"))
             End With
         Next
         lvBounds.EndUpdate()

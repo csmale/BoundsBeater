@@ -5,6 +5,7 @@ Imports System.Security
 Public Class OSMRetriever 
     Public MaxAge As Long = 24 * 60 * 60   ' in seconds, default is one day
     Public API As OSMApi
+    Public LastError As String
 
     Public Sub New()
         MyBase.New()
@@ -30,8 +31,10 @@ Public Class OSMRetriever
         Dim xDoc As OSMDoc
         xDoc = API.GetOSMDoc(xType, lRef, bFull)
         If xDoc Is Nothing Then
+            LastError = API.LastError
             Return Nothing
         End If
+        LastError = ""
         Select Case xType
             Case OSMObject.ObjectType.Node
                 Return xDoc.Nodes(lRef)
@@ -40,6 +43,7 @@ Public Class OSMRetriever
             Case OSMObject.ObjectType.Relation
                 Return xDoc.Relations(lRef)
             Case Else
+                LastError = "Unknown object type"
                 Return Nothing
         End Select
     End Function
@@ -51,6 +55,7 @@ Public Class OSMRetriever
             xDoc = API.GetOSMDocVersion(xType, lRef, lVer)
         End If
         If xDoc Is Nothing Then
+            LastError = API.LastError
             Return Nothing
         End If
         Select Case xType
@@ -63,6 +68,7 @@ Public Class OSMRetriever
             Case OSMObject.ObjectType.Changeset
                 Return xDoc.Changesets(lRef)
             Case Else
+                LastError = "Unknown object type"
                 Return Nothing
         End Select
     End Function

@@ -53,7 +53,10 @@ Partial Class frmAnalyze
         Me.tsmiShowAll = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiJSON = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiReport = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiChildOverviewReport = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiDeepChildReport = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiAddChild = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiReview = New System.Windows.Forms.ToolStripMenuItem()
         Me.txtAdminLevel = New System.Windows.Forms.TextBox()
         Me.btnHist = New System.Windows.Forms.Button()
         Me.cmsChild = New System.Windows.Forms.ContextMenuStrip(Me.components)
@@ -61,7 +64,7 @@ Partial Class frmAnalyze
         Me.tsmiChildReport = New System.Windows.Forms.ToolStripMenuItem()
         Me.btnOSM = New System.Windows.Forms.Button()
         Me.btnClear = New System.Windows.Forms.Button()
-        Me.tsmiReview = New System.Windows.Forms.ToolStripMenuItem()
+        Me.sfdReports = New System.Windows.Forms.SaveFileDialog()
         Me.tabDetail.SuspendLayout()
         Me.tbpChildren.SuspendLayout()
         Me.tbpMap.SuspendLayout()
@@ -266,45 +269,63 @@ Partial Class frmAnalyze
         '
         'cmsNode
         '
-        Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiAddChild, Me.tsmiReview})
+        Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiChildOverviewReport, Me.tsmiDeepChildReport, Me.tsmiAddChild, Me.tsmiReview})
         Me.cmsNode.Name = "ContextMenuStrip1"
-        Me.cmsNode.Size = New System.Drawing.Size(166, 180)
+        Me.cmsNode.Size = New System.Drawing.Size(193, 202)
         '
         'tsmiFlush
         '
         Me.tsmiFlush.Name = "tsmiFlush"
-        Me.tsmiFlush.Size = New System.Drawing.Size(165, 22)
+        Me.tsmiFlush.Size = New System.Drawing.Size(192, 22)
         Me.tsmiFlush.Text = "Flush from cache"
         '
         'tsmiEdit
         '
         Me.tsmiEdit.Name = "tsmiEdit"
-        Me.tsmiEdit.Size = New System.Drawing.Size(165, 22)
+        Me.tsmiEdit.Size = New System.Drawing.Size(192, 22)
         Me.tsmiEdit.Text = "Edit"
         '
         'tsmiShowAll
         '
         Me.tsmiShowAll.Name = "tsmiShowAll"
-        Me.tsmiShowAll.Size = New System.Drawing.Size(165, 22)
+        Me.tsmiShowAll.Size = New System.Drawing.Size(192, 22)
         Me.tsmiShowAll.Text = "Show all on map"
         '
         'tsmiJSON
         '
         Me.tsmiJSON.Name = "tsmiJSON"
-        Me.tsmiJSON.Size = New System.Drawing.Size(165, 22)
+        Me.tsmiJSON.Size = New System.Drawing.Size(192, 22)
         Me.tsmiJSON.Text = "Show JSON"
         '
         'tsmiReport
         '
         Me.tsmiReport.Name = "tsmiReport"
-        Me.tsmiReport.Size = New System.Drawing.Size(165, 22)
+        Me.tsmiReport.Size = New System.Drawing.Size(192, 22)
         Me.tsmiReport.Text = "Report"
+        '
+        'tsmiChildOverviewReport
+        '
+        Me.tsmiChildOverviewReport.Name = "tsmiChildOverviewReport"
+        Me.tsmiChildOverviewReport.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiChildOverviewReport.Text = "Child Overview Report"
+        '
+        'tsmiDeepChildReport
+        '
+        Me.tsmiDeepChildReport.Name = "tsmiDeepChildReport"
+        Me.tsmiDeepChildReport.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiDeepChildReport.Text = "Deep Child Report"
         '
         'tsmiAddChild
         '
         Me.tsmiAddChild.Name = "tsmiAddChild"
-        Me.tsmiAddChild.Size = New System.Drawing.Size(165, 22)
-        Me.tsmiAddChild.Text = "Add child"
+        Me.tsmiAddChild.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiAddChild.Text = "Add Child"
+        '
+        'tsmiReview
+        '
+        Me.tsmiReview.Name = "tsmiReview"
+        Me.tsmiReview.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiReview.Text = "Review OSM"
         '
         'txtAdminLevel
         '
@@ -357,12 +378,6 @@ Partial Class frmAnalyze
         Me.btnClear.TabIndex = 17
         Me.btnClear.Text = "Clear"
         Me.btnClear.UseVisualStyleBackColor = True
-        '
-        'tsmiReview
-        '
-        Me.tsmiReview.Name = "tsmiReview"
-        Me.tsmiReview.Size = New System.Drawing.Size(165, 22)
-        Me.tsmiReview.Text = "Review OSM"
         '
         'frmAnalyze
         '
@@ -436,4 +451,7 @@ Partial Class frmAnalyze
     Friend WithEvents tsmiChildReport As ToolStripMenuItem
     Friend WithEvents tsmiAddChild As ToolStripMenuItem
     Friend WithEvents tsmiReview As ToolStripMenuItem
+    Friend WithEvents tsmiChildOverviewReport As ToolStripMenuItem
+    Friend WithEvents tsmiDeepChildReport As ToolStripMenuItem
+    Friend WithEvents sfdReports As SaveFileDialog
 End Class

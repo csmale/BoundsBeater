@@ -27,7 +27,7 @@ Public Class RelationReport
                 Else
                     sLvl = xRel.Tag("admin_level")
                     If IsNumeric(sLvl) Then
-                        iLvl = CLng(sLvl)
+                        iLvl = Long.Parse(sLvl)
                         If iLvl < 1 Or iLvl > 12 Then iLvl = 0
                     Else
                         iLvl = 0
@@ -247,9 +247,13 @@ Public Class RelationReport
                 xRing = xResolver.Rings(i)
                 xFile.WriteStartElement("h4")
                 If xRing.isClosed Then
-                    xFile.WriteString(String.Format("Ring {0} ({2}) closed, {3} ways, length {4:F0}m, end node {1}", i, xRing.Head.ID, xRing.Role, xRing.Ways.Count, xRing.Length))
+                    xFile.WriteString(String.Format("Ring {0} ({1}) closed, {2} ways, length {3:F0}m, end node ", i, xRing.Role, xRing.Ways.Count, xRing.Length))
+                    PutAnchor(xFile, xRing.Head.BrowseURL, xRing.Head.ID.ToString())
                 Else
-                    xFile.WriteString(String.Format("Ring {0} ({3}) not closed, {4} ways, length {5:F0}m, from node {1} to {2}", i, xRing.Head.ID, xRing.Tail.ID, xRing.Role, xRing.Ways.Count, xRing.Length))
+                    xFile.WriteString(String.Format("Ring {0} ({1}) not closed, {2} ways, length {3:F0}m, from node ", i, xRing.Role, xRing.Ways.Count, xRing.Length))
+                    PutAnchor(xFile, xRing.Head.BrowseURL, xRing.Head.ID.ToString())
+                    xFile.WriteString(" to ")
+                    PutAnchor(xFile, xRing.Tail.BrowseURL, xRing.Tail.ID.ToString())
                     myLog.Write(xRel, Nothing, "Ring " & i & " (" & xRing.Role & ") is not closed")
                 End If
                 xFile.WriteEndElement()

@@ -9,7 +9,7 @@ Public Class BoundaryDB
     Public Path As String
     Public Items As New Dictionary(Of String, BoundaryItem)
     Dim ss() As String
-    Dim bChanges As Boolean
+    Public bChanges As Boolean
     Private _root As BoundaryItem
     Private _ChangedItems As List(Of BoundaryItem)
 
@@ -354,7 +354,18 @@ Public Class BoundaryDB
                 _btcode = _mapBTString(value)
             End Set
         End Property
+        Private _ONSCode As String
         Public Property ONSCode As String
+            Get
+                Return _ONSCode
+            End Get
+            Set(value As String)
+                If _ONSCode <> value Then
+                    _ONSCode = value
+                    If _bdb IsNot Nothing Then _bdb.bChanges = True
+                End If
+            End Set
+        End Property
         Public ParentCode As String
         Public OSMRelation As Long
         Public AdminLevel As Integer
@@ -366,6 +377,8 @@ Public Class BoundaryDB
         Private _Parent As BoundaryItem
         Private _btcode As String
         Private _Children As New List(Of BoundaryItem)
+        Private ReadOnly Property DeepCount As Integer
+        Private ReadOnly Property DeepCountOSM As Integer
 
         Public Sub New(bdb As BoundaryDB)
             Me.New()
@@ -685,7 +698,7 @@ Public Class BoundaryDB
             SetValue(_xNode, "name2", Name2)
             SetValue(_xNode, "council_name", CouncilName)
             SetValue(_xNode, "council_name2", CouncilName2)
-            SetValue(_xNode, "osmid", If(OSMRelation = 0, "", CStr(OSMRelation)))
+            SetIDinXML()
             SetValue(_xNode, "newcode", ONSCode)
             SetValue(_xNode, "type", BoundaryType_ToString(BoundaryType))
             SetValue(_xNode, "council_style", CouncilStyle_ToString(CouncilStyle))
@@ -837,14 +850,14 @@ Public Class BoundaryDB
     End Function
     Private Shared Function Normalise(sName As String) As String
         Static ss() As String = {
-            "london borough Of ",
-            "royal borough Of ",
-            "city Of ",
+            "london borough of ",
+            "royal borough of ",
+            "city of ",
             " cp",
             " civil parish",
-            "district Of ",
-            "borough Of ",
-            "parish Of ",
+            "district of ",
+            "borough of ",
+            "parish of ",
             " county council",
             " district council",
             " borough council",
