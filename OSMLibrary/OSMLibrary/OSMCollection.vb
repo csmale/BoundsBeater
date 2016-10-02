@@ -1,12 +1,13 @@
 ﻿Imports System
 Imports System.Collections
 
-Public Class OSMCollection
+Public Class OSMCollection(Of T)
     Inherits DictionaryBase
 
     Private ObjType As OSMObject.ObjectType
     Private MbrType As Type
 
+#If False Then
     Public Sub New(OType As OSMObject.ObjectType)
         MyBase.New()
         ObjType = OType
@@ -21,12 +22,17 @@ Public Class OSMCollection
                 MbrType = GetType(OSMChangeset)
         End Select
     End Sub
+#End If
 
-    Default Public Property Item(key As ULong) As OSMObject
+    Public Sub New()
+        MbrType = GetType(T)
+    End Sub
+
+    Default Public Property Item(key As Long) As T
         Get
-            Return CType(Dictionary(key), OSMObject)
+            Return DirectCast(Dictionary(key), T)
         End Get
-        Set(value As OSMObject)
+        Set(value As T)
             Dictionary(key) = value
         End Set
     End Property
@@ -43,48 +49,54 @@ Public Class OSMCollection
         End Get
     End Property
 
-    Public Sub Add(key As ULong, value As OSMObject)
+    Public Sub Add(key As Long, value As T)
         Dictionary.Add(key, value)
     End Sub 'Add
 
-    Public Function Contains(key As ULong) As Boolean
+    Public Function Contains(key As Long) As Boolean
         Return Dictionary.Contains(key)
     End Function 'Contains
 
-    Public Sub Remove(key As ULong)
+    Public Sub Remove(key As Long)
         Dictionary.Remove(key)
     End Sub 'Remove
 
     Protected Overrides Sub OnInsert(key As Object, value As Object)
-        If Not GetType(System.UInt64).IsAssignableFrom(key.GetType()) Then
-            Throw New ArgumentException("key must be of type Integer.", "key")
+        If Not GetType(Long).IsAssignableFrom(key.GetType()) Then
+            Throw New ArgumentException("key must be of type Integer.", NameOf(key))
         End If
+#If False Then
         If Not MbrType.IsAssignableFrom(value.GetType()) Then
-            Throw New ArgumentException("value must be of type OSMObject.", "value")
+            Throw New ArgumentException("value must be of type OSMObject.", NameOf(value))
         End If
+#End If
     End Sub 'OnInsert
 
     Protected Overrides Sub OnRemove(key As Object, value As Object)
-        If Not GetType(System.UInt64).IsAssignableFrom(key.GetType()) Then
-            Throw New ArgumentException("key must be of type Integer.", "key")
+        If Not GetType(Long).IsAssignableFrom(key.GetType()) Then
+            Throw New ArgumentException("key must be of type Integer.", NameOf(key))
         End If
     End Sub 'OnRemove
 
     Protected Overrides Sub OnSet(key As Object, oldValue As Object, newValue As Object)
-        If Not GetType(System.UInt64).IsAssignableFrom(key.GetType()) Then
-            Throw New ArgumentException("key must be of type Integer.", "key")
+        If Not GetType(Long).IsAssignableFrom(key.GetType()) Then
+            Throw New ArgumentException("key must be of type Integer.", NameOf(key))
         End If
+#If False Then
         If Not MbrType.IsAssignableFrom(newValue.GetType()) Then
-            Throw New ArgumentException("newValue must be of type OSMObject.", "newValue")
+            Throw New ArgumentException("newValue must be of type OSMObject.", NameOf(newValue))
         End If
+#End If
     End Sub 'OnSet
 
     Protected Overrides Sub OnValidate(key As Object, value As Object)
-        If Not GetType(System.UInt64).IsAssignableFrom(key.GetType()) Then
-            Throw New ArgumentException("key must be of type Integer.", "key")
+        If Not GetType(Long).IsAssignableFrom(key.GetType()) Then
+            Throw New ArgumentException("key must be of type Integer.", NameOf(key))
         End If
+#If False Then
         If Not MbrType.IsAssignableFrom(value.GetType()) Then
-            Throw New ArgumentException("value must be of type OSMObject.", "value")
+            Throw New ArgumentException("value must be of type OSMObject.", NameOf(value))
         End If
+#End If
     End Sub 'OnValidate 
 End Class

@@ -98,7 +98,7 @@ Public Class BoundaryDB
             Return True
         Catch e As XmlException
             xw?.Close()
-            MsgBox(e.Message, MsgBoxStyle.Critical + MsgBoxStyle.OkOnly, "Save error")
+            MsgBox(e.Message, MsgBoxStyle.Critical Or MsgBoxStyle.OkOnly, "Save error")
             Return False
         End Try
     End Function
@@ -417,16 +417,17 @@ Public Class BoundaryDB
 
         Public ReadOnly Property NumChildren() As Integer
             Get
-                Dim count As Integer = Children.Count
+                Dim count As Integer = 0
                 For Each i In Children
-                    count += i.Children.Count
+                    If i.BoundaryType <> BoundaryTypes.BT_ParishGroup Then count += 1
+                    count += i.NumChildren
                 Next
                 Return count
             End Get
         End Property
         Public ReadOnly Property NumKnownChildren() As Integer
             Get
-                Dim count As Integer
+                Dim count As Integer = 0
                 For Each i In Children
                     If i.OSMRelation > 0 Then count += 1
                     count += i.NumKnownChildren
@@ -473,8 +474,7 @@ Public Class BoundaryDB
             End If
             NormName = NodeText(xBnd.SelectSingleNode("norm_name"))
             sTmp = NodeText(xBnd.SelectSingleNode("admin_level"))
-            If IsNumeric(sTmp) Then
-                AdminLevel = CLng(sTmp)
+            If Integer.TryParse(sTmp, AdminLevel) Then
                 If AdminLevel < 0 Or AdminLevel > 11 Then AdminLevel = 0
             Else
                 AdminLevel = 0
@@ -765,8 +765,7 @@ Public Class BoundaryDB
                 End If
                 sName = xRel.Tag("name")
                 sLevel = xRel.Tag("admin_level")
-                If IsNumeric(sLevel) Then
-                    iLevel = CLng(sLevel)
+                If Integer.TryParse(sLevel, iLevel) Then
                     If iLevel < 2 Or iLevel > 11 Then iLevel = 0
                 Else
                     iLevel = 0
@@ -841,7 +840,7 @@ Public Class BoundaryDB
             End If
         Next
         If bChanges Then
-            If MsgBox("Save Changes?", MsgBoxStyle.OkCancel + MsgBoxStyle.Question) = MsgBoxResult.Ok Then
+            If MsgBox("Save Changes?", MsgBoxStyle.OkCancel Or MsgBoxStyle.Question) = MsgBoxResult.Ok Then
                 ' but now we have to persist the changes somehow...
                 Save()
             End If

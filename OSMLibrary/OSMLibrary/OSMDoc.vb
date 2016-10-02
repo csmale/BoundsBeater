@@ -1,11 +1,11 @@
 ﻿Imports System.Xml
 Public Class OSMDoc
     Dim xDoc As New XmlDocument
-    Public Relations As New OSMCollection(OSMObject.ObjectType.Relation)
-    Public Ways As New OSMCollection(OSMObject.ObjectType.Way)
+    Public Relations As New OSMCollection(Of OSMRelation)
+    Public Ways As New OSMCollection(Of OSMWay)
     '    Public Nodes As New Dictionary(Of ULong, OSMNode)
-    Public Nodes As New OSMCollection(OSMObject.ObjectType.Node)
-    Public Changesets As New OSMCollection(OSMObject.ObjectType.Changeset)
+    Public Nodes As New OSMCollection(Of OSMNode)
+    Public Changesets As New OSMCollection(Of OSMChangeset)
     Public Retriever As OSMRetriever
     Public Users As New Dictionary(Of ULong, OSMUser)
 
@@ -23,8 +23,8 @@ Public Class OSMDoc
         Dim xOsmRel As OSMRelation
         Dim xMbr As OSMRelationMember
         Dim xOsmChg As OSMChangeset
-        Dim ID As ULong
-        Dim iVer As ULong
+        Dim ID As Long
+        Dim iVer As Long
         xNodes = xDoc.SelectNodes("/osm/node")
         '        MsgBox("found " & xNodes.Count & " nodes")
         For Each xNode In xNodes
@@ -206,7 +206,7 @@ Public Class OSMDoc
         Dim xNode As OSMNode
         Dim xWay As OSMWay
         Dim xRel As OSMRelation
-        Dim ID As ULong
+        Dim ID As Long
         Try
             xRdr = New XmlTextReader(sFile)
         Catch

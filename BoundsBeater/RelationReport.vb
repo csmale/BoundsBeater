@@ -1,6 +1,7 @@
 ﻿Imports OSMLibrary
 Imports System.Xml
 Imports System.IO
+Imports System.Text
 
 Public Class RelationReport
     Dim myLog As myLogger
@@ -19,7 +20,7 @@ Public Class RelationReport
         Dim sName As String
         myLog = New myLogger(sFolder & "\issues.txt")
 
-        For Each xRelID As ULong In oDoc.Relations.Keys
+        For Each xRelID As Long In oDoc.Relations.Keys
             xRel = oDoc.Relations(xRelID)
             If xRel.Tag("type") = "boundary" Or xRel.Tag("type") = "multipolygon" Then
                 If IsNothing(xRel.Tag("admin_level")) Then
@@ -27,7 +28,7 @@ Public Class RelationReport
                 Else
                     sLvl = xRel.Tag("admin_level")
                     If IsNumeric(sLvl) Then
-                        iLvl = Long.Parse(sLvl)
+                        iLvl = Integer.Parse(sLvl)
                         If iLvl < 1 Or iLvl > 12 Then iLvl = 0
                     Else
                         iLvl = 0
@@ -47,7 +48,7 @@ Public Class RelationReport
                 xFile = New XmlTextWriter(sFolder & "\r" & xRelID & ".htm", Nothing)
                 xFile.Formatting = Formatting.Indented
                 xFile.Indentation = 1
-                xFile.IndentChar = vbTab
+                xFile.IndentChar = Chr(9) ' vbTab
                 RelationReport(xFile, xRel)
                 xFile.Close()
                 '                Exit Sub
@@ -61,7 +62,7 @@ Public Class RelationReport
         xFile = New XmlTextWriter(sFolder & "\index.htm", Nothing)
         xFile.Formatting = Formatting.Indented
         xFile.Indentation = 1
-        xFile.IndentChar = vbTab
+        xFile.IndentChar = Chr(9) ' vbTab
         xFile.WriteDocType("html", Nothing, Nothing, Nothing)
         xFile.WriteStartElement("html")
         xFile.WriteStartElement("meta")
@@ -97,7 +98,7 @@ Public Class RelationReport
         xFile = New XmlTextWriter(sFile, Nothing)
         xFile.Formatting = Formatting.Indented
         xFile.Indentation = 1
-        xFile.IndentChar = vbTab
+        xFile.IndentChar = Chr(9) ' vbTab
         xFile.WriteDocType("html", Nothing, Nothing, Nothing)
         xFile.WriteStartElement("html")
         xFile.WriteStartElement("meta")
@@ -144,10 +145,10 @@ Public Class RelationReport
 
     Public Sub RelationReport(sFile As String, xRel As OSMRelation)
         Dim xFile As XmlTextWriter
-        xFile = New XmlTextWriter(sFile, Nothing)
+        xFile = New XmlTextWriter(sFile, Encoding.UTF8)
         xFile.Formatting = Formatting.Indented
         xFile.Indentation = 1
-        xFile.IndentChar = vbTab
+        xFile.IndentChar = Chr(9) ' vbTab
         Dim sFolder As String
         sFolder = System.IO.Path.GetDirectoryName(sFile)
         myLog = New myLogger(sFolder & "\issues.txt")
@@ -396,7 +397,7 @@ Public Class RelationReport
                 xFile.WriteEndElement()
                 If bCheckLevels Then
                     Try
-                        iWayLevel = xWay("admin_level")
+                        iWayLevel = Integer.Parse(xWay("admin_level"))
                     Catch
                         myLog.Write(xRel, xWay, "Missing or erroneous admin_level: " & xWay("admin_level"))
                         iWayLevel = 0
@@ -438,7 +439,7 @@ Public Class RelationReport
                 xList = xWay.MemberOf()
                 sList = ""
                 For Each xMbr2 In xList
-                    xRel2 = xMbr2.Member
+                    xRel2 = DirectCast(xMbr2.Member, OSMRelation)
                     If xRel2.ID <> xRel.ID Then
                         If Len(sList) > 0 Then xFile.WriteString(", ")
                         sList = "xx"
@@ -450,7 +451,7 @@ Public Class RelationReport
                     End If
                 Next
                 xFile.WriteEndElement()
-                xFile.WriteElementString("td", xWay.Timestamp)
+                xFile.WriteElementString("td", xWay.Timestamp.ToString())
                 xFile.WriteElementString("td", xWay.User)
                 xFile.WriteEndElement() ' tr
 
@@ -459,7 +460,7 @@ Public Class RelationReport
 
         For Each xMbr In xRel.Members
             If xMbr.Type = OSMObject.ObjectType.Way Then
-                xWay = xMbr.Member
+                xWay = DirectCast(xMbr.Member, OSMWay)
 
             End If
         Next

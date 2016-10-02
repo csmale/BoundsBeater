@@ -319,8 +319,6 @@ Public Class OSMResolver
 
         Function JSON() As String
             Dim jb As New StringBuilder
-
-            Dim w As OSMWay
             Dim nlist As LinkedList(Of OSMNode)
 
             If isClosed() Then

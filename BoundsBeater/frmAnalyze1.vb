@@ -45,22 +45,21 @@ Public Class frmAnalyze
     ''' <param name="sender"></param>
     ''' <param name="e"></param>
     Private Sub btnSingle_Click(sender As Object, e As EventArgs) Handles btnSingle.Click
-        Dim iRel As ULong
+        Dim iRel As Long
         Dim sTmp As String = Me.txtSingle.Text
         If Len(sTmp) < 1 Or Len(sTmp) > 10 Then Exit Sub
-        If Not ULong.TryParse(sTmp, iRel) Then Exit Sub
+        If Not Long.TryParse(sTmp, iRel) Then Exit Sub
         If iRel < 1 Then Exit Sub
         Dim xAPI As New OSMApi
         Dim xDoc As New OSMDoc
         Dim xRel As OSMObject
         Dim xCache As New OSMHistoryCache
-        Dim xHObj As OSMHistoryCache.OSMHistoryObject
 
         xRel = xCache.OSMNodeHistory(iRel)
 
         xRel = xRetriever.GetOSMObjectHistory(OSMObject.ObjectType.Node, iRel, True)
 
-        Dim xWay As OSMWay
+        ' Dim xWay As OSMWay
         'xWay = xAPI.GetOSMObjectHistory(OSMObject.ObjectType.Way, iRel)
 
         '        ShowRelation(iRel)
@@ -70,7 +69,7 @@ Public Class frmAnalyze
     ''' Shows a boundary on the map, with some information in a text box
     ''' </summary>
     ''' <param name="iRel">The OSM ID of the selecte relation</param>
-    Private Sub ShowRelation(iRel As ULong)
+    Private Sub ShowRelation(iRel As Long)
         Dim xRel As OSMRelation
         Dim xRes As OSMResolver
         Dim sLine As String
@@ -78,13 +77,13 @@ Public Class frmAnalyze
 
         '        txtReport.Clear()
         xRetriever.MaxAge = 60 * 15
-        xRel = xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, iRel)
+        xRel = DirectCast(xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, iRel), OSMRelation)
         If IsNothing(xRel) Then
             xRel = Nothing
             txtReport.Text = "Unable to retrieve relation #" & iRel
             Exit Sub
         End If
-        sTmp = "Loaded " & xRel.Name() & ", OSM Relation " & iRel.ToString
+        sTmp = "Loaded " & xRel.Name() & ", OSM Relation " & iRel.ToString & ", version " & xRel.Version.ToString() & " of " & xRel.Timestamp.ToString()
         tsStatus.Text = sTmp
 
         Dim bHasWays As Boolean = False
@@ -111,11 +110,11 @@ Public Class frmAnalyze
         Dim xWays As New List(Of OSMWay)
         For Each xMbr As OSMRelationMember In xRel.Members
             If xMbr.Type = OSMObject.ObjectType.Way Then
-                If xWays.Contains(xMbr.Member) Then
+                If xWays.Contains(DirectCast(xMbr.Member, OSMWay)) Then
                     sLine = "Relation contains duplicate Way #" & xMbr.Member.ID
                     sTmp = sTmp & vbCrLf & sLine
                 Else
-                    xWays.Add(xMbr.Member)
+                    xWays.Add(DirectCast(xMbr.Member, OSMWay))
                 End If
             End If
         Next
@@ -217,7 +216,7 @@ Public Class frmAnalyze
         Dim fntRequired As Font
         Dim colRequired As Color
 
-        Dim xItem As BoundaryDB.BoundaryItem = tvi.Tag
+        Dim xItem As BoundaryDB.BoundaryItem = DirectCast(tvi.Tag, BoundaryDB.BoundaryItem)
 
         If xItem Is Nothing Then
             sName = tvi.Text
@@ -355,11 +354,11 @@ Public Class frmAnalyze
 
     End Sub
     Private Sub tvList_AfterSelect(sender As Object, e As TreeViewEventArgs) Handles tvList.AfterSelect
-        Dim iRel As ULong
+        Dim iRel As Long
         Dim x As BoundaryDB.BoundaryItem
 
         If bInRightClick Then Exit Sub
-        x = e.Node.Tag
+        x = DirectCast(e.Node.Tag, BoundaryDB.BoundaryItem)
         ShowChildren(e.Node)
         If Not IsNothing(x) Then
             iRel = x.OSMRelation
@@ -401,7 +400,7 @@ Public Class frmAnalyze
         End With
     End Sub
     Private Sub ShowOnMap(xRel As OSMRelation)
-        Dim sJSON As String, sID As String
+        Dim sJSON As String
         If Not bMapInitDone Then Exit Sub
         Dim res As New OSMResolver(xRel)
         'sJSON = xRel.GeoJSON
@@ -425,34 +424,33 @@ Public Class frmAnalyze
         Me.tabDetail.Height = Me.Height - Me.tabDetail.Top - 64
     End Sub
     Private Sub CollectExpanded(tvn As TreeNode, l As List(Of BoundaryDB.BoundaryItem))
-        If tvn.IsExpanded Then l.Add(tvn.Tag)
-        For Each xNode In tvn.Nodes
+        If tvn.IsExpanded Then l.Add(DirectCast(tvn.Tag, BoundaryDB.BoundaryItem))
+        For Each xNode As TreeNode In tvn.Nodes
             CollectExpanded(xNode, l)
         Next
     End Sub
     Private Sub RestoreExpanded(tvn As TreeNode, l As List(Of BoundaryDB.BoundaryItem))
-        If l.Contains(tvn.Tag) Then tvn.Expand()
-        For Each xnode In tvn.Nodes
-            RestoreExpanded(xnode, l)
-        Next
+        If l.Contains(DirectCast(tvn.Tag, BoundaryDB.BoundaryItem)) Then tvn.Expand()
+        For Each xnode As TreeNode In tvn.Nodes
+                RestoreExpanded(xnode, l)
+            Next
     End Sub
     Private Sub btnUpdate_Click(sender As Object, e As EventArgs) Handles btnUpdate.Click
         Dim oDoc As OSMDoc
         Dim bBox As New BBox
-        Dim iRel As ULong
+        Dim iRel As Long
         Dim x As BoundaryDB.BoundaryItem
         Dim xNode As TreeNode
         Dim sURL As String
         Dim bUpdateAll As Boolean = chkUpdateAll.Checked
         Dim sAdminLevel As String = txtAdminLevel.Text
-        Dim fntRequired As Font
 
         If Not GetMapBBox(bBox) Then
             xNode = tvList.SelectedNode
             If IsNothing(xNode) Then
                 Exit Sub
             End If
-            x = xNode.Tag
+            x = DirectCast(xNode.Tag, BoundaryDB.BoundaryItem)
             If IsNothing(x) Then
                 Exit Sub
             End If
@@ -481,15 +479,15 @@ Public Class frmAnalyze
         End If
 
         Try
-            tsStatus.Tag = "Retrieving " & sURL
+            tsStatus.Text = "Retrieving " & sURL
             Application.DoEvents()
             oDoc = xRetriever.API.GetOSM(sURL)
             If IsNothing(oDoc) Then
-                tsStatus.Tag = "Query failed or returned no data"
+                tsStatus.Text = "Query failed or returned no data: " & xRetriever.API.LastError
                 Exit Sub
             End If
-        Catch
-            MsgBox($"Unable to retrieve {sURL}")
+        Catch ex As Exception
+            MsgBox($"Unable to retrieve {sURL} : {ex.Message}")
             Exit Sub
         End Try
 
@@ -518,12 +516,13 @@ Public Class frmAnalyze
             Application.DoEvents()
             ReloadTV(xDB) ' only reloads top level initially!
 
-            Dim j As Integer = i - 1
+            Dim j As Integer = i - 2
             If j > 0 Then
-                xNode = tvList.Nodes(tvList.Nodes.IndexOfKey(selectedNodes(j)))
+                i = tvList.Nodes.IndexOfKey(selectedNodes(j))
+                xNode = tvList.Nodes(i)
                 Do
                     xNode.Expand()
-                    If j < 0 Then Exit Do
+                    If j <= 0 Then Exit Do
                     j = j - 1
                     xNode = xNode.Nodes(xNode.Nodes.IndexOfKey(selectedNodes(j)))
                 Loop
@@ -536,12 +535,12 @@ Public Class frmAnalyze
             ' Next
         End If
             tsStatus.Text = "Update complete."
-        MsgBox("Update complete.", MsgBoxStyle.OkOnly + MsgBoxStyle.Information)
+        MsgBox("Update complete.", MsgBoxStyle.OkOnly Or MsgBoxStyle.Information)
     End Sub
 
     Private Sub lvChildren_ColumnClick(sender As Object, e As ColumnClickEventArgs) Handles lvChildren.ColumnClick
         ' Get the new sorting column.
-        Dim lv As ListView = sender
+        Dim lv As ListView = DirectCast(sender, ListView)
         Dim new_sorting_column As ColumnHeader =
             lv.Columns(e.Column)
 
@@ -586,7 +585,7 @@ Public Class frmAnalyze
 
     Private Sub lvChildren_DoubleClick(sender As Object, e As EventArgs) Handles lvChildren.DoubleClick
         If lvChildren.SelectedItems.Count <> 1 Then Exit Sub
-        Dim x As TreeNode = lvChildren.SelectedItems(0).Tag
+        Dim x As TreeNode = DirectCast(lvChildren.SelectedItems(0).Tag, TreeNode)
         x.EnsureVisible()
         tvList.SelectedNode = x
     End Sub
@@ -606,28 +605,17 @@ Public Class frmAnalyze
     End Sub
 
     Private Sub tsmiEdit_Click(sender As Object, e As EventArgs) Handles tsmiEdit.Click
-        Dim x As TreeNode = tvList.SelectedNode
-        Dim sTmp As String, sName As String
-        Dim iBracket As Integer
-        If IsNothing(x) Then Return
+        Dim xNode As TreeNode = tvList.SelectedNode
+        If IsNothing(xNode) Then Return
         Dim bi As BoundaryDB.BoundaryItem
-        bi = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        bi = DirectCast(xNode.Tag, BoundaryDB.BoundaryItem)
         If bi.Edit() Then
             ' reload current tv item name possibly - no, definitely!
-            If bi.OSMRelation > 0 Then
-                x.NodeFont = fntBold
-            Else
-                x.NodeFont = fntNormal
-            End If
-            sName = x.Text
-            iBracket = InStr(sName, "[")
-            If iBracket > 0 Then
-                sTmp = Mid(sName, iBracket - 1)
-            Else
-                sTmp = ""
-            End If
-            sName = DisplayString(bi) & sTmp
-            If sName <> x.Text Then x.Text = sName
+            Do Until xNode Is Nothing
+                LoadTreeNodeText(xNode)
+                xNode = xNode.Parent
+            Loop
+            tvList.Sort()
         End If
     End Sub
 
@@ -663,9 +651,9 @@ Public Class frmAnalyze
         p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
         Dim iPar As Long = p.OSMRelation
         If iPar > 0 Then
-            xRel = xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, iPar)
+            xRel = TryCast(xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, iPar), OSMRelation)
             sJSON = xRel.GeoJSON()
-            If MsgBox(sJSON, MsgBoxStyle.Question + MsgBoxStyle.OkCancel, "Save JSON to Clipboard?") = MsgBoxResult.Ok Then
+            If MsgBox(sJSON, MsgBoxStyle.Question Or MsgBoxStyle.OkCancel, "Save JSON to Clipboard?") = MsgBoxResult.Ok Then
                 Clipboard.SetText(sJSON)
             End If
         End If
@@ -695,14 +683,13 @@ Public Class frmAnalyze
     End Function
 
     Private Sub btnHist_Click(sender As Object, e As EventArgs) Handles btnHist.Click
-        Dim iRel As ULong
+        Dim iRel As Long
         Dim sTmp As String = Me.txtSingle.Text
         If Len(sTmp) < 1 Or Len(sTmp) > 10 Then Exit Sub
-        If Not ULong.TryParse(sTmp, iRel) Then Exit Sub
+        If Not Long.TryParse(sTmp, iRel) Then Exit Sub
         If iRel < 1 Then Exit Sub
         Dim xRet As New OSMRetriever
         Dim xDoc As New OSMDoc
-        Dim xRel As OSMObject
 
         xDoc = xRet.GetOSMObjectHistoryFull(OSMObject.ObjectType.Relation, iRel)
         If xDoc Is Nothing Then
@@ -749,7 +736,7 @@ Public Class frmAnalyze
         Dim iRel As Long = p.OSMRelation
         If iRel > 0 Then
             sFile = SpecialDirectories.Temp & "\r" & iRel & ".htm"
-            xRel = xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, iRel)
+            xRel = TryCast(xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, iRel), OSMRelation)
             Dim rep As New RelationReport(tmpDoc)
             rep.RelationReport(sFile, xRel)
             OpenBrowserAt(sFile)
@@ -766,7 +753,7 @@ Public Class frmAnalyze
 
         If iRel > 0 Then
             sFile = SpecialDirectories.Temp & "\r" & iRel & ".htm"
-            xRel = xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, iRel)
+            xRel = TryCast(xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, iRel), OSMRelation)
             Dim rep As New RelationReport(tmpDoc)
             rep.RelationReport(sFile, xRel)
             OpenBrowserAt(sFile)
@@ -926,24 +913,51 @@ Public Class frmAnalyze
         If n.Nodes(0).Text <> DUMMY_MARKER Then Return
         n.Nodes(0).Remove()
         LoadTreeNode(tvList, n, xItem)
+        tvList.Sort()
+    End Sub
+    Private Sub LoadTreeNodeText(tvn As TreeNode)
+        Dim iCount As Integer, iCountOSM As Integer
+        Dim sName As String
+        Dim colRequired As Color
+        Dim xItem As BoundaryDB.BoundaryItem = DirectCast(tvn.Tag, BoundaryDB.BoundaryItem)
+        iCount = xItem.NumChildren
+        iCountOSM = xItem.NumKnownChildren
+        sName = DisplayString(xItem)
+        If iCount > 0 Then
+            sName = $"{sName} [{iCountOSM}/{iCount}]"
+        End If
+        If iCountOSM = iCount Then
+            colRequired = Color.Green
+        Else
+            colRequired = Color.Black
+        End If
+
+        If xItem.OSMRelation > 0 Then
+            tvn.NodeFont = fntBold
+        Else
+            tvn.NodeFont = fntNormal
+        End If
+        If tvn.ForeColor <> colRequired Then
+            tvn.ForeColor = colRequired
+        End If
+        If tvn.Text <> sName Then
+            tvn.Text = sName
+        End If
     End Sub
     Private Sub LoadTreeNode(tv As TreeView, n As TreeNode, xItem As BoundaryDB.BoundaryItem)
         Dim tvn As TreeNode
-        Dim sName As String
         For Each xChild In xItem.Children
-            sName = DisplayString(xChild)
             If n Is Nothing Then
-                tvn = tv.Nodes.Add(xChild.ONSCode, sName)
+                tvn = tv.Nodes.Add(xChild.ONSCode, "")
             Else
-                tvn = n.Nodes.Add(xChild.ONSCode, sName)
+                tvn = n.Nodes.Add(xChild.ONSCode, "")
             End If
-            If xChild.OSMRelation > 0 Then
-                tvn.NodeFont = fntBold
-            Else
-                tvn.NodeFont = fntNormal
-            End If
+
             tvn.Tag = xChild
             tvn.ContextMenuStrip = cmsNode
+
+            LoadTreeNodeText(tvn)
+
             If xChild.Children.Count > 0 Then
                 tvn.Nodes.Add(DUMMY_MARKER)
             End If

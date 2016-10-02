@@ -51,14 +51,14 @@ Public Class frmMain
 
     Private Sub btnResolve_Click(sender As Object, e As EventArgs) Handles btnResolve.Click
         Dim r As OSMRelation
-        Dim iRelID As ULong
+        Dim iRelID As Long
         If oDoc Is Nothing Then
             Exit Sub
         End If
         If Not IsNumeric(txtID.Text) Then
             Exit Sub
         End If
-        iRelID = ULong.Parse(txtID.Text)
+        iRelID = Long.Parse(txtID.Text)
         r = oDoc.Relations(iRelID)
         If IsNothing(r) Then
             MsgBox("Cannot find relation #" & iRelID & " in file.")
@@ -158,16 +158,15 @@ Public Class frmMain
 
     Private Sub btnReportOne_Click(sender As Object, e As EventArgs) Handles btnReportOne.Click
         Dim tmpDoc As OSMDoc
-        Dim xFile As XmlTextWriter
         Dim xRetriever As New OSMRetriever
         Dim xRel As OSMRelation
-        Dim iRelID As ULong
+        Dim iRelID As Long
         Dim sFolder As String = "C:\Temp"
         Dim sFile As String
         If Not IsNumeric(txtID.Text) Then
             Exit Sub
         End If
-        iRelID = ULong.Parse(txtID.Text)
+        iRelID = Long.Parse(txtID.Text)
         If chkOnline.Checked Then
             tmpDoc = xRetriever.API.GetOSMDoc(OSMObject.ObjectType.Relation, iRelID, True)
             If IsNothing(tmpDoc) Then
@@ -210,7 +209,7 @@ Public Class frmMain
         If lvBounds.SelectedItems.Count <> 1 Then
             Exit Sub
         End If
-        xRel = lvBounds.SelectedItems(0).Tag
+        xRel = DirectCast(lvBounds.SelectedItems(0).Tag, OSMRelation)
         xNew = New XmlDocument()
 
         Dim xtw As New XmlTextWriter(strMstream, System.Text.Encoding.UTF8)
@@ -276,14 +275,14 @@ Public Class frmMain
 
     Private Sub btnAnalyseWay_Click(sender As Object, e As EventArgs) Handles btnAnalyseWay.Click
         Dim w As OSMWay
-        Dim iWayID As ULong
+        Dim iWayID As Long
         Dim xRetriever As New OSMRetriever
 
         If Not IsNumeric(txtWayID.Text) Then
             Exit Sub
         End If
-        iWayID = ULong.Parse(txtWayID.Text)
-        w = xRetriever.GetOSMObject(OSMObject.ObjectType.Way, iWayID, True)
+        iWayID = Long.Parse(txtWayID.Text)
+        w = TryCast(xRetriever.GetOSMObject(OSMObject.ObjectType.Way, iWayID, True), OSMWay)
         If IsNothing(w) Then
             MsgBox("Cannot find way #" & iWayID & " in file.")
             Exit Sub

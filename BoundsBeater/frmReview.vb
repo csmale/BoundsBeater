@@ -30,7 +30,6 @@ Public Class frmReview
 
     Private Sub populate()
         Dim sTag As String
-        Dim sTmp As String
         If xDbRelation Is Nothing Then Return
         If xDbRelation.OSMRelation <= 0 Then Return
         Try

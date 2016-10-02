@@ -92,8 +92,8 @@ Public Class OSMRetriever
         Dim xRel2 As OSMRelation
         Dim xWay2 As OSMWay
         Dim xMbr As OSMRelationMember
-        Dim listWays As New OSMCollection(OSMObject.ObjectType.Way)
-        Dim listNodes As New OSMCollection(OSMObject.ObjectType.Node)
+        Dim listWays As New OSMCollection(Of OSMWay)
+        Dim listNodes As New OSMCollection(Of OSMNode)
 
         ' this just gets the history of the object itself, not the referenced ways and nodes
         xDoc = API.GetOSMObjectHistory(xType, lRef)

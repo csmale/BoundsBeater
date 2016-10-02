@@ -9,7 +9,7 @@ Public MustInherit Class OSMObject
         Relation
         Changeset
     End Enum
-    Public ID As ULong
+    Public ID As Long
     Public Version As ULong
     Public UID As ULong
     Public User As String

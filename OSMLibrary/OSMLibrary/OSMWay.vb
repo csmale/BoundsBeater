@@ -72,7 +72,7 @@ Public Class OSMWay
         End Get
     End Property
 
-    Public Sub LoadXML(x As XmlNode, xNodes As OSMCollection)
+    Public Sub LoadXML(x As XmlNode, xNodes As OSMCollection(Of OSMNode))
         MyBase.LoadGenericXML(x)
         Dim xRef As XmlNode
         Dim lRef As Long
@@ -93,7 +93,7 @@ Public Class OSMWay
         Next
         __Bbox = Nothing
     End Sub
-    Public Sub New(xWay As XmlNode, xNodes As OSMCollection)
+    Public Sub New(xWay As XmlNode, xNodes As OSMCollection(Of OSMNode))
         LoadXML(xWay, xNodes)
     End Sub
     Public Sub New(xWay As XmlNode)
@@ -106,7 +106,7 @@ Public Class OSMWay
         MyBase.New(xDoc)
         LoadXML(x, Doc.Nodes)
     End Sub
-    Public Sub New(x As Xml.XmlNode, xNodes As OSMCollection, xDoc As OSMDoc)
+    Public Sub New(x As Xml.XmlNode, xNodes As OSMCollection(Of OSMNode), xDoc As OSMDoc)
         MyBase.New(xDoc)
         LoadXML(x, xNodes)
     End Sub

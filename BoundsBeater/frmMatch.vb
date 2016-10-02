@@ -38,7 +38,7 @@ Public Class frmMatch
             End If
         End If
         Me.DialogResult = Windows.Forms.DialogResult.OK
-        oMatch = lvAreas.SelectedItems(0).Tag
+        oMatch = DirectCast(lvAreas.SelectedItems(0).Tag, BoundaryDB.BoundaryItem)
         Me.Close()
     End Sub
 
@@ -139,7 +139,7 @@ Public Class frmMatch
 
     Private Sub btnForget_Click(sender As Object, e As EventArgs) Handles btnForget.Click
         Dim xItem As BoundaryDB.BoundaryItem
-        xItem = lvAreas.SelectedItems(0).Tag
+        xItem = DirectCast(lvAreas.SelectedItems(0).Tag, BoundaryDB.BoundaryItem)
         xItem.OSMRelation = 0
         xItem.SetIDinXML()
         lvAreas.SelectedItems(0).SubItems(2).Text = "0"

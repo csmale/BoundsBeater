@@ -111,14 +111,14 @@ xml:        history.xml()
 
     End Function
 
-    Public Function OSMNodeHistory(ID As ULong, Optional ForceFetch As Boolean = False) As OSMNode
+    Public Function OSMNodeHistory(ID As Long, Optional ForceFetch As Boolean = False) As OSMNode
         Return OSMObjectHistory(OSMObject.ObjectType.Node, ID, ForceFetch)
     End Function
-    Public Function OSMWayHistory(ID As ULong, Optional ForceFetch As Boolean = False) As OSMWay
+    Public Function OSMWayHistory(ID As Long, Optional ForceFetch As Boolean = False) As OSMWay
 
     End Function
 
-    Public Function OSMRelationHistory(ID As ULong, Optional ForceFetch As Boolean = False) As OSMRelation
+    Public Function OSMRelationHistory(ID As Long, Optional ForceFetch As Boolean = False) As OSMRelation
 
     End Function
 #If False Then

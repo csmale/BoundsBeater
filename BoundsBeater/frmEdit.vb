@@ -31,7 +31,6 @@ Public Class frmEdit
     End Class
     Private Sub frmEdit_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         If xItem Is Nothing Then Return
-        Dim i As Integer
         sOriginalGSS = xItem.ONSCode
         cbGroup.Left = txtCouncilName.Left
         cbGroup.Width = txtCouncilName.Width
