@@ -18,6 +18,7 @@ Public Class frmAnalyze
     Dim fntBold As Font
     Dim bInRightClick As Boolean = False
     Const DUMMY_MARKER As String = "dummy"
+    Dim bExpanding As Boolean = False
     Dim x As New System.Data.SQLite.SQLiteConnection()
 
     Private Sub testpbf()
@@ -598,9 +599,18 @@ Public Class frmAnalyze
         If IsNothing(x) Then Return
         Dim bi As BoundaryDB.BoundaryItem
         bi = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        If IsNothing(bi) Then Exit Sub
         If bi.Edit() Then
             LoadChildListItem(lvi, bi)
             ' reload current lv item
+            If Not (tvList.SelectedNode Is Nothing) Then
+                Dim xNode As TreeNode = tvList.SelectedNode
+                Do Until xNode Is Nothing
+                    LoadTreeNodeText(xNode)
+                    xNode = xNode.Parent
+                Loop
+                '                tvList.Sort()
+            End If
         End If
     End Sub
 
@@ -615,7 +625,7 @@ Public Class frmAnalyze
                 LoadTreeNodeText(xNode)
                 xNode = xNode.Parent
             Loop
-            tvList.Sort()
+            '             tvList.Sort()
         End If
     End Sub
 
@@ -913,12 +923,13 @@ Public Class frmAnalyze
         If n.Nodes(0).Text <> DUMMY_MARKER Then Return
         n.Nodes(0).Remove()
         LoadTreeNode(tvList, n, xItem)
-        tvList.Sort()
+        ' tvList.Sort()
     End Sub
     Private Sub LoadTreeNodeText(tvn As TreeNode)
         Dim iCount As Integer, iCountOSM As Integer
         Dim sName As String
         Dim colRequired As Color
+        If tvn Is Nothing OrElse tvn.Tag Is Nothing Then Exit Sub
         Dim xItem As BoundaryDB.BoundaryItem = DirectCast(tvn.Tag, BoundaryDB.BoundaryItem)
         iCount = xItem.NumChildren
         iCountOSM = xItem.NumKnownChildren
@@ -946,22 +957,32 @@ Public Class frmAnalyze
     End Sub
     Private Sub LoadTreeNode(tv As TreeView, n As TreeNode, xItem As BoundaryDB.BoundaryItem)
         Dim tvn As TreeNode
+        Dim xList As New SortedList(Of String, BoundaryDB.BoundaryItem)
         For Each xChild In xItem.Children
+            xList.Add(xChild.Name, xChild)
+        Next
+        Dim xEntry As BoundaryDB.BoundaryItem
+        tv.Sorted = False
+        tv.BeginUpdate()
+        For Each xKVP As KeyValuePair(Of String, BoundaryDB.BoundaryItem) In xList
+            xEntry = xKVP.Value
+
             If n Is Nothing Then
-                tvn = tv.Nodes.Add(xChild.ONSCode, "")
+                tvn = tv.Nodes.Add(xEntry.ONSCode, "")
             Else
-                tvn = n.Nodes.Add(xChild.ONSCode, "")
+                tvn = n.Nodes.Add(xEntry.ONSCode, "")
             End If
 
-            tvn.Tag = xChild
+            tvn.Tag = xEntry
             tvn.ContextMenuStrip = cmsNode
 
             LoadTreeNodeText(tvn)
 
-            If xChild.Children.Count > 0 Then
+            If xEntry.Children.Count > 0 Then
                 tvn.Nodes.Add(DUMMY_MARKER)
             End If
         Next
+        tv.EndUpdate()
     End Sub
 End Class
 Public Class ListViewComparer
