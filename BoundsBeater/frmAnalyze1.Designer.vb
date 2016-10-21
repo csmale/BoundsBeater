@@ -156,6 +156,7 @@ Partial Class frmAnalyze
         '
         'lvChildren
         '
+        Me.lvChildren.AllowColumnReorder = True
         Me.lvChildren.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colName, Me.colOSMID, Me.colType, Me.colGSS, Me.colCouncilStyle, Me.colParishType, Me.colCouncilName})
         Me.lvChildren.Dock = System.Windows.Forms.DockStyle.Fill
         Me.lvChildren.FullRowSelect = True

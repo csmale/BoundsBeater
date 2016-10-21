@@ -150,6 +150,7 @@ Public Class OSMApi
         req.UserAgent = UserAgent
         req.Credentials = Credentials
         req.Timeout = 30000
+        req.AutomaticDecompression = DecompressionMethods.Deflate Or DecompressionMethods.GZip
         iStartTime = Environment.TickCount
         Try
             resp = req.GetResponse
@@ -160,12 +161,15 @@ Public Class OSMApi
                 LastError = e.Message
                 Throw New OSMWebException("Unknown error", e)
             Else
-                If resp.StatusCode = 410 Then
+                If resp.StatusCode = 404 Then
+                    LastError = "Not found"
+                    Throw New OSMWebException("Object not found", e)
+                ElseIf resp.StatusCode = 410 Then
                     LastError = "Deleted"
                     Throw New OSMWebException("Object deleted", e)
                 End If
+                Return Nothing
             End If
-            Return Nothing
         End Try
         iEndTime = Environment.TickCount
         Debug.Print("HTTP status " & resp.StatusCode & "(" & resp.StatusDescription & ") in " & (iEndTime - iStartTime) & "ms")

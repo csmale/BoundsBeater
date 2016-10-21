@@ -29,7 +29,12 @@ Public Class OSMRetriever
     End Sub
     Public Function GetOSMObject(xType As OSMObject.ObjectType, lRef As Long, Optional bFull As Boolean = False) As OSMObject
         Dim xDoc As OSMDoc
-        xDoc = API.GetOSMDoc(xType, lRef, bFull)
+        Try
+            xDoc = API.GetOSMDoc(xType, lRef, bFull)
+        Catch e As OSMWebException
+            LastError = API.LastError
+            Return Nothing
+        End Try
         If xDoc Is Nothing Then
             LastError = API.LastError
             Return Nothing

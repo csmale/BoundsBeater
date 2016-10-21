@@ -4,8 +4,10 @@ Public Class frmEdit
     Public xItem As BoundaryDB.BoundaryItem
     Public xDB As BoundaryDB
     Public sOriginalGSS As String
+    Private iOriginalRel As Long
     Public Retriever As OSMRetriever
     Public RelChangeAllowed As Boolean = True
+    Private bIgnoreKeyPress As Boolean = False
     Private _groups As New List(Of BoundaryDB.BoundaryItem)
 
     Private Class GenericListItem(Of T)
@@ -32,6 +34,7 @@ Public Class frmEdit
     Private Sub frmEdit_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         If xItem Is Nothing Then Return
         sOriginalGSS = xItem.ONSCode
+        iOriginalRel = xItem.OSMRelation
         cbGroup.Left = txtCouncilName.Left
         cbGroup.Width = txtCouncilName.Width
         cbGroup.Top = txtCouncilName.Top
@@ -213,7 +216,7 @@ Public Class frmEdit
     End Sub
 
     Private Sub txtRelID_KeyPress(sender As Object, e As KeyPressEventArgs) Handles txtRelID.KeyPress
-        If Char.IsDigit(e.KeyChar) OrElse e.KeyChar = vbBack OrElse e.KeyChar = Chr(127) Then
+        If bIgnoreKeyPress OrElse Char.IsDigit(e.KeyChar) OrElse e.KeyChar = vbBack OrElse e.KeyChar = Chr(127) Then
             e.Handled = False
         Else
             e.Handled = True
@@ -227,6 +230,64 @@ Public Class frmEdit
         If Not Long.TryParse(txtRelID.Text, iRel) Then
             MsgBox("Please enter a numeric relation ID")
             txtRelID.Focus()
+            Return
+        End If
+        ' no change from saved value
+        If iRel = iOriginalRel Then
+            Return
+        End If
+        Dim xNewRel As OSMRelation
+        Dim sName As String = "?", sLevel As String = "?"
+        If iRel = 0 Then
+            If MsgBox("Do you want to remove the OSM relation from this boundary?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
+                Return
+            Else
+                txtRelID.Text = iOriginalRel.ToString()
+                txtRelID.Focus()
+                Return
+            End If
+        End If
+
+        ' check for relation
+        ' does not exist
+        ' not correct type
+        ' check intended
+        If Not Retriever Is Nothing Then
+            xNewRel = DirectCast(Retriever.GetOSMObject(OSMObject.ObjectType.Relation, iRel), OSMRelation)
+            If xNewRel Is Nothing Then
+                MsgBox($"Unable to retrieve relation {iRel}")
+                txtRelID.Focus()
+                Return
+            End If
+            If xNewRel.Tag("type") <> "boundary" Then
+                MsgBox($"Relation {iRel} is not a boundary relation")
+                txtRelID.Focus()
+                Return
+            End If
+            If xNewRel.Tag("boundary") <> "administrative" AndAlso xNewRel.Tag("boundary") <> "ceremonial" Then
+                MsgBox($"Boundary relation {iRel} is not administrative or ceremonial")
+                txtRelID.Focus()
+                Return
+            End If
+            sName = xNewRel.Name()
+            sLevel = xNewRel.Tag("admin_level")
+        Else
+            sName = iRel.ToString()
+            sLevel = "unknown"
+        End If
+
+        If MsgBox($"Do you want to set the OSM relation to {sName} (level {sLevel})? ", MsgBoxStyle.YesNo, "Change OSM Relation") = MsgBoxResult.Yes Then
+            iOriginalRel = iRel
+        Else
+            txtRelID.Text = iOriginalRel.ToString()
+            txtRelID.Focus()
+            Return
+        End If
+    End Sub
+
+    Private Sub txtRelID_KeyDown(sender As Object, e As KeyEventArgs) Handles txtRelID.KeyDown
+        If e.Control AndAlso (e.KeyCode = Keys.V Or e.KeyCode = Keys.C Or e.KeyCode = Keys.X) Then
+            bIgnoreKeyPress = True
         End If
     End Sub
 End Class

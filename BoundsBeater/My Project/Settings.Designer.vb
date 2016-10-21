@@ -77,6 +77,42 @@ Namespace My
                 Me("BoundaryXML") = value
             End Set
         End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property ListColumnWidth() As String
+            Get
+                Return CType(Me("ListColumnWidth"),String)
+            End Get
+            Set
+                Me("ListColumnWidth") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property ListColumnOrder() As String
+            Get
+                Return CType(Me("ListColumnOrder"),String)
+            End Get
+            Set
+                Me("ListColumnOrder") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("")>  _
+        Public Property ListColumnSorting() As String
+            Get
+                Return CType(Me("ListColumnSorting"),String)
+            End Get
+            Set
+                Me("ListColumnSorting") = value
+            End Set
+        End Property
     End Class
 End Namespace
 

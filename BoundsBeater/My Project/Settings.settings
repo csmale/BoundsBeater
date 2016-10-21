@@ -8,5 +8,14 @@
     <Setting Name="BoundaryXML" Type="System.String" Scope="User">
       <Value Profile="(Default)">%USERPROFILE%\Google Drive\BoundsBeater\UKBoundaries.xml</Value>
     </Setting>
+    <Setting Name="ListColumnWidth" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ListColumnOrder" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ListColumnSorting" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

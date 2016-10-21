@@ -99,7 +99,7 @@ Public MustInherit Class OSMObject
                 Return ""
             End If
             sJSON.Append("{ ")
-            sJSON.Append("_id")
+            sJSON.Append(JSONString("_id"))
             sJSON.Append(":")
             sJSON.Append(JSONString(ObjectTypeChar(Me.Type) & ID.ToString))
             For Each xTag In __Tags.Tags.Values

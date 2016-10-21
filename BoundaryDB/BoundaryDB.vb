@@ -672,9 +672,10 @@ Public Class BoundaryDB
                 SetValue(xNode, "osmid", "r" & OSMRelation.ToString())
             End If
         End Sub
-        Public Function Edit() As Boolean
+        Public Function Edit(Optional Retriever As OSMRetriever = Nothing) As Boolean
             Dim f As New frmEdit
             f.xDB = _bdb
+            f.Retriever = Retriever
             f.xItem = Me
             If f.ShowDialog() = DialogResult.OK Then
                 NormName = BoundaryDB.Normalise(Name)

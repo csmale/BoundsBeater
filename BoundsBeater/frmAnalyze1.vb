@@ -4,6 +4,7 @@ Imports System.Runtime.InteropServices.ComTypes
 Imports Microsoft.VisualBasic.FileIO
 Imports ProtoBuf.Meta
 Imports System.ComponentModel
+Imports System.Text
 
 Public Class frmAnalyze
     Private m_SortingColumn As ColumnHeader
@@ -18,6 +19,7 @@ Public Class frmAnalyze
     Dim fntBold As Font
     Dim bInRightClick As Boolean = False
     Const DUMMY_MARKER As String = "dummy"
+    Dim bAllowExpandCollapse As Boolean = False
     Dim bExpanding As Boolean = False
     Dim x As New System.Data.SQLite.SQLiteConnection()
 
@@ -147,7 +149,7 @@ Public Class frmAnalyze
         txtReport.Text = txtReport.Text & vbCrLf & sTmp
     End Sub
 
-
+#If False Then
     Private Sub LoadTreeView(tv As TreeView, xParentNode As TreeNode, xDB As BoundaryDB, xItem As BoundaryDB.BoundaryItem, ByRef iTotal As Integer, ByRef iCount As Integer)
         Dim tvn As TreeNode
         Dim xChild As BoundaryDB.BoundaryItem
@@ -263,6 +265,7 @@ Public Class frmAnalyze
         iTotal += iThisTotal
         iCount += iThisCount
     End Sub
+#End If
     Private Function DisplayString(xItem As BoundaryDB.BoundaryItem) As String
         Dim sName As String
         sName = xItem.TypeCode & " " & xItem.Name
@@ -272,6 +275,7 @@ Public Class frmAnalyze
         End If
         Return sName
     End Function
+#If False Then
     Private Sub SetTreeItems(tv As TreeView)
         Dim iTotal As Integer, iCount As Integer
         For Each tvi As TreeNode In tv.Nodes
@@ -280,6 +284,7 @@ Public Class frmAnalyze
             SetTreeItems2(tvi, iTotal, iCount)
         Next
     End Sub
+#End If
     Private Function FindBoundaryDB() As String
         Dim sDB As String = ""
 
@@ -294,7 +299,11 @@ Public Class frmAnalyze
 
         Return ""
     End Function
-
+    ''' <summary>
+    ''' Handle click on Go button
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
     Private Sub btnGo_Click(sender As Object, e As EventArgs) Handles btnGo.Click
         Dim sDB As String
 
@@ -327,6 +336,11 @@ Public Class frmAnalyze
         xDB = x
         sDBPath = sDB
     End Sub
+
+    ''' <summary>
+    ''' Clears and reloads the main TreeView
+    ''' </summary>
+    ''' <param name="x">The BoundaryDB to be loaded</param>
     Public Sub ReloadTV(x As BoundaryDB)
         Dim xItem As BoundaryDB.BoundaryItem
 
@@ -344,60 +358,62 @@ Public Class frmAnalyze
             i = i + 1
             tsProgress.Value = i
             Application.DoEvents()
-            ' LoadTreeView(tvList, Nothing, x, xItem, iTotal, iCount)
             LoadTreeNode(tvList, Nothing, xItem)
         Next
 
-        ' SetTreeItems(tvList)
         Application.DoEvents()
         tvList.Sort()
         tvList.EndUpdate()
 
     End Sub
-    Private Sub tvList_AfterSelect(sender As Object, e As TreeViewEventArgs) Handles tvList.AfterSelect
-        Dim iRel As Long
-        Dim x As BoundaryDB.BoundaryItem
 
+    ''' <summary>
+    ''' After the treeview selection changes, show the selected relation on the map and/or show its children in the listview
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    Private Sub tvList_AfterSelect(sender As Object, e As TreeViewEventArgs) Handles tvList.AfterSelect
         If bInRightClick Then Exit Sub
-        x = DirectCast(e.Node.Tag, BoundaryDB.BoundaryItem)
         ShowChildren(e.Node)
-        If Not IsNothing(x) Then
-            iRel = x.OSMRelation
-            If iRel > 0 Then
-                ShowRelation(iRel)
-            End If
-        End If
     End Sub
 
+    ''' <summary>
+    ''' Show the children of the given treenode into the listview
+    ''' </summary>
+    ''' <param name="n"></param>
     Private Sub ShowChildren(n As TreeNode)
         Dim p As BoundaryDB.BoundaryItem
         lvChildren.Items.Clear()
         For Each x As TreeNode In n.Nodes
             p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
-            Dim lvi As ListViewItem = lvChildren.Items.Add("")
-            lvChildren.ContextMenuStrip = cmsChild
-            LoadChildListItem(lvi, p)
-            lvi.Tag = x
+            If Not p Is Nothing Then
+                Dim lvi As ListViewItem = lvChildren.Items.Add("")
+                lvChildren.ContextMenuStrip = cmsChild
+                LoadChildListItem(lvChildren, lvi, p)
+                lvi.Tag = x
+            End If
         Next
     End Sub
-    Private Sub LoadChildListItem(lvi As ListViewItem, p As BoundaryDB.BoundaryItem)
+
+    ''' <summary>
+    ''' Fills a single row of the listview will all the details of a boundary.
+    ''' </summary>
+    ''' <param name="lvi">ListViewItem to be populated</param>
+    ''' <param name="p">BoundaryItem to use</param>
+    Private Sub LoadChildListItem(lv As ListView, lvi As ListViewItem, p As BoundaryDB.BoundaryItem)
         With lvi
             .Text = p.Name
             If .SubItems.Count = 1 Then
-                .SubItems.Add(p.OSMRelation.ToString)
-                .SubItems.Add(p.TypeCode)
-                .SubItems.Add(p.ONSCode)
-                .SubItems.Add(BoundaryDB.BoundaryItem.CouncilStyle_ToString(p.CouncilStyle))
-                .SubItems.Add(BoundaryDB.BoundaryItem.ParishType_ToString(p.ParishType))
-                .SubItems.Add(p.CouncilName.ToString)
-            Else
-                .SubItems(1).Text = p.OSMRelation.ToString
-                .SubItems(2).Text = p.TypeCode
-                .SubItems(3).Text = p.ONSCode
-                .SubItems(4).Text = BoundaryDB.BoundaryItem.CouncilStyle_ToString(p.CouncilStyle)
-                .SubItems(5).Text = BoundaryDB.BoundaryItem.ParishType_ToString(p.ParishType)
-                .SubItems(6).Text = p.CouncilName.ToString
+                For i = 1 To lv.Columns.Count - 1
+                    .SubItems.Add("")
+                Next
             End If
+            .SubItems(colOSMID.Index).Text = p.OSMRelation.ToString
+            .SubItems(colType.Index).Text = p.TypeCode
+            .SubItems(colGSS.Index).Text = p.ONSCode
+            .SubItems(colCouncilStyle.Index).Text = BoundaryDB.BoundaryItem.CouncilStyle_ToString(p.CouncilStyle)
+            .SubItems(colParishType.Index).Text = BoundaryDB.BoundaryItem.ParishType_ToString(p.ParishType)
+            .SubItems(colCouncilName.Index).Text = p.CouncilName.ToString
         End With
     End Sub
     Private Sub ShowOnMap(xRel As OSMRelation)
@@ -433,8 +449,8 @@ Public Class frmAnalyze
     Private Sub RestoreExpanded(tvn As TreeNode, l As List(Of BoundaryDB.BoundaryItem))
         If l.Contains(DirectCast(tvn.Tag, BoundaryDB.BoundaryItem)) Then tvn.Expand()
         For Each xnode As TreeNode In tvn.Nodes
-                RestoreExpanded(xnode, l)
-            Next
+            RestoreExpanded(xnode, l)
+        Next
     End Sub
     Private Sub btnUpdate_Click(sender As Object, e As EventArgs) Handles btnUpdate.Click
         Dim oDoc As OSMDoc
@@ -459,7 +475,7 @@ Public Class frmAnalyze
             If iRel <= 0 Then
                 Exit Sub
             End If
-            bBox = tmpDoc.Relations(iRel).Bbox
+            bBox = tmpDoc.Relations(iRel).BBox
         End If
 
         If Len(sAdminLevel) = 0 Then
@@ -522,10 +538,13 @@ Public Class frmAnalyze
                 i = tvList.Nodes.IndexOfKey(selectedNodes(j))
                 xNode = tvList.Nodes(i)
                 Do
+                    bAllowExpandCollapse = True ' otherwise the expand gets cancelled
                     xNode.Expand()
                     If j <= 0 Then Exit Do
                     j = j - 1
-                    xNode = xNode.Nodes(xNode.Nodes.IndexOfKey(selectedNodes(j)))
+                    If xNode.Nodes.IndexOfKey(selectedNodes(j)) >= 0 Then
+                        xNode = xNode.Nodes(xNode.Nodes.IndexOfKey(selectedNodes(j)))
+                    End If
                 Loop
             End If
 
@@ -535,7 +554,7 @@ Public Class frmAnalyze
             ' RestoreExpanded(xNode, xExpanded)
             ' Next
         End If
-            tsStatus.Text = "Update complete."
+        tsStatus.Text = "Update complete."
         MsgBox("Update complete.", MsgBoxStyle.OkOnly Or MsgBoxStyle.Information)
     End Sub
 
@@ -600,11 +619,11 @@ Public Class frmAnalyze
         Dim bi As BoundaryDB.BoundaryItem
         bi = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
         If IsNothing(bi) Then Exit Sub
-        If bi.Edit() Then
-            LoadChildListItem(lvi, bi)
+        If bi.Edit(xRetriever) Then
+            LoadChildListItem(lvChildren, lvi, bi)
             ' reload current lv item
-            If Not (tvList.SelectedNode Is Nothing) Then
-                Dim xNode As TreeNode = tvList.SelectedNode
+            If Not (x Is Nothing) Then
+                Dim xNode As TreeNode = x
                 Do Until xNode Is Nothing
                     LoadTreeNodeText(xNode)
                     xNode = xNode.Parent
@@ -619,7 +638,7 @@ Public Class frmAnalyze
         If IsNothing(xNode) Then Return
         Dim bi As BoundaryDB.BoundaryItem
         bi = DirectCast(xNode.Tag, BoundaryDB.BoundaryItem)
-        If bi.Edit() Then
+        If bi.Edit(xRetriever) Then
             ' reload current tv item name possibly - no, definitely!
             Do Until xNode Is Nothing
                 LoadTreeNodeText(xNode)
@@ -837,7 +856,7 @@ Public Class frmAnalyze
         ' Type = boundary, boundary=administrative, admin_level, designation, name, name:en, Name: cy,
         ' website, council_name, council_name: en, council_name: cy, council_style, parish_type, source,
         ' ref: gss
-        Dim hdrs() As String = {"+status", "+dbname", "+dbtype", "+osmid", "+osmver", "type", "boundary", "admin_level", "designation", "name", "council_name", "council_style", "parish_type", "ref:gss"}
+        Static hdrs() As String = {"+status", "+dbname", "+dbtype", "+osmid", "+osmver", "type", "boundary", "admin_level", "designation", "name", "council_name", "council_style", "parish_type", "ref:gss"}
 
         With sfdReports
             .Filter = "CSV Files|*.csv|All files|*.*"
@@ -917,6 +936,10 @@ Public Class frmAnalyze
     End Sub
 
     Private Sub tvList_BeforeExpand(sender As Object, e As TreeViewCancelEventArgs) Handles tvList.BeforeExpand
+        If Not bAllowExpandCollapse Then
+            e.Cancel = True
+            Return
+        End If
         Dim n As TreeNode = e.Node
         Dim xItem As BoundaryDB.BoundaryItem = DirectCast(n.Tag, BoundaryDB.BoundaryItem)
         If n.Nodes.Count <> 1 Then Return
@@ -937,7 +960,7 @@ Public Class frmAnalyze
         If iCount > 0 Then
             sName = $"{sName} [{iCountOSM}/{iCount}]"
         End If
-        If iCountOSM = iCount Then
+        If iCount > 0 AndAlso iCountOSM = iCount Then
             colRequired = Color.Green
         Else
             colRequired = Color.Black
@@ -955,8 +978,15 @@ Public Class frmAnalyze
             tvn.Text = sName
         End If
     End Sub
+    ''' <summary>
+    ''' Adds all the children of the given node in the TreeView. If they have children, a dummy grandchild node is added.
+    ''' </summary>
+    ''' <param name="tv">The TreeView control</param>
+    ''' <param name="n">The TreeNode whose children are to be loaded</param>
+    ''' <param name="xItem">The BoundaryItem corresponding to the TreeNode</param>
     Private Sub LoadTreeNode(tv As TreeView, n As TreeNode, xItem As BoundaryDB.BoundaryItem)
         Dim tvn As TreeNode
+        ' ensure the nodes are sorted by name
         Dim xList As New SortedList(Of String, BoundaryDB.BoundaryItem)
         For Each xChild In xItem.Children
             xList.Add(xChild.Name, xChild)
@@ -983,6 +1013,115 @@ Public Class frmAnalyze
             End If
         Next
         tv.EndUpdate()
+    End Sub
+
+    Private Sub tvList_DoubleClick(sender As Object, e As EventArgs) Handles tvList.DoubleClick
+        Dim iRel As Long
+        Dim xItem As BoundaryDB.BoundaryItem
+
+        If tvList.SelectedNode Is Nothing Then Exit Sub
+        If tvList.SelectedNode.Tag Is Nothing Then Exit Sub
+        xItem = DirectCast(tvList.SelectedNode.Tag, BoundaryDB.BoundaryItem)
+        If Not IsNothing(xItem) Then
+            iRel = xItem.OSMRelation
+            If iRel > 0 Then
+                ShowRelation(iRel)
+            End If
+        End If
+    End Sub
+
+    Private Sub frmAnalyze_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
+        Dim sbTmp As New StringBuilder
+        ' column widths
+        For i = 0 To lvChildren.Columns.Count - 1
+            If i > 0 Then
+                sbTmp.Append(",")
+            End If
+            sbTmp.Append(lvChildren.Columns(i).Width)
+        Next
+        My.Settings.ListColumnWidth = sbTmp.ToString()
+        ' column display order
+        sbTmp.Clear()
+        For i = 0 To lvChildren.Columns.Count - 1
+            If i > 0 Then
+                sbTmp.Append(",")
+            End If
+            sbTmp.Append(lvChildren.Columns(i).DisplayIndex)
+        Next
+        My.Settings.ListColumnOrder = sbTmp.ToString()
+        ' sorting column and order
+        sbTmp.Clear()
+        If m_SortingColumn Is Nothing Then
+        Else
+            My.Settings.ListColumnSorting = m_SortingColumn.Index.ToString & "," & lvChildren.Sorting.ToString()
+        End If
+
+    End Sub
+
+    Private Sub frmAnalyze_Load(sender As Object, e As EventArgs) Handles Me.Load
+        ' restore listview settings
+        Dim iWidth As Integer
+        Dim sTmp As String
+        Dim aTmp() As String
+        ' column width
+        sTmp = My.Settings.ListColumnWidth
+        aTmp = Split(sTmp, ",")
+        If UBound(aTmp) = lvChildren.Columns.Count - 1 Then
+            For i = 0 To lvChildren.Columns.Count - 1
+                If Integer.TryParse(aTmp(i), iWidth) Then
+                    If iWidth > 10 And iWidth < 500 Then
+                        lvChildren.Columns(i).Width = iWidth
+                    End If
+                End If
+            Next
+        End If
+        'column display order
+        ' this needs to be set in order of the displayindex values to stop things getting confused
+        sTmp = My.Settings.ListColumnOrder
+        aTmp = Split(sTmp, ",")
+        Dim tmpMap As New SortedList(Of Integer, Integer)
+        If UBound(aTmp) = lvChildren.Columns.Count - 1 Then
+            For i = 0 To lvChildren.Columns.Count - 1
+                If Integer.TryParse(aTmp(i), iWidth) Then
+                    tmpMap(i) = iWidth
+                End If
+            Next
+            For Each i In tmpMap.Keys
+                If tmpMap(i) >= 0 And tmpMap(i) < lvChildren.Columns.Count Then
+                    lvChildren.Columns(i).DisplayIndex = tmpMap(i)
+                End If
+            Next
+        End If
+        ' sort column and order
+        sTmp = My.Settings.ListColumnSorting
+        aTmp = Split(sTmp, ",")
+        If UBound(aTmp) = 1 Then
+            If Integer.TryParse(aTmp(0), iWidth) Then
+                m_SortingColumn = lvChildren.Columns(iWidth)
+            End If
+            If Integer.TryParse(aTmp(1), iWidth) Then
+                lvChildren.Sorting = DirectCast(iWidth, SortOrder)
+            End If
+        End If
+    End Sub
+
+    Private Sub tvList_MouseDown(sender As Object, e As MouseEventArgs) Handles tvList.MouseDown
+        '   check if clicked on node's plus/minus sign
+        Dim info As TreeViewHitTestInfo = tvList.HitTest(e.X, e.Y)
+        If info IsNot Nothing AndAlso info.Location = TreeViewHitTestLocations.PlusMinus Then
+            '   in that case, allow expand/collapse
+            bAllowExpandCollapse = True
+        Else
+            '   otherwise don't allow expand/collapse
+            bAllowExpandCollapse = False
+        End If
+    End Sub
+
+    Private Sub tvList_BeforeCollapse(sender As Object, e As TreeViewCancelEventArgs) Handles tvList.BeforeCollapse
+        If Not bAllowExpandCollapse Then
+            e.Cancel = True
+            Return
+        End If
     End Sub
 End Class
 Public Class ListViewComparer

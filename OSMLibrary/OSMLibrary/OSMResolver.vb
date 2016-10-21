@@ -17,6 +17,8 @@ Public Class OSMResolver
         Public Head As OSMNode
         Public Tail As OSMNode
         Public Index As Integer
+        Public Resolver As OSMResolver
+        Public EnclosingRing As Ring
 
         Public Function isClosed() As Boolean
             If Ways.Count = 0 Then
@@ -90,33 +92,91 @@ Public Class OSMResolver
                 Return New DPoint(cLon, cLat)
             End Get
         End Property
-        Public Function NodeList() As LinkedList(Of OSMNode)
-            Dim h As OSMNode = Head
-            Dim t As OSMNode = Tail
-            Dim nlist As New LinkedList(Of OSMNode)
-            ' ways are in a linked list, in order - but the points may need reversing
-            nlist.AddFirst(h)
-            'Dim wnodes As LinkedList(Of OSMNode)
-            Dim wnodes() As OSMNode
-            Dim wn As LinkedListNode(Of OSMWay) = Ways.First
-            Dim w As OSMWay
-            While Not IsNothing(wn)
-                w = wn.Value
-                If w.Nodes.Count > 1 Then
-                    wnodes = w.Nodes.ToArray
-                    If h.ID <> wnodes(0).ID Then
-                        Array.Reverse(wnodes)
-                        Debug.Assert(h.ID = wnodes(0).ID, "problem with way list after reversing way")
-                    End If
-                    h = wnodes(UBound(wnodes))
-                    For i As Integer = 1 To UBound(wnodes)
-                        nlist.AddLast(wnodes(i))
-                    Next
-                End If
-                wn = wn.Next
-            End While
-            Return nlist
+        Public Shared Function IsClockwise(n As LinkedList(Of OSMNode)) As Boolean
+            Dim a As Single = 0
+            Dim j As Integer
+            For i = 0 To (n.Count) - 1
+                j = (i + 1) Mod n.Count
+                a += n(i).Lon * n(j).Lat
+                a -= n(j).Lon * n(i).Lat
+            Next
+            Return (a < 0)
         End Function
+        Private Shared Function Reverse(i As LinkedList(Of OSMNode)) As LinkedList(Of OSMNode)
+            Dim o As New LinkedList(Of OSMNode)
+            Dim n As LinkedListNode(Of OSMNode)
+            n = i.First
+            While n IsNot Nothing
+                o.AddFirst(n.Value)
+                n = n.Next
+            End While
+            Return o
+        End Function
+
+        Public Function NodeListClockwise() As LinkedList(Of OSMNode)
+            Dim n As LinkedList(Of OSMNode) = NodeList()
+            If IsClockwise(n) Then
+                Return n
+            Else
+                Return Reverse(n)
+            End If
+        End Function
+        Public Function NodeListAnticlockwise() As LinkedList(Of OSMNode)
+            Dim n As LinkedList(Of OSMNode) = NodeList()
+            If IsClockwise(n) Then
+                Return Reverse(n)
+            Else
+                Return n
+            End If
+        End Function
+        Public Shared Function PointInPoly(n As LinkedList(Of OSMNode), p As OSMNode) As Boolean
+            ' Int pnpoly(Int nvert, float * vertx, float * verty, float testx, float testy)
+            Dim c As Boolean = False
+            Dim i As Integer, j As Integer
+            Dim testx As Double = p.Lon
+            Dim testy As Double = p.Lat
+            j = n.Count - 1
+            For i = 0 To n.Count - 1
+                If ((n(i).Lat > testy) <> (n(j).Lat > testy)) AndAlso
+                    (testx < (n(j).Lon - n(i).Lon) * (testy - n(i).Lat) / (n(j).Lat - n(i).Lat) + n(i).Lon) Then
+                    c = Not c
+                End If
+                j = i
+            Next
+            Return c
+        End Function
+        Public Function Encloses(inner As Ring) As Boolean
+            Return PointInPoly(NodeList(), inner.Head)
+        End Function
+        Public ReadOnly Property NodeList() As LinkedList(Of OSMNode)
+            Get
+                Dim h As OSMNode = Head
+                Dim t As OSMNode = Tail
+                Dim nlist As New LinkedList(Of OSMNode)
+                ' ways are in a linked list, in order - but the points may need reversing
+                nlist.AddFirst(h)
+                'Dim wnodes As LinkedList(Of OSMNode)
+                Dim wnodes() As OSMNode
+                Dim wn As LinkedListNode(Of OSMWay) = Ways.First
+                Dim w As OSMWay
+                While Not IsNothing(wn)
+                    w = wn.Value
+                    If w.Nodes.Count > 1 Then
+                        wnodes = w.Nodes.ToArray
+                        If h.ID <> wnodes(0).ID Then
+                            Array.Reverse(wnodes)
+                            Debug.Assert(h.ID = wnodes(0).ID, "problem with way list after reversing way")
+                        End If
+                        h = wnodes(UBound(wnodes))
+                        For i As Integer = 1 To UBound(wnodes)
+                            nlist.AddLast(wnodes(i))
+                        Next
+                    End If
+                    wn = wn.Next
+                End While
+                Return nlist
+            End Get
+        End Property
 
         Public Function checkGeometry() As Boolean
             If Not isClosed() Then
@@ -351,37 +411,35 @@ Public Class OSMResolver
                 Else
                     sJSON.Append("{ ""type"": ""MultiLineString"", ""coordinates"" : [")
                 End If
-                sJSON.Append(GeoJSONCoords)
+                sJSON.Append(GeoJSONCoords(NodeList()))
                 sJSON.Append("]}")
                 Return sJSON.ToString
             End Get
         End Property
-        Public ReadOnly Property GeoJSONCoords() As String
-            Get
-                Dim sJSON As New System.Text.StringBuilder
-                Dim bFirst As Boolean = True
-                Dim n As OSMNode
-                Dim nlist As LinkedList(Of OSMNode) = NodeList()
-                Dim wn As LinkedListNode(Of OSMNode)
-                sJSON.Append("[")
-                wn = nlist.First
-                While wn IsNot Nothing
-                    n = wn.Value
-                    If Not bFirst Then sJSON.Append(",")
-                    sJSON.Append(n.GeoJSONCoords)
-                    bFirst = False
-                    wn = wn.Next
-                End While
-                sJSON.Append("]")
-                Return sJSON.ToString()
-            End Get
-        End Property
+        Public Shared Function GeoJSONCoords(nlist As LinkedList(Of OSMNode)) As String
+            Dim sJSON As New System.Text.StringBuilder
+            Dim bFirst As Boolean = True
+            Dim n As OSMNode
+            Dim wn As LinkedListNode(Of OSMNode)
+            sJSON.Append("[")
+            wn = nlist.First
+            While wn IsNot Nothing
+                n = wn.Value
+                If Not bFirst Then sJSON.Append(",")
+                sJSON.Append(n.GeoJSONCoords)
+                bFirst = False
+                wn = wn.Next
+            End While
+            sJSON.Append("]")
+            Return sJSON.ToString()
+        End Function
 
         Sub New()
             MyBase.New()
         End Sub
-        Sub New(w As OSMWay, r As String)
+        Sub New(res As OSMResolver, w As OSMWay, r As String)
             MyBase.New()
+            Resolver = res
             If w.Nodes.Count > 0 Then
                 Ways.AddFirst(w)
                 Head = w.Nodes.First.Value
@@ -460,7 +518,7 @@ Public Class OSMResolver
                     End If
                 Next
                 If Not bLinked Then
-                    r = New Ring(m.Member, m.Role)
+                    r = New Ring(Me, m.Member, m.Role)
                     Rings.AddLast(r)
                     r.Index = Rings.Count
                     Debug.Print("Way " & m.Member.ID & " starts new ring #" & r.Index)
@@ -499,6 +557,7 @@ Public Class OSMResolver
                 rn = rn.Next
             Loop
         Loop Until Not bLinked
+        FindHoles()
         Return True
     End Function
     Public Function checkGeometry() As Boolean
@@ -519,22 +578,75 @@ Public Class OSMResolver
             Next
         End Get
     End Property
+    Private Sub FindHoles()
+        Dim bFound As Boolean
+        For Each r In Rings
+            If r.isClosed AndAlso r.Role = "inner" Then
+                bFound = False
+                For Each outer In Rings
+                    If outer.isClosed AndAlso (outer.Role = "outer" OrElse outer.Role = "") Then
+                        ' if o is inside r
+                        If outer.Encloses(r) Then
+                            r.EnclosingRing = outer
+                            bFound = True
+                            Exit For
+                        End If
+                    End If
+                Next
+                If Not bFound Then
+                    Debug.Print("Inner ring not enclosed by outer ring")
+                End If
+            Else
+                r.EnclosingRing = Nothing
+            End If
+        Next
+    End Sub
+
     Public Function GeoJSON() As String
         Dim sJSON As New StringBuilder(10000)
         Dim xMem As OSMRelationMember
         Dim bFirst As Boolean = True
+        Dim rIn As Ring
+        Dim RingList As New List(Of Ring)
         Dim b As New BBox
         If _relation.Members.Count = 0 Then
             Return ""
         End If
+        RingList.AddRange(Rings)
+        '  FeatureCollection features [
+        '  for each outer ring
+        '   Polygon
+        '       [ coords clockwise ]
+        '       for each inner ring within this outer ring
+        '           [ coords counterclockwise ]
+        '       next
+        '   next
+        '   other members
+        '   ]
         sJSON.Append("{ ""type"": ""FeatureCollection"", ""features"" : [")
         For Each r In Rings
-            If (r.Role = "outer" Or r.Role = "") Then
+            If r.isClosed AndAlso (r.Role = "outer" Or r.Role = "") Then
                 If Not bFirst Then sJSON.Append(", ")
-                sJSON.Append(r.GeoJSON)
+                sJSON.Append("{ ""type"": ""Polygon"", ""coordinates"" : [")
+                sJSON.Append(Ring.GeoJSONCoords(r.NodeListClockwise()))
+                RingList.Remove(r)
+                For Each inner In Rings
+                    If inner.isClosed() AndAlso inner.EnclosingRing Is r Then
+                        sJSON.Append(", ")
+                        sJSON.Append(Ring.GeoJSONCoords(inner.NodeListAnticlockwise()))
+                        RingList.Remove(inner)
+                    End If
+                Next
+                sJSON.Append("] }")
                 b.Merge(r.BBox)
                 bFirst = False
             End If
+        Next
+        For Each r In RingList
+            If Not bFirst Then sJSON.Append(", ")
+            sJSON.Append(r.GeoJSON) ' unclosed ring will be emitted as linestring not polygon
+            b.Merge(r.BBox)
+            bFirst = False
         Next
         For Each xMem In _relation.Members
             If xMem.Type = OSMObject.ObjectType.Node Then

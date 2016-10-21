@@ -166,7 +166,10 @@ Public Class frmMain
         If Not IsNumeric(txtID.Text) Then
             Exit Sub
         End If
-        iRelID = Long.Parse(txtID.Text)
+        If Not Long.TryParse(txtID.Text, iRelID) Then
+            MsgBox($"Relation ID {txtID.Text} must be numeric")
+            Return
+        End If
         If chkOnline.Checked Then
             tmpDoc = xRetriever.API.GetOSMDoc(OSMObject.ObjectType.Relation, iRelID, True)
             If IsNothing(tmpDoc) Then
@@ -252,7 +255,7 @@ Public Class frmMain
             End With
         Next
         For Each xNode In tvDir.Nodes
-            sTag = xNode.Tag
+            sTag = TryCast(xNode.Tag, String)
             If Len(sTag) > 0 Then  'we should have a parent
                 If tvDir.Nodes.ContainsKey(sTag) Then
                     xPar = tvDir.Nodes(tvDir.Nodes.IndexOfKey(sTag))
@@ -266,11 +269,7 @@ Public Class frmMain
         LoadTree("C:\VMShare\mkgmap\ccc.xml")
     End Sub
     Private Function NodeText(xNode As XmlNode) As String
-        If IsNothing(xNode) Then
-            Return ""
-        Else
-            Return xNode.InnerText
-        End If
+        Return If(IsNothing(xNode), "", xNode.InnerText)
     End Function
 
     Private Sub btnAnalyseWay_Click(sender As Object, e As EventArgs) Handles btnAnalyseWay.Click
