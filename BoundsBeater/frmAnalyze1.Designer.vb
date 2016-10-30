@@ -218,7 +218,6 @@ Partial Class frmAnalyze
         '
         Me.wbMap.AllowWebBrowserDrop = False
         Me.wbMap.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.wbMap.IsWebBrowserContextMenuEnabled = False
         Me.wbMap.Location = New System.Drawing.Point(3, 3)
         Me.wbMap.Margin = New System.Windows.Forms.Padding(0)
         Me.wbMap.MinimumSize = New System.Drawing.Size(20, 20)

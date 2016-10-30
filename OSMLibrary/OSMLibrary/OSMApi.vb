@@ -1,37 +1,87 @@
 ﻿Imports System.Net
 Imports System.IO
 Imports System.Security
-
+''' <summary>
+''' OSMApi wraps OSM API v0.6
+''' </summary>
 Public Class OSMApi
-    Public BaseURL As String = My.Settings.OSMBaseApiURL
-    Public Credentials As NetworkCredential
-    Public UserAgent As String = My.Settings.OSMLibUserAgent
-    Public XapiBaseURL As String = My.Settings.OSMXapiBaseApiURL
+    ''' <summary>
+    ''' Base URL for the OSM API.
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property BaseURL As String = My.Settings.OSMBaseApiURL
+    ''' <summary>
+    ''' Credentials for authentication to the OSM API.
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property Credentials As NetworkCredential
+    ''' <summary>
+    ''' User Agent string for HTTP headers.
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property UserAgent As String = My.Settings.OSMLibUserAgent
+    ''' <summary>
+    ''' Base URL for the XAPI service.
+    ''' </summary>
+    ''' <returns></returns>
+    Public Property XapiBaseURL As String = My.Settings.OSMXapiBaseApiURL
     Private sLogFile As String = "OSMAPI.log"
-    Public LastError As String
-
+    ''' <summary>
+    ''' Description of the most recent error from the OSM API.
+    ''' </summary>
+    ''' <returns></returns>
+    Public ReadOnly Property LastError As String = ""
+    ''' <summary>
+    ''' Creates an OSMApi object.
+    ''' </summary>
     Public Sub New()
         MyBase.New()
     End Sub
+    ''' <summary>
+    ''' Creates an OSMApi object initialised with the given Base URL.
+    ''' </summary>
+    ''' <param name="URL"></param>
     Public Sub New(URL As String)
         MyBase.New()
         BaseURL = URL
     End Sub
+    ''' <summary>
+    ''' Creates an OSMApi object initialised with the given Base URL and credentials.
+    ''' </summary>
+    ''' <param name="URL"></param>
+    ''' <param name="Credentials"></param>
     Public Sub New(URL As String, Credentials As NetworkCredential)
         MyBase.New()
         Me.BaseURL = URL
         Me.Credentials = Credentials
     End Sub
+    ''' <summary>
+    ''' Creates an OSMApi object initialised with the given credentials.
+    ''' </summary>
+    ''' <param name="Credentials">Credentials to be used.</param>
     Public Sub New(Credentials As NetworkCredential)
         MyBase.New()
         Me.Credentials = Credentials
     End Sub
-    Public Function GetURL(xType As OSMObject.ObjectType, lRef As Long, bFull As Boolean) As String
+    ''' <summary>
+    ''' Constructs an API URL to access the given OSM object
+    ''' </summary>
+    ''' <param name="xType"></param>
+    ''' <param name="lRef"></param>
+    ''' <param name="bFull"></param>
+    ''' <returns></returns>
+    Public Function GetUrl(xType As OSMObject.ObjectType, lRef As Long, bFull As Boolean) As String
         Dim sTmp As String
         sTmp = BaseURL & OSMObject.ObjectTypeString(xType) & "/" & CStr(lRef)
         If bFull And (xType <> OSMObject.ObjectType.Node) Then sTmp &= "/full"
         Return sTmp
     End Function
+    ''' <summary>
+    ''' Constructs an API URL to access multiple OSM objects of the same type in a single call
+    ''' </summary>
+    ''' <param name="xType"></param>
+    ''' <param name="lRef"></param>
+    ''' <returns></returns>
     Public Function GetURLMulti(xType As OSMObject.ObjectType, lRef As Long()) As String
         Dim sTmp As String
         Dim bFirst As Boolean = True
@@ -136,14 +186,14 @@ Public Class OSMApi
         Dim iStartTime As Integer
         Dim iEndTime As Integer
 
-        LastError = ""
+        _LastError = ""
         Debug.Print("Retrieving " & sUrl)
         Try
             req = WebRequest.Create(sUrl)
             req.Method = "GET"
         Catch e As WebException
             Debug.Print(e.Message)
-            LastError = e.Message
+            _LastError = e.Message
             Return Nothing
         End Try
 
@@ -158,14 +208,14 @@ Public Class OSMApi
             Debug.Print(e.Message)
             'if the object has been deleted, we get a 410 Gone, plus a free WebException for our troubles.
             If IsNothing(resp) Then
-                LastError = e.Message
+                _LastError = e.Message
                 Throw New OSMWebException("Unknown error", e)
             Else
                 If resp.StatusCode = 404 Then
-                    LastError = "Not found"
+                    _LastError = "Not found"
                     Throw New OSMWebException("Object not found", e)
                 ElseIf resp.StatusCode = 410 Then
-                    LastError = "Deleted"
+                    _LastError = "Deleted"
                     Throw New OSMWebException("Object deleted", e)
                 End If
                 Return Nothing
@@ -175,13 +225,13 @@ Public Class OSMApi
         Debug.Print("HTTP status " & resp.StatusCode & "(" & resp.StatusDescription & ") in " & (iEndTime - iStartTime) & "ms")
         If resp.StatusCode <> 200 Then
             Debug.Print("HTTP status " & resp.StatusCode & "(" & resp.StatusDescription & ") on " & sUrl)
-            LastError = resp.StatusDescription
+            _LastError = resp.StatusDescription
             Throw New OSMWebException("Bad HTTP Status " & resp.StatusCode.ToString())
             Return Nothing
         End If
         If Left(resp.ContentType, 8) <> "text/xml" And resp.ContentType <> "application/osm3s+xml" Then
             Debug.Print("HTTP returned content type " & resp.ContentType & " on " & sUrl)
-            LastError = "Unexpected content type " & resp.ContentType
+            _LastError = "Unexpected content type " & resp.ContentType
             Throw New OSMWebException("Unexpected content type " & resp.ContentType)
             Return Nothing
         End If
@@ -196,13 +246,13 @@ Public Class OSMApi
         If xDoc.LoadXML(sResp) Then
             Return xDoc
         Else
-            LastError = "XML processing error"
+            _LastError = "XML processing error"
             Return Nothing
         End If
     End Function
     Public Function GetOSMDoc(xType As OSMObject.ObjectType, lRef As Long, Optional bFull As Boolean = False) As OSMDoc
         Dim sURL As String
-        sURL = GetURL(xType, lRef, bFull)
+        sURL = GetUrl(xType, lRef, bFull)
         Return GetOSM(sURL)
     End Function
     Public Function GetOSMDocVersion(xType As OSMObject.ObjectType, lRef As Long, lVer As Long) As OSMDoc

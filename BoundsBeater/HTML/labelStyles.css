@@ -23,6 +23,8 @@
 
 .label-9 { border-style: none; }
 
-.label-10 { border-style: none; }
+.label-10 { border-style: none; font-style: italic;}
+
+.label-parish-group { border-style: none; color: red; font-style: italic;}
 
 .label-11 { border-style: none; }

@@ -119,6 +119,7 @@
   <ItemGroup>
     <Compile Include="BBox.vb" />
     <Compile Include="fileformat.vb" />
+    <Compile Include="HTTPParallel.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>

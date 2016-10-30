@@ -285,7 +285,7 @@ Public Class OSMRetriever
     End Function
 
     Public Function GetNeighbours(xDoc As OSMDoc, xType As OSMObject.ObjectType, lRef As Long) As OSMDoc
-        Dim sUrl As String = API.GetURL(xType, lRef, False)
+        Dim sUrl As String = API.GetUrl(xType, lRef, False)
         sUrl = sUrl & "/relations"
         Return API.GetOSM(sUrl)
     End Function

@@ -5,6 +5,7 @@
   var mapUrl;
   var mapAttrib;
   var adminLevel = 0;
+  var isParishGroup = false;
 
   function labelRelation(feature, latLng) {
       var sWidth;
@@ -15,9 +16,9 @@
             sWidth = feature.properties._bblabel.length * 4;
             m.bindLabel(feature.properties._bblabel, {
                 noHide: true,
-                direction: 'center',
+                direction: "center",
                 offset: [0, -10],
-                className: "label-" + adminLevel.toString()
+                className: "label-" + (isParishGroup ? "parish-group" : adminLevel.toString())
             });
         } else if (feature.properties && feature.properties.name) {
             m.options.title = feature.properties.name;
@@ -40,8 +41,8 @@ lineOptions = {
 };
 
 relOptions = {
-    color: 'green',
-    fillColor: '#0f3',
+    color: "Green",
+    fillColor: "Magenta",
     fillOpacity: 0.3,
     pointToLayer: labelRelation
 };
@@ -98,7 +99,7 @@ relOptions = {
       {
           // level 6, county / unitary
           color: 'Blue',
-          weight: 5,
+          weight: 6,
           fillColor: 'Blue',
           fillOpacity: 0.15,
           pointToLayer: labelRelation
@@ -144,29 +145,39 @@ relOptions = {
       }
   ];
 var townOptions = {
-      color: 'Teal',
+    color: 'Teal',
+    weight: 4,
       fillColor: 'Teal',
       fillOpacity: 0.3,
       pointToLayer: labelRelation
 };
   var cityOptions = {
       color: 'Orange',
+      weight: 4,
       fillColor: 'Orange',
+      fillOpacity: 0.3,
+      pointToLayer: labelRelation
+  };
+  var pmeetingOptions = {
+      color: "#7fff00",
+      weight: 2,
+      fillColor: "#7fff00",
       fillOpacity: 0.3,
       pointToLayer: labelRelation
   };
   var groupOptions = {
       color: 'Red',
+      weight: 4,
       fill: false,
       pointToLayer: labelRelation
   };
 
 
 
-if (useTiles == 'osm') {
+if (useTiles === 'osm') {
     mapUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
     mapAttrib = 'Map data © openstreetmap contributors';
-} else if (useTiles == 'cloudmade') {
+} else if (useTiles === 'cloudmade') {
     mapUrl = 'http://{s}.tile.cloudmade.com/37aa144eae25445ea78cac122bed5493/997/256/{z}/{x}/{y}.png';
     mapAttrib = 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>';
 } else {
@@ -317,11 +328,12 @@ function drawJSON(j, id) {
             break;
         }
     }
+    isParishGroup = false;
     var opts;
     if (arg && arg.properties && arg.properties.admin_level) {
         adminLevel = arg.properties.admin_level;
         //alert("admin level " + adminLevel);
-        if ((parseInt(adminLevel) === NaN)
+        if ((isNaN(parseInt(adminLevel)))
             || adminLevel < 0
             || adminLevel >= levelOptions.length) {
             adminLevel = 0;
@@ -332,8 +344,11 @@ function drawJSON(j, id) {
                 opts = townOptions;
             } else if (arg.properties.council_style == "city") {
                 opts = cityOptions;
-            } else if (arg.properties.parish_type == "joint_parish_council") {
+            } else if (arg.properties.parish_type == "parish_meeting") {
+                opts = pmeetingOptions;
+            } else if (arg.properties.parish_type == "parish_group") { // magic value
                 opts = groupOptions;
+                isParishGroup = true;
             }
         } else if (adminLevel == 8 || adminLevel == 6) {
             if (arg.properties.council_style == "city") {

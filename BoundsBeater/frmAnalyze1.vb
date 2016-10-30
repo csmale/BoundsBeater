@@ -422,10 +422,13 @@ Public Class frmAnalyze
         Dim res As New OSMResolver(xRel)
         'sJSON = xRel.GeoJSON
         sJSON = res.GeoJSON()
+        ShowJSON(sJSON, "r" & xRel.ID.ToString)
+    End Sub
+    Private Sub ShowJSON(sJSON As String, uid As String)
         Dim xArgs(2) As Object
         If Len(sJSON) > 0 Then
             xArgs(0) = sJSON
-            xArgs(1) = "r" & xRel.ID.ToString
+            xArgs(1) = uid
             wbMap.Document.InvokeScript("drawJSON", xArgs)
         End If
     End Sub
@@ -668,6 +671,8 @@ Public Class frmAnalyze
             If iChild > 0 Then
                 ShowRelation(iChild)
                 Application.DoEvents()
+            ElseIf p.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_ParishGroup Then
+                ShowParishGroup(p)
             End If
         Next
     End Sub
@@ -794,13 +799,17 @@ Public Class frmAnalyze
         Dim p As BoundaryDB.BoundaryItem
         p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
         Dim iRel As Long = p.OSMRelation
+        Dim tvn As TreeNode
 
         Dim xItem As New BoundaryDB.BoundaryItem(xDB)
         xItem.Parent = p
         xItem.ParentCode = p.ONSCode
         If xItem.Edit() Then
             xDB.Items.Add(xItem.ONSCode, xItem)
-            LoadTreeNode(tvList, x, xItem)
+            tvn = x.Nodes.Add(xItem.ONSCode, "")
+            tvn.Tag = xItem
+            tvn.ContextMenuStrip = cmsNode
+            LoadTreeNodeText(tvn)
             MsgBox("edit successful")
         End If
     End Sub
@@ -1019,17 +1028,65 @@ Public Class frmAnalyze
         Dim iRel As Long
         Dim xItem As BoundaryDB.BoundaryItem
 
+        xRetriever.MaxAge = 60 * 15
+
         If tvList.SelectedNode Is Nothing Then Exit Sub
         If tvList.SelectedNode.Tag Is Nothing Then Exit Sub
         xItem = DirectCast(tvList.SelectedNode.Tag, BoundaryDB.BoundaryItem)
         If Not IsNothing(xItem) Then
-            iRel = xItem.OSMRelation
-            If iRel > 0 Then
-                ShowRelation(iRel)
+            If xItem.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_ParishGroup Then
+                ShowParishGroup(xItem)
+            Else
+                iRel = xItem.OSMRelation
+                If iRel > 0 Then
+                    ShowRelation(iRel)
+                End If
             End If
         End If
     End Sub
+    Private Sub ShowParishGroup(xItem As BoundaryDB.BoundaryItem)
+        Dim sName As String
+        Dim xGroup As BoundaryDB.BoundaryItem
+        Dim rTemp As OSMRelation = Nothing
+        Dim xRel As OSMRelation
+        Dim xResolver As OSMResolver = Nothing
 
+        sName = xItem.Name
+        xGroup = xItem
+        xItem = xItem.Parent    ' up to district/unitary
+        For Each d In xDB.Items.Values
+            If d.Parent Is xItem Then
+                If d.OSMRelation > 0 Then
+                    If d.ParishType = BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil Then
+                        If d.CouncilName = sName Then
+                            xRel = DirectCast(xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, d.OSMRelation), OSMRelation)
+                            If xRel Is Nothing Then
+                                MsgBox($"Unable to retrieve relation #{d.OSMRelation} ({d.Name})")
+                            End If
+                            If rTemp Is Nothing Then
+                                rTemp = xRel
+                            Else
+                                rTemp = rTemp.Combine(xRel)
+                            End If
+                        End If
+                    End If
+                End If
+            End If
+        Next
+        If rTemp Is Nothing Then Exit Sub
+        rTemp.Tags.Add("admin_level", New OSMTag("admin_level", "10"))
+        rTemp.Tags.Add("parish_type", New OSMTag("parish_type", "parish_group")) ' special value to trigger javascript
+        rTemp.Tags.Add("ref:gss", New OSMTag("ref:gss", xGroup.ONSCode))
+        rTemp.Tags.Add("name", New OSMTag("name", xGroup.Name))
+        ' resolve into rings
+        xResolver = New OSMResolver(rTemp)
+        ' draw boundary of combined area if any
+        If xResolver IsNot Nothing Then
+            Dim sJson As String
+            sJson = xResolver.GeoJSON
+            ShowJSON(sJson, xGroup.ONSCode)
+        End If
+    End Sub
     Private Sub frmAnalyze_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
         Dim sbTmp As New StringBuilder
         ' column widths

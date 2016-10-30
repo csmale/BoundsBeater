@@ -12,13 +12,13 @@ Public Class DPoint
 End Class
 Public Class OSMResolver
     Public Class Ring
-        Public Role As String
-        Public Ways As New LinkedList(Of OSMWay)
+        Public ReadOnly Property Role As String
+        Public ReadOnly Property Ways As LinkedList(Of OSMWay)
         Public Head As OSMNode
         Public Tail As OSMNode
         Public Index As Integer
         Public Resolver As OSMResolver
-        Public EnclosingRing As Ring
+        Public Property EnclosingRing As Ring
 
         Public Function isClosed() As Boolean
             If Ways.Count = 0 Then
@@ -75,6 +75,9 @@ Public Class OSMResolver
                 Return b
             End Get
         End Property
+        Public Sub SetRole(newRole As String)
+            _Role = newRole
+        End Sub
         Public ReadOnly Property Centroid() As DPoint
             Get
                 Dim cLat As Double, cLon As Double
@@ -403,6 +406,88 @@ Public Class OSMResolver
             End If
             Return jb.ToString
         End Function
+        ''' <summary>
+        ''' Returns a new Ring which has the common boundary between this and Other removed
+        ''' </summary>
+        ''' <param name="Other">The Ring to be combined</param>
+        ''' <returns></returns>
+        Public Function Combine(Other As Ring) As Ring
+            If Other Is Nothing Then Return Me
+            If Not Me.isClosed() Then
+                Throw New Exception("This Ring not closed")
+                Return Nothing
+            End If
+            If Not Other.isClosed() Then
+                Throw New Exception("Other Ring not closed")
+                Return Nothing
+            End If
+            Dim out As New Ring()
+            out.Resolver = Me.Resolver
+            Dim nIn As LinkedList(Of OSMNode) = Me.NodeListClockwise()
+            Dim nOther As LinkedList(Of OSMNode) = Other.NodeListClockwise()
+            Dim nOut As New LinkedList(Of OSMNode)
+            Dim bInseg As Boolean = False
+            Dim segStart As OSMNode = Nothing
+            Dim segEnd As OSMNode = Nothing
+            Dim otherStart As LinkedListNode(Of OSMNode)
+            Dim otherEnd As LinkedListNode(Of OSMNode)
+
+            For Each n In nIn
+                If bInseg Then
+                    If nOther.Contains(n) Then
+                        segEnd = n
+                    Else
+                        ' just off the end of a common segment from segStart to segEnd inclusive
+                        ' go round the other ring until we get back to the join
+                        otherStart = nOther.Find(segStart)
+                        otherEnd = nOther.Find(segEnd)
+                        While otherStart IsNot otherEnd
+                            nOut.AddLast(otherStart.Value)
+                            If otherStart.Next Is Nothing Then
+                                otherStart = nOther.First
+                            Else
+                                otherStart = otherStart.Next
+                            End If
+                        End While
+                        nOut.AddLast(segEnd)
+                        nOut.AddLast(n)
+                        bInseg = False
+                    End If
+                Else
+                    If nOther.Contains(n) Then
+                        segStart = n
+                        segEnd = n
+                        bInseg = True
+                    Else
+                        nOut.AddLast(n)
+                        ' still looking for the start of a common segment
+                    End If
+                End If
+            Next
+            ' the start/end point may also be the end of the common segment
+            If bInseg Then
+                otherStart = nOther.Find(segStart)
+                otherEnd = nOther.Find(segEnd)
+                While otherStart IsNot otherEnd
+                    nOut.AddLast(otherStart.Value)
+                    If otherStart.Next Is Nothing Then
+                        otherStart = nOther.First
+                    Else
+                        otherStart = otherStart.Next
+                    End If
+                End While
+                nOut.AddLast(segEnd)
+            End If
+
+            ' returned ring has a single way containing all the nodes - but nothing else
+            Dim w As New OSMWay
+            w.Nodes = nOut
+            out.Ways.AddLast(w)
+            out.Head = nOut.First.Value
+            out.Tail = nOut.Last.Value
+            Return out
+        End Function
+
         Public ReadOnly Property GeoJSON As String
             Get
                 Dim sJSON As New System.Text.StringBuilder
@@ -436,9 +521,11 @@ Public Class OSMResolver
 
         Sub New()
             MyBase.New()
+            _Ways = New LinkedList(Of OSMWay)
         End Sub
         Sub New(res As OSMResolver, w As OSMWay, r As String)
             MyBase.New()
+            _Ways = New LinkedList(Of OSMWay)
             Resolver = res
             If w.Nodes.Count > 0 Then
                 Ways.AddFirst(w)
@@ -576,6 +663,14 @@ Public Class OSMResolver
                     b.Merge(r.BBox)
                 End If
             Next
+        End Get
+    End Property
+    Public ReadOnly Property OuterRing As Ring
+        Get
+            For Each r In Rings
+                If r.isClosed AndAlso (r.Role = "outer" OrElse r.Role = "") Then Return r
+            Next
+            Return Nothing
         End Get
     End Property
     Private Sub FindHoles()

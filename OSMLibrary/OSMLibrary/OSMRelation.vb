@@ -1,5 +1,6 @@
 ﻿Imports System.Xml
 Imports System.Drawing
+Imports System.Linq.Expressions
 
 Public Class OSMRelation
     Inherits OSMObject
@@ -36,7 +37,7 @@ Public Class OSMRelation
             End If
             sJSON.Append("{ ""type"": ""FeatureCollection"", ""features"" : [")
             For Each xMem In Members
-                If xMem.type = ObjectType.Relation AndAlso xMem.Role = "subarea" Then
+                If xMem.Type = ObjectType.Relation AndAlso xMem.Role = "subarea" Then
                     Continue For
                 End If
                 If xMem.Member.IsPlaceholder Then
@@ -204,12 +205,81 @@ Public Class OSMRelation
             Exit Sub
         End If
         For Each xMbr In Members
-            If xMbr.type = ObjectType.Node Or xMbr.type = ObjectType.Way Then
-                xTmp = Doc.Retriever.GetNeighbours(Doc, xMbr.type, xMbr.Member.ID)
+            If xMbr.Type = ObjectType.Node Or xMbr.Type = ObjectType.Way Then
+                xTmp = Doc.Retriever.GetNeighbours(Doc, xMbr.Type, xMbr.Member.ID)
                 If Not (xTmp Is Nothing) Then
                     Doc.Merge(xTmp)
                 End If
             End If
         Next
     End Sub
+    ''' <summary>
+    ''' Combines a second relation into this, returning a new OSMRelation
+    ''' Nodes are simply added
+    ''' Ways are merged - common ways are removed so the polygons are combined
+    ''' Relations are NOT copied to the result
+    ''' Note this will all go horribly wrong if the relations are not well-formed multipolygons!
+    ''' </summary>
+    ''' <param name="Other">A second OSMRelation to be merged in</param>
+    ''' <returns>OSMRelation with the geometries combined</returns>
+    Public Function Combine(Other As OSMRelation) As OSMRelation
+        Dim rOut As New OSMRelation()
+        Dim res As OSMResolver
+        Dim sRole As String
+        Dim wOtherList As New List(Of Long)
+        For Each mbr In Other.Members
+            If mbr.Type = ObjectType.Way Then wOtherList.Add(mbr.Member.ID)
+        Next
+        For Each mbr In Members
+            Select Case mbr.Type
+                Case ObjectType.Node
+                    rOut.Members.Add(New OSMRelationMember(mbr.Member, mbr.Role))
+                Case ObjectType.Way
+                    If wOtherList.Contains(mbr.Member.ID) Then
+                        wOtherList.Remove(mbr.Member.ID)
+                    Else
+                        sRole = mbr.Role
+                        If sRole = "" Then sRole = "outer"
+                        rOut.Members.Add(New OSMRelationMember(mbr.Member, sRole))
+                    End If
+            End Select
+        Next
+        For Each mbr In Other.Members
+            If mbr.Type = ObjectType.Node Then rOut.Members.Add(New OSMRelationMember(mbr.Member, mbr.Role))
+            If mbr.Type = ObjectType.Way AndAlso wOtherList.Contains(mbr.Member.ID) Then
+                rOut.Members.Add(New OSMRelationMember(mbr.Member, mbr.Role))
+            End If
+        Next
+        rOut.Doc = Me.Doc
+
+        ' check for new rings that have been formed, which should now be inner rings
+        ' this is for the case that two half-moon areas together enclose another area - outer to each source area, but inner to the combination
+        res = New OSMResolver(rOut)
+        Dim rOuter As OSMResolver.Ring = Nothing
+        If res IsNot Nothing Then
+            For Each r In res.Rings
+                If r.Role = "outer" Then
+                    If rOuter Is Nothing Then
+                        rOuter = r
+                    Else
+                        ' if ring r is within rOuter, convert r to an inner ring. otherwise we have got the wrong outer ring so swap them over
+                        If r.Encloses(rOuter) Then
+                            Dim rTmp As OSMResolver.Ring
+                            rTmp = rOuter
+                            rOuter = r
+                            r = rTmp
+                        End If
+                        r.SetRole("inner")
+                        For Each m In Members
+                            If m.Type = ObjectType.Way AndAlso r.Ways.Contains(m.Member) Then
+                                m.Role = "inner"
+                            End If
+                        Next
+                    End If
+                End If
+            Next
+        End If
+
+        Return rOut
+    End Function
 End Class
