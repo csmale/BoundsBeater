@@ -32,6 +32,11 @@ Public Class OSMApi
     ''' <returns></returns>
     Public ReadOnly Property LastError As String = ""
     ''' <summary>
+    ''' Timeout for the http requests
+    ''' </summary>
+    ''' <returns>Timeout in milliseconds</returns>
+    Public Property Timeout As Integer = My.Settings.OSMApiTimeout
+    ''' <summary>
     ''' Creates an OSMApi object.
     ''' </summary>
     Public Sub New()
@@ -119,7 +124,7 @@ Public Class OSMApi
             req = WebRequest.Create(sURL)
             req.UserAgent = UserAgent
             req.Credentials = Credentials
-            req.Timeout = 30000
+            req.Timeout = Timeout
             If Len(sPayload) = 0 Then
                 req.Method = "GET"
             Else
@@ -199,7 +204,7 @@ Public Class OSMApi
 
         req.UserAgent = UserAgent
         req.Credentials = Credentials
-        req.Timeout = 30000
+        req.Timeout = Timeout
         req.AutomaticDecompression = DecompressionMethods.Deflate Or DecompressionMethods.GZip
         iStartTime = Environment.TickCount
         Try

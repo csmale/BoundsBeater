@@ -19,5 +19,11 @@
 &lt;/SerializableConnectionString&gt;</DesignTimeValue>
       <Value Profile="(Default)">data source=T:\BoundsBeater\hcache.sqlite</Value>
     </Setting>
+    <Setting Name="OSMApiTimeout" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">30000</Value>
+    </Setting>
+    <Setting Name="OSMBrowseBaseURL" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://www.openstreetmap.org/</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

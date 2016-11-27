@@ -202,7 +202,8 @@ var bingLayerLabels = new L.BingLayer("Anwt7CdaZfFM7FsXFu1vWVtkwrpUehyWcDhKaQZWi
       attribution: mapAttrib,
       tms: true });
 var tLayer = new L.TileLayer(mapUrl, { minZoom: 1, maxZoom: 19, attribution: mapAttrib });
-var overlayMaps = new L.FeatureGroup();
+var overlayMaps = new L.FeatureGroup();
+
 var baseMaps = {
     "OSM": tLayer,
     "OS25K (OSM)": os25kLayer,
@@ -216,7 +217,8 @@ var baseMaps = {
 
 var overlays = {
 //    "GPX Traces": overlayMaps
-};
+};
+
 L.control.layers(baseMaps).addTo(map);
 
 var miltonkeynes = new L.LatLng(52.0462, -0.7430); // geographical point (longitude and latitude)

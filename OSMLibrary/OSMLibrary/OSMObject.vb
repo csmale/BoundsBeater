@@ -2,13 +2,13 @@
 Imports System.Drawing
 
 Public MustInherit Class OSMObject
-    Const sBrowseURLBase As String = "http://www.openstreetmap.org/browse/"
     Public Enum ObjectType
         Node
         Way
         Relation
         Changeset
     End Enum
+    Public BrowseBaseUrl As String = My.Settings.OSMBrowseBaseURL
     Public ID As Long
     Public Version As ULong
     Public UID As ULong
@@ -246,7 +246,7 @@ Public MustInherit Class OSMObject
             Else
                 sType = "??"
             End If
-            Return sBrowseURLBase & sType & "/" & ID.ToString()
+            Return BrowseBaseUrl & sType & "/" & ID.ToString()
         End Get
     End Property
     ''' <summary>

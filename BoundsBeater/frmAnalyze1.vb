@@ -79,7 +79,7 @@ Public Class frmAnalyze
         Dim sTmp As String = ""
 
         '        txtReport.Clear()
-        xRetriever.MaxAge = 60 * 15
+        xRetriever.MaxAge = My.Settings.MaxCacheAge
         xRel = DirectCast(xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, iRel), OSMRelation)
         If IsNothing(xRel) Then
             xRel = Nothing
@@ -143,9 +143,7 @@ Public Class frmAnalyze
         Dim b As BBox = xRel.BBox
         sTmp = "BBox [" & b.MinLon & "," & b.MinLat & "," & b.MaxLon & "," & b.MaxLat & "]"
         txtReport.Text = txtReport.Text & vbCrLf & sTmp
-        sTmp = "http://overpass-api.de/api/xapi?relation[type=boundary][bbox=" _
-            & b.MinLon & "," & b.MinLat & "," & b.MaxLon & "," & b.MaxLat _
-            & "][@meta]"
+        sTmp = My.Settings.xapiAPI & $"?relation[type=boundary][bbox={b.MinLon},{b.MinLat},{b.MaxLon},{b.MaxLat}][@meta]"
         txtReport.Text = txtReport.Text & vbCrLf & sTmp
     End Sub
 
@@ -482,20 +480,9 @@ Public Class frmAnalyze
         End If
 
         If Len(sAdminLevel) = 0 Then
-            sURL = "http://overpass-api.de/api/xapi?relation[type=boundary][bbox=" _
-                & bBox.MinLon & "," & bBox.MinLat & "," & bBox.MaxLon & "," & bBox.MaxLat _
-                & "][@meta]"
-            sURL = "http://overpass.osm.rambler.ru/cgi/xapi?relation[type=boundary][bbox=" _
-             & bBox.MinLon & "," & bBox.MinLat & "," & bBox.MaxLon & "," & bBox.MaxLat _
-             & "][@meta]"
-
-            'sURL = "http://overpass-api.de/api/interpreter?data=[bbox];rel[type=boundary];[bbox];out+meta;&bbox=" _
-            '         & bBox.MinLon & "," & bBox.MinLat & "," & bBox.MaxLon & "," & bBox.MaxLat _
-            '    & ""
+            sURL = My.Settings.xapiAPI & $"?relation[type=boundary][bbox={bBox.MinLon},{bBox.MinLat},{bBox.MaxLon},{bBox.MaxLat}][@meta]"
         Else
-            sURL = "http://overpass-api.de/api/xapi?relation[type=boundary][admin_level=" & sAdminLevel & "][bbox=" _
-                & bBox.MinLon & "," & bBox.MinLat & "," & bBox.MaxLon & "," & bBox.MaxLat _
-                & "][@meta]"
+            sURL = My.Settings.xapiAPI & $"?relation[type=boundary][admin_level={sAdminLevel}][bbox={bBox.MinLon},{bBox.MinLat},{bBox.MaxLon},{bBox.MaxLat}][@meta]"
         End If
 
         Try
@@ -1028,7 +1015,7 @@ Public Class frmAnalyze
         Dim iRel As Long
         Dim xItem As BoundaryDB.BoundaryItem
 
-        xRetriever.MaxAge = 60 * 15
+        xRetriever.MaxAge = My.Settings.MaxCacheAge
 
         If tvList.SelectedNode Is Nothing Then Exit Sub
         If tvList.SelectedNode.Tag Is Nothing Then Exit Sub

@@ -17,5 +17,11 @@
     <Setting Name="ListColumnSorting" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="xapiAPI" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://overpass-api.de/api/xapi</Value>
+    </Setting>
+    <Setting Name="MaxCacheAge" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">86400</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

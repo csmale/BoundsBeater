@@ -49,6 +49,7 @@ Partial Class frmMain
         Me.btnAnalyseWay = New System.Windows.Forms.Button()
         Me.txtWayID = New System.Windows.Forms.TextBox()
         Me.btnTest = New System.Windows.Forms.Button()
+        Me.btnPrefs = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'btnClose
@@ -196,7 +197,7 @@ Partial Class frmMain
         '
         'btnRelMgr
         '
-        Me.btnRelMgr.Location = New System.Drawing.Point(721, 43)
+        Me.btnRelMgr.Location = New System.Drawing.Point(715, 43)
         Me.btnRelMgr.Name = "btnRelMgr"
         Me.btnRelMgr.Size = New System.Drawing.Size(73, 21)
         Me.btnRelMgr.TabIndex = 12
@@ -253,11 +254,21 @@ Partial Class frmMain
         Me.btnTest.Text = "db test"
         Me.btnTest.UseVisualStyleBackColor = True
         '
+        'btnPrefs
+        '
+        Me.btnPrefs.Location = New System.Drawing.Point(794, 41)
+        Me.btnPrefs.Name = "btnPrefs"
+        Me.btnPrefs.Size = New System.Drawing.Size(75, 23)
+        Me.btnPrefs.TabIndex = 19
+        Me.btnPrefs.Text = "Preferences"
+        Me.btnPrefs.UseVisualStyleBackColor = True
+        '
         'frmMain
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(881, 500)
+        Me.Controls.Add(Me.btnPrefs)
         Me.Controls.Add(Me.btnTest)
         Me.Controls.Add(Me.txtWayID)
         Me.Controls.Add(Me.btnAnalyseWay)
@@ -310,5 +321,5 @@ Partial Class frmMain
     Friend WithEvents btnAnalyseWay As System.Windows.Forms.Button
     Friend WithEvents txtWayID As System.Windows.Forms.TextBox
     Friend WithEvents btnTest As System.Windows.Forms.Button
-
+    Friend WithEvents btnPrefs As Button
 End Class

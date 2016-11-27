@@ -189,6 +189,12 @@
     <Compile Include="frmMatch.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="frmPreferences.Designer.vb">
+      <DependentUpon>frmPreferences.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmPreferences.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmRelMgr.Designer.vb">
       <DependentUpon>frmRelMgr.vb</DependentUpon>
     </Compile>
@@ -236,6 +242,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmMatch.resx">
       <DependentUpon>frmMatch.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmPreferences.resx">
+      <DependentUpon>frmPreferences.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmRelMgr.resx">
       <DependentUpon>frmRelMgr.vb</DependentUpon>

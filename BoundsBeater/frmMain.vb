@@ -45,6 +45,7 @@ Public Class frmMain
     End Sub
 
     Private Sub frmMain_Load(sender As Object, e As EventArgs) Handles Me.Load
+        InitSettings()
         lblStatus.Text = "Please load a file"
         btnReport.Enabled = False
     End Sub
@@ -336,5 +337,31 @@ Public Class frmMain
                 LoadTreeView(tv, tvn, xDB, xChild)
             End If
         Next
+    End Sub
+    Sub InitSettings()
+        Dim bChanged As Boolean = False
+        If My.Settings.MaxCacheAge < 1 Then
+            My.Settings.MaxCacheAge = 86400
+            bChanged = True
+        End If
+        If My.Settings.xapiAPI = "" Then
+            My.Settings.xapiAPI = "http://overpass-api.de/api/xapi"
+            bChanged = True
+        End If
+        If My.Settings.OSMCache = "" Then
+            My.Settings.OSMCache = "%APPDATA%\BoundsBeater\OSMCache.osm"
+            bChanged = True
+        End If
+        If My.Settings.BoundaryXML = "" Then
+            My.Settings.BoundaryXML = "%APPDATA%\BoundsBeater\UKBoundaries.xml"
+            bChanged = True
+        End If
+        If bChanged Then
+            My.Settings.Save()
+        End If
+    End Sub
+
+    Private Sub btnPrefs_Click(sender As Object, e As EventArgs) Handles btnPrefs.Click
+        frmPreferences.ShowDialog()
     End Sub
 End Class
