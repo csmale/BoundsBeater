@@ -2,10 +2,10 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="My" GeneratedClassName="MySettings" UseMySettingsClassName="true">
   <Profiles />
   <Settings>
-    <Setting Name="OSMBaseApiURL" Type="System.String" Scope="Application">
+    <Setting Name="OSMBaseApiURL" Type="System.String" Scope="User">
       <Value Profile="(Default)">http://api.openstreetmap.org/api/0.6/</Value>
     </Setting>
-    <Setting Name="OSMLibUserAgent" Type="System.String" Scope="Application">
+    <Setting Name="OSMLibUserAgent" Type="System.String" Scope="User">
       <Value Profile="(Default)">OSMLibrary/1.0; colin.smale@xs4all.nl</Value>
     </Setting>
     <Setting Name="OSMXapiBaseApiURL" Type="System.String" Scope="User">

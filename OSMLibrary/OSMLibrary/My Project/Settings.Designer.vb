@@ -54,22 +54,28 @@ Namespace My
             End Get
         End Property
         
-        <Global.System.Configuration.ApplicationScopedSettingAttribute(),  _
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.Configuration.DefaultSettingValueAttribute("http://api.openstreetmap.org/api/0.6/")>  _
-        Public ReadOnly Property OSMBaseApiURL() As String
+        Public Property OSMBaseApiURL() As String
             Get
                 Return CType(Me("OSMBaseApiURL"),String)
             End Get
+            Set
+                Me("OSMBaseApiURL") = value
+            End Set
         End Property
         
-        <Global.System.Configuration.ApplicationScopedSettingAttribute(),  _
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.Configuration.DefaultSettingValueAttribute("OSMLibrary/1.0; colin.smale@xs4all.nl")>  _
-        Public ReadOnly Property OSMLibUserAgent() As String
+        Public Property OSMLibUserAgent() As String
             Get
                 Return CType(Me("OSMLibUserAgent"),String)
             End Get
+            Set
+                Me("OSMLibUserAgent") = value
+            End Set
         End Property
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _

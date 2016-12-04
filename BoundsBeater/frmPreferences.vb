@@ -55,4 +55,10 @@ Public Class frmPreferences
             End If
         End With
     End Sub
+
+    Private Sub btnLibPrefs_Click(sender As Object, e As EventArgs) Handles btnLibPrefs.Click
+        With New OSMLibrary.frmLibPrefs
+            .ShowDialog()
+        End With
+    End Sub
 End Class
