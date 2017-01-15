@@ -984,8 +984,14 @@ Public Class frmAnalyze
         Dim tvn As TreeNode
         ' ensure the nodes are sorted by name
         Dim xList As New SortedList(Of String, BoundaryDB.BoundaryItem)
+        Dim sName As String
         For Each xChild In xItem.Children
-            xList.Add(xChild.Name, xChild)
+            sName = xChild.Name & xChild.TypeCode
+            If xList.ContainsKey(sName) Then
+                MsgBox($"Duplicate node name {sName}", MsgBoxStyle.Exclamation Or MsgBoxStyle.OkOnly)
+            Else
+                xList.Add(sName, xChild)
+            End If
         Next
         Dim xEntry As BoundaryDB.BoundaryItem
         tv.Sorted = False
