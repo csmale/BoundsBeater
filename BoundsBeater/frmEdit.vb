@@ -190,7 +190,7 @@ Public Class frmEdit
             .ParishType = CType(cbParishType.SelectedItem, GenericListItem(Of BoundaryDB.BoundaryItem.ParishTypes)).Value
             If .BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish AndAlso .ParishType = BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil Then
                 .CouncilName = Trim(cbGroup.Text)
-                .CouncilName2 = Trim(cbGroup.Text)
+                .CouncilName2 = ""
             Else
                 .CouncilName = Trim(txtCouncilName.Text)
                 .CouncilName2 = Trim(txtCouncilName2.Text)

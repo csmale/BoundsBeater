@@ -71,10 +71,11 @@
     <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>EA1F0DE9926AAF3446B02359FCF4035406BAEDDF</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>B3BBAF3DF02A0F98AE08A2F6088A1EFB3E2202F0</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>BoundsBeater_4_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>
+    </ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
