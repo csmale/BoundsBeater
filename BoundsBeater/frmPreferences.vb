@@ -7,6 +7,7 @@ Public Class frmPreferences
         My.Settings.OSMCache = txtOSMCacheFile.Text
         My.Settings.BoundaryXML = txtUKBoundsFile.Text
         My.Settings.xapiAPI = txtXapiBaseUrl.Text
+        My.Settings.NominatimURL = txtNominatimURL.Text
         My.Settings.Save()
         Me.DialogResult = System.Windows.Forms.DialogResult.OK
         Me.Close()
@@ -22,6 +23,7 @@ Public Class frmPreferences
         txtOSMCacheFile.Text = My.Settings.OSMCache
         txtUKBoundsFile.Text = My.Settings.BoundaryXML
         txtXapiBaseUrl.Text = My.Settings.xapiAPI
+        txtNominatimURL.Text = My.Settings.NominatimURL
     End Sub
 
     Private Sub btnBrowseOSMCacheFile_Click(sender As Object, e As EventArgs) Handles btnBrowseOSMCacheFile.Click

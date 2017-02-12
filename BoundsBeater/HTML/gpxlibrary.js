@@ -239,6 +239,12 @@ map.setZoom(13);
     var bounds = new L.LatLngBounds(southWest, northEast);
     map.fitBounds(bounds);
   }
+function gotoZoom(z) {
+    map.setZoom(z);
+  }
+function gotoPanZoom(lat,lon,z) {
+    map.setView(new L.LatLng(lat, lon), z);
+}
   function drawOutline(j) { // j.points is array of {arrays of {lat,lon}} in json format
     var pts = eval('(' + j + ')');
     var i;

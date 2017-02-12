@@ -15,7 +15,7 @@ Option Explicit On
 Namespace My
     
     <Global.System.Runtime.CompilerServices.CompilerGeneratedAttribute(),  _
-     Global.System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.0.0.0"),  _
+     Global.System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.0.1.0"),  _
      Global.System.ComponentModel.EditorBrowsableAttribute(Global.System.ComponentModel.EditorBrowsableState.Advanced)>  _
     Partial Friend NotInheritable Class MySettings
         Inherits Global.System.Configuration.ApplicationSettingsBase
@@ -128,13 +128,26 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("86400")>  _
+         Global.System.Configuration.DefaultSettingValueAttribute("300")>  _
         Public Property MaxCacheAge() As Integer
             Get
                 Return CType(Me("MaxCacheAge"),Integer)
             End Get
             Set
                 Me("MaxCacheAge") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("http://nominatim.openstreetmap.org/search/gb/{0}?format=xml&accept-language=en&fe"& _ 
+            "aturetype=city&viewbox={1},{2},{3},{4}&bounded=1")>  _
+        Public Property NominatimURL() As String
+            Get
+                Return CType(Me("NominatimURL"),String)
+            End Get
+            Set
+                Me("NominatimURL") = value
             End Set
         End Property
     End Class

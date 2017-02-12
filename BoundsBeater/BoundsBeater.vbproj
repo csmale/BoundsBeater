@@ -171,6 +171,12 @@
     <Compile Include="frmChooseGSS.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="frmChoosePlace.Designer.vb">
+      <DependentUpon>frmChoosePlace.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmChoosePlace.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmEdit.Designer.vb">
       <DependentUpon>frmEdit.vb</DependentUpon>
     </Compile>
@@ -234,6 +240,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmChooseGSS.resx">
       <DependentUpon>frmChooseGSS.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmChoosePlace.resx">
+      <DependentUpon>frmChoosePlace.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmEdit.resx">
       <DependentUpon>frmEdit.vb</DependentUpon>

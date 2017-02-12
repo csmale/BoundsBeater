@@ -21,7 +21,10 @@
       <Value Profile="(Default)">http://overpass-api.de/api/xapi</Value>
     </Setting>
     <Setting Name="MaxCacheAge" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">86400</Value>
+      <Value Profile="(Default)">300</Value>
+    </Setting>
+    <Setting Name="NominatimURL" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://nominatim.openstreetmap.org/search/gb/{0}?format=xml&amp;accept-language=en&amp;featuretype=city&amp;viewbox={1},{2},{3},{4}&amp;bounded=1</Value>
     </Setting>
   </Settings>
 </SettingsFile>

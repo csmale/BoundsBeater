@@ -430,6 +430,25 @@ Public Class frmAnalyze
             wbMap.Document.InvokeScript("drawJSON", xArgs)
         End If
     End Sub
+    Private Sub GotoLatLong(Lat As Double, Lon As Double)
+        Dim xArgs(2) As Object
+        xArgs(0) = Lat
+        xArgs(1) = Lon
+        wbMap.Document.InvokeScript("gotoLatLon", xArgs)
+    End Sub
+    Private Sub GotoZoom(Zoom As Integer)
+        Dim xArgs(1) As Object
+        xArgs(0) = Zoom
+        wbMap.Document.InvokeScript("gotoZoom", xArgs)
+    End Sub
+    Private Sub GotoPanZoom(Lat As Double, Lon As Double, Zoom As Integer)
+        Dim xArgs(3) As Object
+        xArgs(0) = Lat
+        xArgs(1) = Lon
+        xArgs(2) = Zoom
+        wbMap.Document.InvokeScript("gotoPanZoom", xArgs)
+    End Sub
+
     Private Sub tbpMap_Enter(sender As Object, e As EventArgs) Handles tbpMap.Enter
         If Not bMapInitDone Then
             wbMap.Navigate(System.IO.Path.GetDirectoryName(Application.ExecutablePath) & "\HTML\index.htm")
@@ -1173,6 +1192,71 @@ Public Class frmAnalyze
             Return
         End If
     End Sub
+
+    ''' <summary>
+    ''' Search menu item - uses Nominatim to search for the selected place, and centres the map on that place
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    Private Sub tsmiSearch_Click(sender As Object, e As EventArgs) Handles tsmiSearch.Click
+        If Not bMapInitDone Then Exit Sub
+        Dim x As TreeNode = tvList.SelectedNode
+        If x Is Nothing Then Exit Sub
+        Dim p As BoundaryDB.BoundaryItem = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        If p Is Nothing Then Exit Sub
+        Dim bb As New BBox
+        If Not GetMapBBox(bb) Then Exit Sub
+        Dim dTmp As Double
+        dTmp = (bb.MaxLon - bb.MinLon) / 2
+        bb.MaxLon += dTmp
+        If bb.MaxLon > 180.0 Then bb.MaxLon -= 180.0
+        If bb.MaxLon < -180.0 Then bb.MaxLon += 180.0
+        bb.MinLon -= dTmp
+        If bb.MinLon > 180.0 Then bb.MinLon -= 180.0
+        If bb.MinLon < -180.0 Then bb.MinLon += 180.0
+        dTmp = (bb.MaxLat - bb.MinLat) / 2
+        bb.MaxLat += dTmp
+        If bb.MaxLat > 90.0 Then bb.MaxLat = 90.0
+        If bb.MaxLat < -90.0 Then bb.MaxLat = -90.0
+        bb.MinLat -= dTmp
+        If bb.MinLat > 90.0 Then bb.MinLat = 90.0
+        If bb.MinLat < -90.0 Then bb.MinLat = -90.0
+        Dim sURL As String = String.Format(My.Settings.NominatimURL,
+                                           System.Net.WebUtility.HtmlEncode(p.Name),
+                                           CStr(bb.MinLon), CStr(bb.MaxLat), CStr(bb.MaxLon), CStr(bb.MinLat))
+        Dim sResult As String
+
+        'MsgBox(sURL)
+
+        Dim req As New System.Net.WebClient
+        req.Encoding = System.Text.Encoding.UTF8
+        sResult = req.DownloadString(sURL)
+
+        'MsgBox(sResult)
+
+        Dim xDoc As New System.Xml.XmlDocument()
+        xDoc.LoadXml(sResult)
+        Dim xPlace As System.Xml.XmlNode = Nothing
+        Dim xPlaces As System.Xml.XmlNodeList = xDoc.SelectNodes("/searchresults/place")
+        If xPlaces.Count = 0 Then
+            MsgBox("Nominatim returned no results.")
+            Exit Sub
+        ElseIf xPlaces.Count > 1 Then
+            Dim f As New frmChoosePlace
+            f.xDoc = xDoc
+            If f.ShowDialog() = DialogResult.OK Then
+                xPlace = f.SelectedPlace
+            End If
+        Else
+            xPlace = xPlaces(0)
+        End If
+        If xPlace Is Nothing Then Exit Sub
+        Dim dLat As Double, dLon As Double
+        dLon = Double.Parse(xPlace.SelectSingleNode("@lon").InnerText)
+        dLat = Double.Parse(xPlace.SelectSingleNode("@lat").InnerText)
+        tbpMap.Select()
+        GotoPanZoom(dLat, dLon, 15)
+    End Sub
 End Class
 Public Class ListViewComparer
     Implements IComparer
@@ -1180,8 +1264,7 @@ Public Class ListViewComparer
     Private m_ColumnNumber As Integer
     Private m_SortOrder As SortOrder
 
-    Public Sub New(ByVal column_number As Integer, ByVal _
-        sort_order As SortOrder)
+    Public Sub New(ByVal column_number As Integer, ByVal sort_order As SortOrder)
         m_ColumnNumber = column_number
         m_SortOrder = sort_order
     End Sub

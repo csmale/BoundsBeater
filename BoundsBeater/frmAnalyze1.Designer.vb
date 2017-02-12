@@ -65,6 +65,7 @@ Partial Class frmAnalyze
         Me.btnOSM = New System.Windows.Forms.Button()
         Me.btnClear = New System.Windows.Forms.Button()
         Me.sfdReports = New System.Windows.Forms.SaveFileDialog()
+        Me.tsmiSearch = New System.Windows.Forms.ToolStripMenuItem()
         Me.tabDetail.SuspendLayout()
         Me.tbpChildren.SuspendLayout()
         Me.tbpMap.SuspendLayout()
@@ -269,9 +270,9 @@ Partial Class frmAnalyze
         '
         'cmsNode
         '
-        Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiChildOverviewReport, Me.tsmiDeepChildReport, Me.tsmiAddChild, Me.tsmiReview})
+        Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiSearch, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiChildOverviewReport, Me.tsmiDeepChildReport, Me.tsmiAddChild, Me.tsmiReview})
         Me.cmsNode.Name = "ContextMenuStrip1"
-        Me.cmsNode.Size = New System.Drawing.Size(193, 202)
+        Me.cmsNode.Size = New System.Drawing.Size(193, 246)
         '
         'tsmiFlush
         '
@@ -379,6 +380,12 @@ Partial Class frmAnalyze
         Me.btnClear.Text = "Clear"
         Me.btnClear.UseVisualStyleBackColor = True
         '
+        'tsmiSearch
+        '
+        Me.tsmiSearch.Name = "tsmiSearch"
+        Me.tsmiSearch.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiSearch.Text = "Search"
+        '
         'frmAnalyze
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -454,4 +461,5 @@ Partial Class frmAnalyze
     Friend WithEvents tsmiChildOverviewReport As ToolStripMenuItem
     Friend WithEvents tsmiDeepChildReport As ToolStripMenuItem
     Friend WithEvents sfdReports As SaveFileDialog
+    Friend WithEvents tsmiSearch As ToolStripMenuItem
 End Class
