@@ -50,6 +50,7 @@ Partial Class frmEdit
         Me.Label10 = New System.Windows.Forms.Label()
         Me.btnSelRelation = New System.Windows.Forms.Button()
         Me.txtRelID = New System.Windows.Forms.TextBox()
+        Me.btnAutoName = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'btnOK
@@ -162,14 +163,14 @@ Partial Class frmEdit
         '
         Me.txtCouncilName.Location = New System.Drawing.Point(136, 126)
         Me.txtCouncilName.Name = "txtCouncilName"
-        Me.txtCouncilName.Size = New System.Drawing.Size(290, 20)
+        Me.txtCouncilName.Size = New System.Drawing.Size(266, 20)
         Me.txtCouncilName.TabIndex = 13
         '
         'txtCouncilName2
         '
         Me.txtCouncilName2.Location = New System.Drawing.Point(136, 148)
         Me.txtCouncilName2.Name = "txtCouncilName2"
-        Me.txtCouncilName2.Size = New System.Drawing.Size(290, 20)
+        Me.txtCouncilName2.Size = New System.Drawing.Size(266, 20)
         Me.txtCouncilName2.TabIndex = 14
         '
         'cbStyle
@@ -300,11 +301,21 @@ Partial Class frmEdit
         Me.txtRelID.Size = New System.Drawing.Size(248, 20)
         Me.txtRelID.TabIndex = 29
         '
+        'btnAutoName
+        '
+        Me.btnAutoName.Location = New System.Drawing.Point(408, 134)
+        Me.btnAutoName.Name = "btnAutoName"
+        Me.btnAutoName.Size = New System.Drawing.Size(18, 23)
+        Me.btnAutoName.TabIndex = 30
+        Me.btnAutoName.Text = "*"
+        Me.btnAutoName.UseVisualStyleBackColor = True
+        '
         'frmEdit
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(433, 419)
+        Me.Controls.Add(Me.btnAutoName)
         Me.Controls.Add(Me.txtRelID)
         Me.Controls.Add(Me.btnSelRelation)
         Me.Controls.Add(Me.Label10)
@@ -368,4 +379,5 @@ Partial Class frmEdit
     Friend WithEvents Label10 As Label
     Friend WithEvents btnSelRelation As Button
     Friend WithEvents txtRelID As TextBox
+    Friend WithEvents btnAutoName As Button
 End Class

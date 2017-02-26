@@ -1086,10 +1086,14 @@ Public Class frmAnalyze
             End If
         Next
         If rTemp Is Nothing Then Exit Sub
-        rTemp.Tags.Add("admin_level", New OSMTag("admin_level", "10"))
-        rTemp.Tags.Add("parish_type", New OSMTag("parish_type", "parish_group")) ' special value to trigger javascript
-        rTemp.Tags.Add("ref:gss", New OSMTag("ref:gss", xGroup.ONSCode))
-        rTemp.Tags.Add("name", New OSMTag("name", xGroup.Name))
+        Try
+            rTemp.Tags.Add("admin_level", New OSMTag("admin_level", "10"))
+            rTemp.Tags.Add("parish_type", New OSMTag("parish_type", "parish_group")) ' special value to trigger javascript
+            rTemp.Tags.Add("ref:gss", New OSMTag("ref:gss", xGroup.ONSCode))
+            rTemp.Tags.Add("name", New OSMTag("name", xGroup.Name))
+        Catch
+        End Try
+
         ' resolve into rings
         xResolver = New OSMResolver(rTemp)
         ' draw boundary of combined area if any

@@ -1,14 +1,16 @@
 ﻿Imports OSMLibrary
+Imports BoundsBeater.BoundaryDB
+
 
 Public Class frmEdit
-    Public xItem As BoundaryDB.BoundaryItem
+    Public xItem As BoundaryItem
     Public xDB As BoundaryDB
     Public sOriginalGSS As String
     Private iOriginalRel As Long
     Public Retriever As OSMRetriever
     Public RelChangeAllowed As Boolean = True
     Private bIgnoreKeyPress As Boolean = False
-    Private _groups As New List(Of BoundaryDB.BoundaryItem)
+    Private _groups As New List(Of BoundaryItem)
 
     Private Class GenericListItem(Of T)
         Private mText As String
@@ -40,47 +42,47 @@ Public Class frmEdit
         cbGroup.Top = txtCouncilName.Top
         With cbParishType.Items
             .Clear()
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.ParishTypes)("Parish Council", BoundaryDB.BoundaryItem.ParishTypes.PT_ParishCouncil))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.ParishTypes)("Joint Parish Council", BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.ParishTypes)("Parish Meeting", BoundaryDB.BoundaryItem.ParishTypes.PT_ParishMeeting))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.ParishTypes)("N/A", BoundaryDB.BoundaryItem.ParishTypes.PT_NA))
+            .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Parish Council", BoundaryItem.ParishTypes.PT_ParishCouncil))
+            .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Joint Parish Council", BoundaryItem.ParishTypes.PT_JointParishCouncil))
+            .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Parish Meeting", BoundaryItem.ParishTypes.PT_ParishMeeting))
+            .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("N/A", BoundaryItem.ParishTypes.PT_NA))
         End With
         With cbType.Items
             .Clear()
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Country", BoundaryDB.BoundaryItem.BoundaryTypes.BT_Country))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Nation", BoundaryDB.BoundaryItem.BoundaryTypes.BT_Nation))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Region", BoundaryDB.BoundaryItem.BoundaryTypes.BT_Region))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Ceremonial Country", BoundaryDB.BoundaryItem.BoundaryTypes.BT_CeremonialCounty))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Metropolitan County", BoundaryDB.BoundaryItem.BoundaryTypes.BT_MetroCounty))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Metropolitan District", BoundaryDB.BoundaryItem.BoundaryTypes.BT_MetroDistrict))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Non-Metropolitan District", BoundaryDB.BoundaryItem.BoundaryTypes.BT_NonMetroDistrict))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Non-Metropolitan Country", BoundaryDB.BoundaryItem.BoundaryTypes.BT_NonMetroCounty))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Civil Parish", BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Community", BoundaryDB.BoundaryItem.BoundaryTypes.BT_Community))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Unitary Authority", BoundaryDB.BoundaryItem.BoundaryTypes.BT_Unitary))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Sui Generis", BoundaryDB.BoundaryItem.BoundaryTypes.BT_SuiGeneris))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Liberty", BoundaryDB.BoundaryItem.BoundaryTypes.BT_Liberty))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("London Borough", BoundaryDB.BoundaryItem.BoundaryTypes.BT_LondonBorough))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Preserved County", BoundaryDB.BoundaryItem.BoundaryTypes.BT_PreservedCounty))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Prinicipal Area", BoundaryDB.BoundaryItem.BoundaryTypes.BT_PrincipalArea))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Scottish Council", BoundaryDB.BoundaryItem.BoundaryTypes.BT_ScotCouncil))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Northern Ireland District", BoundaryDB.BoundaryItem.BoundaryTypes.BT_NIreDistrict))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)("Parish Group", BoundaryDB.BoundaryItem.BoundaryTypes.BT_ParishGroup))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Country", BoundaryItem.BoundaryTypes.BT_Country))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Nation", BoundaryItem.BoundaryTypes.BT_Nation))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Region", BoundaryItem.BoundaryTypes.BT_Region))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Ceremonial Country", BoundaryItem.BoundaryTypes.BT_CeremonialCounty))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Metropolitan County", BoundaryItem.BoundaryTypes.BT_MetroCounty))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Metropolitan District", BoundaryItem.BoundaryTypes.BT_MetroDistrict))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Non-Metropolitan District", BoundaryItem.BoundaryTypes.BT_NonMetroDistrict))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Non-Metropolitan Country", BoundaryItem.BoundaryTypes.BT_NonMetroCounty))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Civil Parish", BoundaryItem.BoundaryTypes.BT_CivilParish))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Community", BoundaryItem.BoundaryTypes.BT_Community))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Unitary Authority", BoundaryItem.BoundaryTypes.BT_Unitary))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Sui Generis", BoundaryItem.BoundaryTypes.BT_SuiGeneris))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Liberty", BoundaryItem.BoundaryTypes.BT_Liberty))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("London Borough", BoundaryItem.BoundaryTypes.BT_LondonBorough))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Preserved County", BoundaryItem.BoundaryTypes.BT_PreservedCounty))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Prinicipal Area", BoundaryItem.BoundaryTypes.BT_PrincipalArea))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Scottish Council", BoundaryItem.BoundaryTypes.BT_ScotCouncil))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Northern Ireland District", BoundaryItem.BoundaryTypes.BT_NIreDistrict))
+            .Add(New GenericListItem(Of BoundaryItem.BoundaryTypes)("Parish Group", BoundaryItem.BoundaryTypes.BT_ParishGroup))
         End With
         With cbStyle.Items
             .Clear()
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.CouncilStyles)("(default)", BoundaryDB.BoundaryItem.CouncilStyles.CS_Default))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.CouncilStyles)("Borough", BoundaryDB.BoundaryItem.CouncilStyles.CS_Borough))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.CouncilStyles)("Town", BoundaryDB.BoundaryItem.CouncilStyles.CS_Town))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.CouncilStyles)("City", BoundaryDB.BoundaryItem.CouncilStyles.CS_City))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.CouncilStyles)("City and County", BoundaryDB.BoundaryItem.CouncilStyles.CS_CityAndCounty))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.CouncilStyles)("City and District", BoundaryDB.BoundaryItem.CouncilStyles.CS_CityAndDistrict))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.CouncilStyles)("County", BoundaryDB.BoundaryItem.CouncilStyles.CS_County))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.CouncilStyles)("Community", BoundaryDB.BoundaryItem.CouncilStyles.CS_Community))
-            .Add(New GenericListItem(Of BoundaryDB.BoundaryItem.CouncilStyles)("Village", BoundaryDB.BoundaryItem.CouncilStyles.CS_Village))
+            .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("(default)", BoundaryItem.CouncilStyles.CS_Default))
+            .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("Borough", BoundaryItem.CouncilStyles.CS_Borough))
+            .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("Town", BoundaryItem.CouncilStyles.CS_Town))
+            .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("City", BoundaryItem.CouncilStyles.CS_City))
+            .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("City and County", BoundaryItem.CouncilStyles.CS_CityAndCounty))
+            .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("City and District", BoundaryItem.CouncilStyles.CS_CityAndDistrict))
+            .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("County", BoundaryItem.CouncilStyles.CS_County))
+            .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("Community", BoundaryItem.CouncilStyles.CS_Community))
+            .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("Village", BoundaryItem.CouncilStyles.CS_Village))
         End With
         Dim bGotGroup As Boolean = False
-        Dim xSelected As BoundaryDB.BoundaryItem = Nothing
+        Dim xSelected As BoundaryItem = Nothing
         For Each x In xDB.Items.Values
             If x.Parent Is xItem.Parent Then
                 If x.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_ParishGroup Then
@@ -92,9 +94,9 @@ Public Class frmEdit
         If xSelected Is Nothing _
             AndAlso xItem.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish _
             AndAlso xItem.ParishType = BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil Then
-            Dim x As New BoundaryDB.BoundaryItem(xDB)
+            Dim x As New BoundaryItem(xDB)
             x.Name = xItem.CouncilName
-            x.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_ParishGroup
+            x.BoundaryType = BoundaryItem.BoundaryTypes.BT_ParishGroup
             x.ONSCode = "dummy"
             xSelected = x
             _groups.Add(x)
@@ -112,19 +114,19 @@ Public Class frmEdit
             txtCouncilName.Text = .CouncilName
             txtCouncilName2.Text = .CouncilName2
             For Each x In cbParishType.Items
-                If CType(x, GenericListItem(Of BoundaryDB.BoundaryItem.ParishTypes)).Value = .ParishType Then
+                If CType(x, GenericListItem(Of BoundaryItem.ParishTypes)).Value = .ParishType Then
                     cbParishType.SelectedItem = x
                     Exit For
                 End If
             Next
             For Each x In cbType.Items
-                If CType(x, GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)).Value = .BoundaryType Then
+                If CType(x, GenericListItem(Of BoundaryItem.BoundaryTypes)).Value = .BoundaryType Then
                     cbType.SelectedItem = x
                     Exit For
                 End If
             Next
             For Each x In cbStyle.Items
-                If CType(x, GenericListItem(Of BoundaryDB.BoundaryItem.CouncilStyles)).Value = .CouncilStyle Then
+                If CType(x, GenericListItem(Of BoundaryItem.CouncilStyles)).Value = .CouncilStyle Then
                     cbStyle.SelectedItem = x
                     Exit For
                 End If
@@ -139,8 +141,8 @@ Public Class frmEdit
 
     Private Sub SwitchNameFields()
         If cbType.SelectedItem Is Nothing Or cbParishType.SelectedItem Is Nothing Then Return
-        Dim bt As BoundaryDB.BoundaryItem.BoundaryTypes = CType(cbType.SelectedItem, GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)).Value
-        Dim pt As BoundaryDB.BoundaryItem.ParishTypes = CType(cbParishType.SelectedItem, GenericListItem(Of BoundaryDB.BoundaryItem.ParishTypes)).Value
+        Dim bt As BoundaryItem.BoundaryTypes = CType(cbType.SelectedItem, GenericListItem(Of BoundaryItem.BoundaryTypes)).Value
+        Dim pt As BoundaryItem.ParishTypes = CType(cbParishType.SelectedItem, GenericListItem(Of BoundaryItem.ParishTypes)).Value
         If bt = BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish And pt = BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil Then
             cbGroup.Visible = True
             txtCouncilName.Visible = False
@@ -186,8 +188,8 @@ Public Class frmEdit
             .Name2 = Trim(txtName2.Text)
             If Long.TryParse(txtRelID.Text, lTmp) Then .OSMRelation = lTmp
             .ONSCode = Trim(txtGSS.Text)
-            .BoundaryType = CType(cbType.SelectedItem, GenericListItem(Of BoundaryDB.BoundaryItem.BoundaryTypes)).Value
-            .ParishType = CType(cbParishType.SelectedItem, GenericListItem(Of BoundaryDB.BoundaryItem.ParishTypes)).Value
+            .BoundaryType = CType(cbType.SelectedItem, GenericListItem(Of BoundaryItem.BoundaryTypes)).Value
+            .ParishType = CType(cbParishType.SelectedItem, GenericListItem(Of BoundaryItem.ParishTypes)).Value
             If .BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish AndAlso .ParishType = BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil Then
                 .CouncilName = Trim(cbGroup.Text)
                 .CouncilName2 = ""
@@ -195,7 +197,7 @@ Public Class frmEdit
                 .CouncilName = Trim(txtCouncilName.Text)
                 .CouncilName2 = Trim(txtCouncilName2.Text)
             End If
-            .CouncilStyle = CType(cbStyle.SelectedItem, GenericListItem(Of BoundaryDB.BoundaryItem.CouncilStyles)).Value
+            .CouncilStyle = CType(cbStyle.SelectedItem, GenericListItem(Of BoundaryItem.CouncilStyles)).Value
             .IsBorough = chkBorough.Checked
             .IsRoyal = chkRoyal.Checked
             .IsCity = chkCity.Checked
@@ -288,6 +290,84 @@ Public Class frmEdit
     Private Sub txtRelID_KeyDown(sender As Object, e As KeyEventArgs) Handles txtRelID.KeyDown
         If e.Control AndAlso (e.KeyCode = Keys.V Or e.KeyCode = Keys.C Or e.KeyCode = Keys.X) Then
             bIgnoreKeyPress = True
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' AutoName button generates a council name based on the type of council
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    Private Sub btnAutoName_Click(sender As Object, e As EventArgs) Handles btnAutoName.Click
+        Dim x = cbType.SelectedItem
+        If IsNothing(x) Then Exit Sub
+        Dim boundaryType As BoundaryItem.BoundaryTypes = CType(x, GenericListItem(Of BoundaryItem.BoundaryTypes)).Value
+        x = cbStyle.SelectedItem
+        If IsNothing(x) Then Exit Sub
+        Dim councilStyle As BoundaryItem.CouncilStyles = CType(x, GenericListItem(Of BoundaryItem.CouncilStyles)).Value
+        Dim parishType As BoundaryItem.ParishTypes
+        If boundaryType = BoundaryItem.BoundaryTypes.BT_CivilParish Then
+            x = cbParishType.SelectedItem
+            If IsNothing(x) Then Exit Sub
+            parishType = CType(x, GenericListItem(Of BoundaryItem.ParishTypes)).Value
+        Else
+            parishType = BoundaryItem.ParishTypes.PT_NA
+        End If
+        Dim sSuffix As String = ""
+        Select Case boundaryType
+            Case BoundaryItem.BoundaryTypes.BT_CivilParish
+                If parishType = BoundaryItem.ParishTypes.PT_JointParishCouncil Then
+                    sSuffix = ""
+                ElseIf chkCity.Checked Then
+                    sSuffix = "City Council"
+                Else
+                    Select Case councilStyle
+                        Case BoundaryItem.CouncilStyles.CS_Town
+                            sSuffix = "Town Council"
+                        Case BoundaryItem.CouncilStyles.CS_Neighbourhood
+                            sSuffix = "Neighbourhood Council"
+                        Case BoundaryItem.CouncilStyles.CS_Village
+                            sSuffix = "Village Council"
+                        Case BoundaryItem.CouncilStyles.CS_Community
+                            sSuffix = "Community Council"
+                        Case BoundaryItem.CouncilStyles.CS_City
+                            sSuffix = "City Council"
+                        Case Else
+                            Select Case parishType
+                                Case BoundaryItem.ParishTypes.PT_ParishCouncil
+                                    sSuffix = "Parish Council"
+                                Case BoundaryItem.ParishTypes.PT_ParishMeeting
+                                    sSuffix = "Parish Meeting"
+                            End Select
+                    End Select
+                End If
+            Case BoundaryItem.BoundaryTypes.BT_ParishGroup
+                sSuffix = "Parish Council"
+            Case BoundaryItem.BoundaryTypes.BT_MetroDistrict, BoundaryItem.BoundaryTypes.BT_NonMetroDistrict
+                If chkCity.Checked Then
+                    sSuffix = "City Council"
+                ElseIf chkBorough.Checked Then
+                    sSuffix = "Borough Council"
+                Else
+                    sSuffix = "District Council"
+                End If
+            Case BoundaryItem.BoundaryTypes.BT_Unitary
+                If chkCity.Checked Then
+                    sSuffix = "City Council"
+                ElseIf chkBorough.Checked Then
+                    sSuffix = "Borough Council"
+                Else
+                    If councilStyle = BoundaryItem.CouncilStyles.CS_County Then
+                        sSuffix = "County Council"
+                    Else
+                        sSuffix = "Council"
+                    End If
+                End If
+            Case BoundaryItem.BoundaryTypes.BT_MetroCounty, BoundaryItem.BoundaryTypes.BT_NonMetroCounty
+                sSuffix = "County Council"
+        End Select
+        If Len(sSuffix) > 0 Then
+            txtCouncilName.Text = txtName.Text & " " & sSuffix
         End If
     End Sub
 End Class
