@@ -86,7 +86,7 @@ Public Class frmAnalyze
             txtReport.Text = "Unable to retrieve relation #" & iRel
             Exit Sub
         End If
-        sTmp = "Loaded " & xRel.Name() & ", OSM Relation " & iRel.ToString & ", version " & xRel.Version.ToString() & " of " & xRel.Timestamp.ToString()
+        sTmp = "Loaded " & xRel.Name() & ", OSM Relation " & iRel.ToString & ", version " & xRel.Version.ToString() & " of " & xRel.Timestamp.ToString() & " by " & xRel.User
         tsStatus.Text = sTmp
 
         Dim bHasWays As Boolean = False
@@ -837,7 +837,8 @@ Public Class frmAnalyze
         If xParishItem.BoundaryType <> BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish Then
             Return
         End If
-        If xParishItem.ParishType <> BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil Then
+        If xParishItem.ParishType <> BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil AndAlso
+            xParishItem.ParishType <> BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishMeeting Then
             Return
         End If
         xParishItem.CouncilName = xGroupItem.Name
@@ -1069,7 +1070,8 @@ Public Class frmAnalyze
         For Each d In xDB.Items.Values
             If d.Parent Is xItem Then
                 If d.OSMRelation > 0 Then
-                    If d.ParishType = BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil Then
+                    If d.ParishType = BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil OrElse
+                        d.ParishType = BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishMeeting Then
                         If d.CouncilName = sName Then
                             xRel = DirectCast(xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, d.OSMRelation), OSMRelation)
                             If xRel Is Nothing Then

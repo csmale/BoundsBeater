@@ -44,6 +44,7 @@ Public Class frmEdit
             .Clear()
             .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Parish Council", BoundaryItem.ParishTypes.PT_ParishCouncil))
             .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Joint Parish Council", BoundaryItem.ParishTypes.PT_JointParishCouncil))
+            .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Joint Parish Meeting", BoundaryItem.ParishTypes.PT_JointParishMeeting))
             .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Parish Meeting", BoundaryItem.ParishTypes.PT_ParishMeeting))
             .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("N/A", BoundaryItem.ParishTypes.PT_NA))
         End With
@@ -85,15 +86,15 @@ Public Class frmEdit
         Dim xSelected As BoundaryItem = Nothing
         For Each x In xDB.Items.Values
             If x.Parent Is xItem.Parent Then
-                If x.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_ParishGroup Then
+                If x.BoundaryType = BoundaryItem.BoundaryTypes.BT_ParishGroup Then
                     _groups.Add(x)
                     If x.Name = xItem.CouncilName Then xSelected = x
                 End If
             End If
         Next
         If xSelected Is Nothing _
-            AndAlso xItem.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish _
-            AndAlso xItem.ParishType = BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil Then
+            AndAlso xItem.BoundaryType = BoundaryItem.BoundaryTypes.BT_CivilParish _
+            AndAlso (xItem.ParishType = BoundaryItem.ParishTypes.PT_JointParishCouncil OrElse xItem.ParishType = BoundaryItem.ParishTypes.PT_JointParishMeeting) Then
             Dim x As New BoundaryItem(xDB)
             x.Name = xItem.CouncilName
             x.BoundaryType = BoundaryItem.BoundaryTypes.BT_ParishGroup
@@ -143,7 +144,7 @@ Public Class frmEdit
         If cbType.SelectedItem Is Nothing Or cbParishType.SelectedItem Is Nothing Then Return
         Dim bt As BoundaryItem.BoundaryTypes = CType(cbType.SelectedItem, GenericListItem(Of BoundaryItem.BoundaryTypes)).Value
         Dim pt As BoundaryItem.ParishTypes = CType(cbParishType.SelectedItem, GenericListItem(Of BoundaryItem.ParishTypes)).Value
-        If bt = BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish And pt = BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil Then
+        If bt = BoundaryItem.BoundaryTypes.BT_CivilParish AndAlso (pt = BoundaryItem.ParishTypes.PT_JointParishCouncil OrElse pt = BoundaryItem.ParishTypes.PT_JointParishMeeting) Then
             cbGroup.Visible = True
             txtCouncilName.Visible = False
             btnNewGroup.Visible = True
@@ -190,7 +191,8 @@ Public Class frmEdit
             .ONSCode = Trim(txtGSS.Text)
             .BoundaryType = CType(cbType.SelectedItem, GenericListItem(Of BoundaryItem.BoundaryTypes)).Value
             .ParishType = CType(cbParishType.SelectedItem, GenericListItem(Of BoundaryItem.ParishTypes)).Value
-            If .BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish AndAlso .ParishType = BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil Then
+            If .BoundaryType = BoundaryItem.BoundaryTypes.BT_CivilParish AndAlso
+                    (.ParishType = BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil OrElse .ParishType = BoundaryItem.ParishTypes.PT_JointParishMeeting) Then
                 .CouncilName = Trim(cbGroup.Text)
                 .CouncilName2 = ""
             Else
@@ -314,9 +316,10 @@ Public Class frmEdit
             parishType = BoundaryItem.ParishTypes.PT_NA
         End If
         Dim sSuffix As String = ""
+        Dim sSuffix2 As String = ""
         Select Case boundaryType
             Case BoundaryItem.BoundaryTypes.BT_CivilParish
-                If parishType = BoundaryItem.ParishTypes.PT_JointParishCouncil Then
+                If parishType = BoundaryItem.ParishTypes.PT_JointParishCouncil OrElse parishType = BoundaryItem.ParishTypes.PT_JointParishMeeting Then
                     sSuffix = ""
                 ElseIf chkCity.Checked Then
                     sSuffix = "City Council"
@@ -365,9 +368,39 @@ Public Class frmEdit
                 End If
             Case BoundaryItem.BoundaryTypes.BT_MetroCounty, BoundaryItem.BoundaryTypes.BT_NonMetroCounty
                 sSuffix = "County Council"
+            Case BoundaryItem.BoundaryTypes.BT_PrincipalArea
+                If chkCity.Checked Then
+                    sSuffix = "City Council"
+                    sSuffix2 = "Cyngol Dinas"
+                ElseIf chkBorough.Checked Then
+                    sSuffix = "County Borough Council"
+                    sSuffix2 = "Cyngor Bwrdeisdref Sirol"
+                Else
+                    sSuffix = "County Council"
+                    If txtName2.Text.Substring(0, 4) = "Sir " Then
+                        sSuffix2 = "Cyngor"
+                    Else
+                        sSuffix2 = "Cyngor Sir"
+                    End If
+                End If
+            Case BoundaryItem.BoundaryTypes.BT_Community
+                Select Case councilStyle
+                    Case BoundaryItem.CouncilStyles.CS_Town
+                        sSuffix = "Town Council"
+                        sSuffix2 = "Cyngor Tref"
+                    Case BoundaryItem.CouncilStyles.CS_City
+                        sSuffix = "City Council"
+                        sSuffix2 = "Cyngor Dinas"
+                    Case Else
+                        sSuffix = "Community Council"
+                        sSuffix2 = "Cyngor Cymuned"
+                End Select
         End Select
         If Len(sSuffix) > 0 Then
             txtCouncilName.Text = txtName.Text & " " & sSuffix
+        End If
+        If Len(sSuffix2) > 0 AndAlso Len(txtName2.Text) > 0 Then
+            txtCouncilName2.Text = sSuffix2 & " " & txtName2.Text
         End If
     End Sub
 End Class

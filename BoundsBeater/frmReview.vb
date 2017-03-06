@@ -97,6 +97,8 @@ Public Class frmReview
                         tagsBDB("parish_type") = "parish_meeting"
                     Case BoundaryItem.ParishTypes.PT_JointParishCouncil
                         tagsBDB("parish_type") = "joint_parish_council"
+                    Case BoundaryItem.ParishTypes.PT_JointParishMeeting
+                        tagsBDB("parish_type") = "joint_parish_meeting"
                 End Select
             Case BoundaryItem.BoundaryTypes.BT_CeremonialCounty
                 tagsBDB("boundary") = "ceremonial"

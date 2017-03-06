@@ -278,6 +278,7 @@ Public Class BoundaryDB
             PT_ParishCouncil
             PT_ParishMeeting
             PT_JointParishCouncil
+            PT_JointParishMeeting
             PT_LandsCommon
             PT_NA
         End Enum
@@ -639,6 +640,7 @@ Public Class BoundaryDB
                 Case ParishTypes.PT_ParishCouncil : sTmp = "parish_council"
                 Case ParishTypes.PT_ParishMeeting : sTmp = "parish_meeting"
                 Case ParishTypes.PT_JointParishCouncil : sTmp = "joint_parish_council"
+                Case ParishTypes.PT_JointParishMeeting : sTmp = "joint_parish_meeting"
                 Case ParishTypes.PT_LandsCommon : sTmp = "lands_common"
                 Case ParishTypes.PT_NA : sTmp = ""
                 Case Else
@@ -655,6 +657,8 @@ Public Class BoundaryDB
                     xRet = ParishTypes.PT_ParishMeeting
                 Case "joint_parish_council"
                     xRet = ParishTypes.PT_JointParishCouncil
+                Case "joint_parish_meeting"
+                    xRet = ParishTypes.PT_JointParishMeeting
                 Case "lands_common"
                     xRet = ParishTypes.PT_LandsCommon
                 Case ""
