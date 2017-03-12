@@ -9,6 +9,7 @@ Imports System.Text
 Public Class frmAnalyze
     Private m_SortingColumn As ColumnHeader
 
+    Dim loading As Boolean = True
     Dim tmpDoc As New OSMDoc
     Dim xRetriever As New OSMRetriever
     Dim bMapInitDone As Boolean = False
@@ -402,7 +403,7 @@ Public Class frmAnalyze
         With lvi
             .Text = p.Name
             If .SubItems.Count = 1 Then
-                For i = 1 To lv.Columns.Count - 1
+                For i = 1 To lvi.ListView.Columns.Count - 1
                     .SubItems.Add("")
                 Next
             End If
@@ -457,8 +458,11 @@ Public Class frmAnalyze
     End Sub
 
     Private Sub frmAnalyze_Resize(sender As Object, e As EventArgs) Handles Me.Resize
-        Me.tabDetail.Width = Me.Width - Me.tabDetail.Left - 32
-        Me.tabDetail.Height = Me.Height - Me.tabDetail.Top - 64
+        'Me.tabDetail.Width = Me.Width - Me.tabDetail.Left - 32
+        'Me.tabDetail.Height = Me.Height - Me.tabDetail.Top - 64
+        Dim frameWidth As Integer = (Me.Width - Me.ClientSize.Width) \ 2
+        Me.Panel1.Width = Me.ClientSize.Width - 2 * Me.Panel1.Left
+        Me.Panel1.Height = Me.ClientSize.Height - Me.Panel1.Top - Me.ssStatus.Height - frameWidth
     End Sub
     Private Sub CollectExpanded(tvn As TreeNode, l As List(Of BoundaryDB.BoundaryItem))
         If tvn.IsExpanded Then l.Add(DirectCast(tvn.Tag, BoundaryDB.BoundaryItem))
@@ -1053,6 +1057,10 @@ Public Class frmAnalyze
                 iRel = xItem.OSMRelation
                 If iRel > 0 Then
                     ShowRelation(iRel)
+                Else
+                    If xItem.Lat * xItem.Lon <> 0.0 Then
+                        GotoPanZoom(xItem.Lat, xItem.Lon, 13)
+                    End If
                 End If
             End If
         End If
@@ -1178,6 +1186,9 @@ Public Class frmAnalyze
                 lvChildren.Sorting = DirectCast(iWidth, SortOrder)
             End If
         End If
+        scon1.SplitterDistance = My.Settings.frmAnalyze_Splitter1
+        scon2.SplitterDistance = My.Settings.frmAnalyze_Splitter2
+        loading = False
     End Sub
 
     Private Sub tvList_MouseDown(sender As Object, e As MouseEventArgs) Handles tvList.MouseDown
@@ -1262,6 +1273,64 @@ Public Class frmAnalyze
         dLat = Double.Parse(xPlace.SelectSingleNode("@lat").InnerText)
         tbpMap.Select()
         GotoPanZoom(dLat, dLon, 15)
+    End Sub
+
+    Private Sub scon1_SplitterMoved(sender As Object, e As SplitterEventArgs) Handles scon1.SplitterMoved
+        If Not loading Then
+            If scon1.Orientation = Orientation.Vertical Then
+                My.Settings.frmAnalyze_Splitter1 = e.SplitX
+            Else
+                My.Settings.frmAnalyze_Splitter1 = e.SplitY
+            End If
+            My.Settings.Save()
+        End If
+    End Sub
+
+    Private Sub scon2_SplitterMoved(sender As Object, e As SplitterEventArgs) Handles scon2.SplitterMoved
+        If Not loading Then
+            If scon2.Orientation = Orientation.Vertical Then
+                My.Settings.frmAnalyze_Splitter2 = e.SplitX
+            Else
+                My.Settings.frmAnalyze_Splitter2 = e.SplitY
+            End If
+            My.Settings.Save()
+        End If
+    End Sub
+
+    Private Sub btnCentroids_Click(sender As Object, e As EventArgs) Handles btnCentroids.Click
+        Dim sLatLong As String
+        Dim fi As System.IO.FileInfo
+
+        If xDB Is Nothing Then
+            MsgBox("Must load boundary database before importing centroids")
+            Exit Sub
+        End If
+        sLatLong = My.Settings.LatLongFile
+        With ofdBooundaries
+            .Title = "Import Lat/Lon from GSS CSV File"
+            If Len(sLatLong) > 0 Then
+                fi = New System.IO.FileInfo(sLatLong)
+                .FileName = fi.Name
+                .InitialDirectory = fi.DirectoryName
+            Else
+                .FileName = ""
+                .InitialDirectory = GetFolderPath(SpecialFolder.MyDocuments)
+            End If
+            If .ShowDialog <> DialogResult.OK Then
+                Exit Sub
+            End If
+            sLatLong = .FileName
+        End With
+        If Len(sLatLong) > 0 AndAlso System.IO.File.Exists(sLatLong) Then
+            tsStatus.Text = "Importing centroids from " & sLatLong
+            If xDB.ImportLatLong(sLatLong) Then
+                tsStatus.Text = "Centroids imported from " & sLatLong
+                My.Settings.LatLongFile = sLatLong
+            Else
+                tsStatus.Text = "Error importing centroids from " & sLatLong
+            End If
+        End If
+
     End Sub
 End Class
 Public Class ListViewComparer

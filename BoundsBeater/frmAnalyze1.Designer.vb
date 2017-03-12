@@ -29,7 +29,6 @@ Partial Class frmAnalyze
         Me.cbLists = New System.Windows.Forms.ComboBox()
         Me.txtReport = New System.Windows.Forms.TextBox()
         Me.btnGo = New System.Windows.Forms.Button()
-        Me.tvList = New System.Windows.Forms.TreeView()
         Me.tabDetail = New System.Windows.Forms.TabControl()
         Me.tbpChildren = New System.Windows.Forms.TabPage()
         Me.lvChildren = New System.Windows.Forms.ListView()
@@ -50,6 +49,7 @@ Partial Class frmAnalyze
         Me.cmsNode = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.tsmiFlush = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiEdit = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiSearch = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiShowAll = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiJSON = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiReport = New System.Windows.Forms.ToolStripMenuItem()
@@ -65,13 +65,27 @@ Partial Class frmAnalyze
         Me.btnOSM = New System.Windows.Forms.Button()
         Me.btnClear = New System.Windows.Forms.Button()
         Me.sfdReports = New System.Windows.Forms.SaveFileDialog()
-        Me.tsmiSearch = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tvList = New System.Windows.Forms.TreeView()
+        Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.scon1 = New System.Windows.Forms.SplitContainer()
+        Me.scon2 = New System.Windows.Forms.SplitContainer()
+        Me.btnCentroids = New System.Windows.Forms.Button()
+        Me.ofdBooundaries = New System.Windows.Forms.OpenFileDialog()
         Me.tabDetail.SuspendLayout()
         Me.tbpChildren.SuspendLayout()
         Me.tbpMap.SuspendLayout()
         Me.ssStatus.SuspendLayout()
         Me.cmsNode.SuspendLayout()
         Me.cmsChild.SuspendLayout()
+        Me.Panel1.SuspendLayout()
+        CType(Me.scon1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.scon1.Panel1.SuspendLayout()
+        Me.scon1.Panel2.SuspendLayout()
+        Me.scon1.SuspendLayout()
+        CType(Me.scon2, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.scon2.Panel1.SuspendLayout()
+        Me.scon2.Panel2.SuspendLayout()
+        Me.scon2.SuspendLayout()
         Me.SuspendLayout()
         '
         'btnClose
@@ -105,43 +119,37 @@ Partial Class frmAnalyze
         Me.cbLists.FormattingEnabled = True
         Me.cbLists.Location = New System.Drawing.Point(12, 11)
         Me.cbLists.Name = "cbLists"
-        Me.cbLists.Size = New System.Drawing.Size(200, 21)
+        Me.cbLists.Size = New System.Drawing.Size(158, 21)
         Me.cbLists.TabIndex = 4
         '
         'txtReport
         '
-        Me.txtReport.Location = New System.Drawing.Point(12, 403)
+        Me.txtReport.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.txtReport.Location = New System.Drawing.Point(0, 0)
         Me.txtReport.Multiline = True
         Me.txtReport.Name = "txtReport"
         Me.txtReport.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.txtReport.Size = New System.Drawing.Size(355, 242)
+        Me.txtReport.Size = New System.Drawing.Size(292, 370)
         Me.txtReport.TabIndex = 6
         '
         'btnGo
         '
-        Me.btnGo.Location = New System.Drawing.Point(218, 12)
+        Me.btnGo.Location = New System.Drawing.Point(176, 9)
         Me.btnGo.Name = "btnGo"
-        Me.btnGo.Size = New System.Drawing.Size(75, 23)
+        Me.btnGo.Size = New System.Drawing.Size(53, 23)
         Me.btnGo.TabIndex = 8
         Me.btnGo.Text = "Load"
         Me.btnGo.UseVisualStyleBackColor = True
-        '
-        'tvList
-        '
-        Me.tvList.HideSelection = False
-        Me.tvList.Location = New System.Drawing.Point(12, 38)
-        Me.tvList.Name = "tvList"
-        Me.tvList.Size = New System.Drawing.Size(354, 363)
-        Me.tvList.TabIndex = 9
         '
         'tabDetail
         '
         Me.tabDetail.Controls.Add(Me.tbpChildren)
         Me.tabDetail.Controls.Add(Me.tbpMap)
-        Me.tabDetail.Location = New System.Drawing.Point(372, 38)
+        Me.tabDetail.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.tabDetail.Location = New System.Drawing.Point(0, 0)
         Me.tabDetail.Name = "tabDetail"
         Me.tabDetail.SelectedIndex = 0
-        Me.tabDetail.Size = New System.Drawing.Size(433, 363)
+        Me.tabDetail.Size = New System.Drawing.Size(581, 603)
         Me.tabDetail.TabIndex = 11
         '
         'tbpChildren
@@ -150,7 +158,7 @@ Partial Class frmAnalyze
         Me.tbpChildren.Location = New System.Drawing.Point(4, 22)
         Me.tbpChildren.Name = "tbpChildren"
         Me.tbpChildren.Padding = New System.Windows.Forms.Padding(3)
-        Me.tbpChildren.Size = New System.Drawing.Size(425, 337)
+        Me.tbpChildren.Size = New System.Drawing.Size(573, 577)
         Me.tbpChildren.TabIndex = 0
         Me.tbpChildren.Text = "Children"
         Me.tbpChildren.UseVisualStyleBackColor = True
@@ -165,7 +173,7 @@ Partial Class frmAnalyze
         Me.lvChildren.Location = New System.Drawing.Point(3, 3)
         Me.lvChildren.MultiSelect = False
         Me.lvChildren.Name = "lvChildren"
-        Me.lvChildren.Size = New System.Drawing.Size(419, 331)
+        Me.lvChildren.Size = New System.Drawing.Size(567, 571)
         Me.lvChildren.TabIndex = 11
         Me.lvChildren.UseCompatibleStateImageBehavior = False
         Me.lvChildren.View = System.Windows.Forms.View.Details
@@ -210,7 +218,7 @@ Partial Class frmAnalyze
         Me.tbpMap.Location = New System.Drawing.Point(4, 22)
         Me.tbpMap.Name = "tbpMap"
         Me.tbpMap.Padding = New System.Windows.Forms.Padding(3)
-        Me.tbpMap.Size = New System.Drawing.Size(425, 337)
+        Me.tbpMap.Size = New System.Drawing.Size(573, 577)
         Me.tbpMap.TabIndex = 1
         Me.tbpMap.Text = "Map"
         Me.tbpMap.UseVisualStyleBackColor = True
@@ -224,14 +232,14 @@ Partial Class frmAnalyze
         Me.wbMap.MinimumSize = New System.Drawing.Size(20, 20)
         Me.wbMap.Name = "wbMap"
         Me.wbMap.ScrollBarsEnabled = False
-        Me.wbMap.Size = New System.Drawing.Size(419, 331)
+        Me.wbMap.Size = New System.Drawing.Size(567, 571)
         Me.wbMap.TabIndex = 0
         '
         'btnUpdate
         '
-        Me.btnUpdate.Location = New System.Drawing.Point(300, 13)
+        Me.btnUpdate.Location = New System.Drawing.Point(316, 9)
         Me.btnUpdate.Name = "btnUpdate"
-        Me.btnUpdate.Size = New System.Drawing.Size(75, 23)
+        Me.btnUpdate.Size = New System.Drawing.Size(53, 23)
         Me.btnUpdate.TabIndex = 12
         Me.btnUpdate.Text = "Update"
         Me.btnUpdate.UseVisualStyleBackColor = True
@@ -272,7 +280,7 @@ Partial Class frmAnalyze
         '
         Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiSearch, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiChildOverviewReport, Me.tsmiDeepChildReport, Me.tsmiAddChild, Me.tsmiReview})
         Me.cmsNode.Name = "ContextMenuStrip1"
-        Me.cmsNode.Size = New System.Drawing.Size(193, 246)
+        Me.cmsNode.Size = New System.Drawing.Size(193, 224)
         '
         'tsmiFlush
         '
@@ -285,6 +293,12 @@ Partial Class frmAnalyze
         Me.tsmiEdit.Name = "tsmiEdit"
         Me.tsmiEdit.Size = New System.Drawing.Size(192, 22)
         Me.tsmiEdit.Text = "Edit"
+        '
+        'tsmiSearch
+        '
+        Me.tsmiSearch.Name = "tsmiSearch"
+        Me.tsmiSearch.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiSearch.Text = "Search"
         '
         'tsmiShowAll
         '
@@ -380,17 +394,78 @@ Partial Class frmAnalyze
         Me.btnClear.Text = "Clear"
         Me.btnClear.UseVisualStyleBackColor = True
         '
-        'tsmiSearch
+        'tvList
         '
-        Me.tsmiSearch.Name = "tsmiSearch"
-        Me.tsmiSearch.Size = New System.Drawing.Size(192, 22)
-        Me.tsmiSearch.Text = "Search"
+        Me.tvList.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.tvList.HideSelection = False
+        Me.tvList.Location = New System.Drawing.Point(0, 0)
+        Me.tvList.Name = "tvList"
+        Me.tvList.Size = New System.Drawing.Size(292, 229)
+        Me.tvList.TabIndex = 9
+        '
+        'Panel1
+        '
+        Me.Panel1.Controls.Add(Me.scon1)
+        Me.Panel1.Location = New System.Drawing.Point(12, 42)
+        Me.Panel1.Name = "Panel1"
+        Me.Panel1.Size = New System.Drawing.Size(877, 603)
+        Me.Panel1.TabIndex = 19
+        '
+        'scon1
+        '
+        Me.scon1.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.scon1.Location = New System.Drawing.Point(0, 0)
+        Me.scon1.Name = "scon1"
+        '
+        'scon1.Panel1
+        '
+        Me.scon1.Panel1.Controls.Add(Me.scon2)
+        '
+        'scon1.Panel2
+        '
+        Me.scon1.Panel2.Controls.Add(Me.tabDetail)
+        Me.scon1.Size = New System.Drawing.Size(877, 603)
+        Me.scon1.SplitterDistance = 292
+        Me.scon1.TabIndex = 0
+        '
+        'scon2
+        '
+        Me.scon2.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.scon2.Location = New System.Drawing.Point(0, 0)
+        Me.scon2.Name = "scon2"
+        Me.scon2.Orientation = System.Windows.Forms.Orientation.Horizontal
+        '
+        'scon2.Panel1
+        '
+        Me.scon2.Panel1.Controls.Add(Me.tvList)
+        '
+        'scon2.Panel2
+        '
+        Me.scon2.Panel2.Controls.Add(Me.txtReport)
+        Me.scon2.Size = New System.Drawing.Size(292, 603)
+        Me.scon2.SplitterDistance = 229
+        Me.scon2.TabIndex = 10
+        '
+        'btnCentroids
+        '
+        Me.btnCentroids.Location = New System.Drawing.Point(236, 9)
+        Me.btnCentroids.Name = "btnCentroids"
+        Me.btnCentroids.Size = New System.Drawing.Size(73, 23)
+        Me.btnCentroids.TabIndex = 20
+        Me.btnCentroids.Text = "Centroids"
+        Me.btnCentroids.UseVisualStyleBackColor = True
+        '
+        'ofdBooundaries
+        '
+        Me.ofdBooundaries.Filter = "CSV Files|*.csv|All Files|*.*"
         '
         'frmAnalyze
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(901, 670)
+        Me.Controls.Add(Me.btnCentroids)
+        Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.btnClear)
         Me.Controls.Add(Me.btnOSM)
         Me.Controls.Add(Me.btnHist)
@@ -398,10 +473,7 @@ Partial Class frmAnalyze
         Me.Controls.Add(Me.ssStatus)
         Me.Controls.Add(Me.chkUpdateAll)
         Me.Controls.Add(Me.btnUpdate)
-        Me.Controls.Add(Me.tabDetail)
-        Me.Controls.Add(Me.tvList)
         Me.Controls.Add(Me.btnGo)
-        Me.Controls.Add(Me.txtReport)
         Me.Controls.Add(Me.cbLists)
         Me.Controls.Add(Me.btnSingle)
         Me.Controls.Add(Me.txtSingle)
@@ -415,6 +487,16 @@ Partial Class frmAnalyze
         Me.ssStatus.PerformLayout()
         Me.cmsNode.ResumeLayout(False)
         Me.cmsChild.ResumeLayout(False)
+        Me.Panel1.ResumeLayout(False)
+        Me.scon1.Panel1.ResumeLayout(False)
+        Me.scon1.Panel2.ResumeLayout(False)
+        CType(Me.scon1, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.scon1.ResumeLayout(False)
+        Me.scon2.Panel1.ResumeLayout(False)
+        Me.scon2.Panel2.ResumeLayout(False)
+        Me.scon2.Panel2.PerformLayout()
+        CType(Me.scon2, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.scon2.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -425,7 +507,6 @@ Partial Class frmAnalyze
     Friend WithEvents cbLists As System.Windows.Forms.ComboBox
     Friend WithEvents txtReport As System.Windows.Forms.TextBox
     Friend WithEvents btnGo As System.Windows.Forms.Button
-    Friend WithEvents tvList As System.Windows.Forms.TreeView
     Friend WithEvents tabDetail As System.Windows.Forms.TabControl
     Friend WithEvents tbpChildren As System.Windows.Forms.TabPage
     Friend WithEvents lvChildren As System.Windows.Forms.ListView
@@ -462,4 +543,10 @@ Partial Class frmAnalyze
     Friend WithEvents tsmiDeepChildReport As ToolStripMenuItem
     Friend WithEvents sfdReports As SaveFileDialog
     Friend WithEvents tsmiSearch As ToolStripMenuItem
+    Friend WithEvents tvList As TreeView
+    Friend WithEvents scon1 As SplitContainer
+    Friend WithEvents scon2 As SplitContainer
+    Friend WithEvents Panel1 As Panel
+    Friend WithEvents btnCentroids As Button
+    Friend WithEvents ofdBooundaries As OpenFileDialog
 End Class

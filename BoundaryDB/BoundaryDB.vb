@@ -140,7 +140,7 @@ Public Class BoundaryDB
                     xDoc = New XmlDocument()
                     Select Case xRdr.Name
                         Case "relation"
-                            xEl = xDoc.ReadNode(xRdr)
+                            xEl = DirectCast(xDoc.ReadNode(xRdr), XmlElement)
                             If GetTag(xEl, "type") <> "boundary" Then
                                 xRdr.Read()
                                 Continue While
@@ -183,9 +183,13 @@ Public Class BoundaryDB
         End If
         sCouncilName = GetTag(xEl, "council_name:en")
         If Len(sCouncilName) = 0 Then sCouncilName = GetTag(xEl, "council_name")
+        ' try welsh, cornish and scots gaelic to get second name value
         sCouncilNameWelsh = GetTag(xEl, "council_name:cy")
         If sCouncilNameWelsh = "" Then
             sCouncilNameWelsh = GetTag(xEl, "council_name:kw")
+        End If
+        If sCouncilNameWelsh = "" Then
+            sCouncilNameWelsh = GetTag(xEl, "council_name:gd")
         End If
         ptParishType = BoundaryItem.ParishType_FromString(GetTag(xEl, "parish_type"))
         csStyle = BoundaryItem.CouncilStyle_FromString(GetTag(xEl, "council_style"))
@@ -202,10 +206,10 @@ Public Class BoundaryDB
         bi.UpdateXML()
     End Sub
     Private Function GetTag(xElement As XmlElement, sKey As String) As String
-        Dim xTag As XmlElement
+        Dim xTag As XmlNode
         xTag = xElement.SelectSingleNode("tag[@k='" & sKey & "']")
         If xTag Is Nothing Then Return ""
-        Return xTag.GetAttribute("v")
+        Return DirectCast(xTag, XmlElement).GetAttribute("v")
     End Function
 
 
@@ -294,6 +298,8 @@ Public Class BoundaryDB
         Public CouncilName2 As String
         Public ParishType As ParishTypes
         Public CouncilStyle As CouncilStyles
+        Public Lat As Double
+        Public Lon As Double
         Private _BoundaryType As BoundaryTypes
         Private Shared _mapBTString As Dictionary(Of BoundaryTypes, String)
         Private Shared _mapStringBT As Dictionary(Of String, BoundaryTypes)
@@ -499,6 +505,8 @@ Public Class BoundaryDB
                 IsCity = sTmp = "1"
             End If
             Notes = NodeText(xBnd.SelectSingleNode("notes"))
+            Double.TryParse(NodeText(xBnd.SelectSingleNode("lat")), Lat)
+            Double.TryParse(NodeText(xBnd.SelectSingleNode("lon")), Lon)
             _xNode = xBnd
             Return True
         End Function
@@ -712,10 +720,12 @@ Public Class BoundaryDB
             SetValue(_xNode, "is_borough", If(IsBorough, "1", "0"))
             SetValue(_xNode, "is_royal", If(IsRoyal, "1", "0"))
             SetValue(_xNode, "is_city", If(IsCity, "1", "0"))
+            SetValue(_xNode, "lat", Lat.ToString)
+            SetValue(_xNode, "lon", Lon.ToString)
             SetValue(_xNode, "notes", Notes)
         End Sub
         Private Sub SetValue(xNode As XmlElement, sKey As String, sValue As String)
-            Dim xChild As XmlElement = xNode.SelectSingleNode(sKey)
+            Dim xChild As XmlElement = DirectCast(xNode.SelectSingleNode(sKey), XmlElement)
             ' how to insert a missing element?
             If IsNothing(xChild) Then
                 ' don't *add* element that doesn't already exist if the value is blank or boolean "false"
@@ -734,6 +744,8 @@ Public Class BoundaryDB
             End If
         End Sub
     End Class
+
+
     Private Shared Function NodeText(xNode As XmlNode) As String
         If IsNothing(xNode) Then
             Return ""
@@ -903,4 +915,87 @@ Public Class BoundaryDB
         Return sTmp
     End Function
 
+    Private Function IsGSSType(t As BoundaryItem.BoundaryTypes) As Boolean
+        Select Case t
+            Case BoundaryItem.BoundaryTypes.BT_CivilParish,
+                 BoundaryItem.BoundaryTypes.BT_Community,
+                 BoundaryItem.BoundaryTypes.BT_LondonBorough,
+                 BoundaryItem.BoundaryTypes.BT_MetroCounty,
+                 BoundaryItem.BoundaryTypes.BT_MetroDistrict,
+                 BoundaryItem.BoundaryTypes.BT_Nation,
+                 BoundaryItem.BoundaryTypes.BT_NonMetroCounty,
+                 BoundaryItem.BoundaryTypes.BT_NonMetroDistrict,
+                 BoundaryItem.BoundaryTypes.BT_PrincipalArea,
+                 BoundaryItem.BoundaryTypes.BT_ScotCouncil,
+                 BoundaryItem.BoundaryTypes.BT_Unitary
+                Return True
+        End Select
+        Return False
+    End Function
+    Private Structure latlongdata
+        Dim GSS As String
+        Dim Lat As Double
+        Dim Lon As Double
+    End Structure
+
+    Public Function ImportLatLong(Path As String) As Boolean
+        Dim tfp As Microsoft.VisualBasic.FileIO.TextFieldParser
+        Dim fLat As Integer = -1, fLon As Integer = -1, fGSS As Integer = -1
+        Dim i As Integer
+        Dim sFields() As String
+        Dim re As New System.Text.RegularExpressions.Regex("[a-z]+\d\dcd")
+
+        tfp = New Microsoft.VisualBasic.FileIO.TextFieldParser(Path)
+
+        tfp.Delimiters = {","}
+        tfp.HasFieldsEnclosedInQuotes = True
+        sFields = tfp.ReadFields()
+        For i = 0 To sFields.Count - 1
+            Select Case sFields(i)
+                Case "lat"
+                    fLat = i
+                Case "long"
+                    fLon = i
+                Case Else
+                    If fGSS < 0 AndAlso re.IsMatch(sFields(i)) Then
+                        fGSS = i
+                    End If
+            End Select
+        Next
+        If (fGSS * fLat * fLon) < 0 Then
+            MsgBox($"Unable to find the required fields in Lat/Lon data, GSS={fGSS} Lat={fLat} Lon={fLon}")
+            tfp.Close()
+            Return False
+        End If
+
+        Dim lld As New Dictionary(Of String, latlongdata)
+        Dim x As latlongdata
+        While Not tfp.EndOfData
+            sFields = tfp.ReadFields()
+            x = New latlongdata
+            x.GSS = sFields(fGSS)
+            x.Lat = Double.Parse(sFields(fLat))
+            x.Lon = Double.Parse(sFields(fLon))
+            lld(x.GSS) = x
+        End While
+        tfp.Close()
+
+        For Each bi As BoundaryItem In Items.Values
+            If IsGSSType(bi.BoundaryType) Then
+                If lld.ContainsKey(bi.ONSCode) Then
+                    x = lld(bi.ONSCode)
+                    bi.Lat = x.Lat
+                    bi.Lon = x.Lon
+                    bi.UpdateXML()
+                Else
+                    ' MsgBox("Entity " & bi.ONSCode & " not found in latlong data")
+                    Debug.Print("Entity " & bi.ONSCode & " not found in latlong data")
+                End If
+            End If
+        Next
+        If bChanges Then
+            Save()
+        End If
+        Return True
+    End Function
 End Class

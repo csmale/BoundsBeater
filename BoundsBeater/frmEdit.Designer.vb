@@ -51,12 +51,16 @@ Partial Class frmEdit
         Me.btnSelRelation = New System.Windows.Forms.Button()
         Me.txtRelID = New System.Windows.Forms.TextBox()
         Me.btnAutoName = New System.Windows.Forms.Button()
+        Me.Label11 = New System.Windows.Forms.Label()
+        Me.txtLat = New System.Windows.Forms.TextBox()
+        Me.Label12 = New System.Windows.Forms.Label()
+        Me.txtLon = New System.Windows.Forms.TextBox()
         Me.SuspendLayout()
         '
         'btnOK
         '
         Me.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK
-        Me.btnOK.Location = New System.Drawing.Point(236, 392)
+        Me.btnOK.Location = New System.Drawing.Point(236, 415)
         Me.btnOK.Name = "btnOK"
         Me.btnOK.Size = New System.Drawing.Size(75, 23)
         Me.btnOK.TabIndex = 0
@@ -66,7 +70,7 @@ Partial Class frmEdit
         'btnCancel
         '
         Me.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel
-        Me.btnCancel.Location = New System.Drawing.Point(136, 392)
+        Me.btnCancel.Location = New System.Drawing.Point(136, 415)
         Me.btnCancel.Name = "btnCancel"
         Me.btnCancel.Size = New System.Drawing.Size(75, 23)
         Me.btnCancel.TabIndex = 1
@@ -243,7 +247,7 @@ Partial Class frmEdit
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(17, 296)
+        Me.Label4.Location = New System.Drawing.Point(17, 319)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(35, 13)
         Me.Label4.TabIndex = 22
@@ -251,7 +255,7 @@ Partial Class frmEdit
         '
         'txtNotes
         '
-        Me.txtNotes.Location = New System.Drawing.Point(58, 296)
+        Me.txtNotes.Location = New System.Drawing.Point(58, 319)
         Me.txtNotes.Multiline = True
         Me.txtNotes.Name = "txtNotes"
         Me.txtNotes.ScrollBars = System.Windows.Forms.ScrollBars.Both
@@ -310,11 +314,47 @@ Partial Class frmEdit
         Me.btnAutoName.Text = "*"
         Me.btnAutoName.UseVisualStyleBackColor = True
         '
+        'Label11
+        '
+        Me.Label11.AutoSize = True
+        Me.Label11.Location = New System.Drawing.Point(17, 293)
+        Me.Label11.Name = "Label11"
+        Me.Label11.Size = New System.Drawing.Size(22, 13)
+        Me.Label11.TabIndex = 31
+        Me.Label11.Text = "Lat"
+        '
+        'txtLat
+        '
+        Me.txtLat.Location = New System.Drawing.Point(58, 290)
+        Me.txtLat.Name = "txtLat"
+        Me.txtLat.Size = New System.Drawing.Size(145, 20)
+        Me.txtLat.TabIndex = 32
+        '
+        'Label12
+        '
+        Me.Label12.AutoSize = True
+        Me.Label12.Location = New System.Drawing.Point(211, 290)
+        Me.Label12.Name = "Label12"
+        Me.Label12.Size = New System.Drawing.Size(25, 13)
+        Me.Label12.TabIndex = 33
+        Me.Label12.Text = "Lon"
+        '
+        'txtLon
+        '
+        Me.txtLon.Location = New System.Drawing.Point(236, 290)
+        Me.txtLon.Name = "txtLon"
+        Me.txtLon.Size = New System.Drawing.Size(148, 20)
+        Me.txtLon.TabIndex = 34
+        '
         'frmEdit
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(433, 419)
+        Me.ClientSize = New System.Drawing.Size(433, 446)
+        Me.Controls.Add(Me.txtLon)
+        Me.Controls.Add(Me.Label12)
+        Me.Controls.Add(Me.txtLat)
+        Me.Controls.Add(Me.Label11)
         Me.Controls.Add(Me.btnAutoName)
         Me.Controls.Add(Me.txtRelID)
         Me.Controls.Add(Me.btnSelRelation)
@@ -380,4 +420,8 @@ Partial Class frmEdit
     Friend WithEvents btnSelRelation As Button
     Friend WithEvents txtRelID As TextBox
     Friend WithEvents btnAutoName As Button
+    Friend WithEvents Label11 As Label
+    Friend WithEvents txtLat As TextBox
+    Friend WithEvents Label12 As Label
+    Friend WithEvents txtLon As TextBox
 End Class

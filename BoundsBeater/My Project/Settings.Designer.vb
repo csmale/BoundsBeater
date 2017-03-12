@@ -150,6 +150,43 @@ Namespace My
                 Me("NominatimURL") = value
             End Set
         End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("0")>  _
+        Public Property frmAnalyze_Splitter1() As Integer
+            Get
+                Return CType(Me("frmAnalyze_Splitter1"),Integer)
+            End Get
+            Set
+                Me("frmAnalyze_Splitter1") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("0")>  _
+        Public Property frmAnalyze_Splitter2() As Integer
+            Get
+                Return CType(Me("frmAnalyze_Splitter2"),Integer)
+            End Get
+            Set
+                Me("frmAnalyze_Splitter2") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("C:\Users\Colin\Downloads\Parishes_December_2016_Full_Extent_Boundaries_in_England"& _ 
+            "_and_Wales.csv")>  _
+        Public Property LatLongFile() As String
+            Get
+                Return CType(Me("LatLongFile"),String)
+            End Get
+            Set
+                Me("LatLongFile") = value
+            End Set
+        End Property
     End Class
 End Namespace
 

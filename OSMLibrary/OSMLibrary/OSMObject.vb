@@ -20,6 +20,7 @@ Public MustInherit Class OSMObject
     '    Public Versions As New Dictionary(Of Long, OSMObject)
     Public Versions As New LinkedList(Of OSMObject)
     Private __Tags As New OSMTagList
+    Public Changed As Boolean = False
     Public Doc As OSMDoc
     ''' <summary>
     ''' 

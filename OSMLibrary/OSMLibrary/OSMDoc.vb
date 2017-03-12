@@ -315,4 +315,50 @@ Public Class OSMDoc
         x.Close()
         Return True
     End Function
+    Public Sub ClearChangedFlags()
+        For Each xn As OSMNode In Nodes.Values.Cast(Of OSMNode)()
+            xn.Changed = False
+        Next
+        'write ways
+        For Each xw As OSMWay In Ways.Values.Cast(Of OSMWay)()
+            xw.Changed = False
+        Next
+        'write relations
+        For Each xr As OSMRelation In Relations.Values.Cast(Of OSMRelation)()
+            xr.Changed = False
+        Next
+    End Sub
+    Public Function GetChangeFile(x As XmlWriter) As Boolean
+        x.WriteStartDocument(True)
+        x.WriteStartElement("osmChange")
+        x.WriteAttributeString("version", "0.6")
+        x.WriteAttributeString("generator", "BoundsBeater")
+
+        x.WriteStartElement("modify")
+        'write nodes
+        For Each xn As OSMNode In Nodes.Values.Cast(Of OSMNode)()
+            If Not xn.IsPlaceholder AndAlso xn.Changed Then
+                xn.Serialize(x)
+            End If
+        Next
+        'write ways
+        For Each xw As OSMWay In Ways.Values.Cast(Of OSMWay)()
+            If Not xw.IsPlaceholder AndAlso xw.Changed Then
+                xw.Serialize(x)
+            End If
+        Next
+        'write relations
+        For Each xr As OSMRelation In Relations.Values.Cast(Of OSMRelation)()
+            If Not xr.IsPlaceholder AndAlso xr.Changed Then
+                xr.Serialize(x)
+            End If
+        Next
+        'write trailer
+
+        x.WriteEndElement() ' modify
+        x.WriteEndElement() ' osmChange
+        x.WriteEndDocument()
+        x.Close()
+        Return True
+    End Function
 End Class

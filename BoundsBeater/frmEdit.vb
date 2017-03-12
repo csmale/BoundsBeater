@@ -136,6 +136,8 @@ Public Class frmEdit
             chkRoyal.Checked = .IsRoyal
             chkCity.Checked = .IsCity
             txtNotes.Text = .Notes
+            txtLat.Text = CStr(.Lat)
+            txtLon.Text = CStr(.Lon)
         End With
         SwitchNameFields()
     End Sub
@@ -203,6 +205,8 @@ Public Class frmEdit
             .IsBorough = chkBorough.Checked
             .IsRoyal = chkRoyal.Checked
             .IsCity = chkCity.Checked
+            Double.TryParse(txtLat.Text, .Lat)
+            Double.TryParse(txtLon.Text, .Lon)
             .Notes = Trim(txtNotes.Text)
         End With
     End Sub
