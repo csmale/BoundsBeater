@@ -1,10 +1,7 @@
+<html>
 <head>
-    <script type="text/javascript" src="https://getfirebug.com/firebug-lite.js"></script>
+
     <link rel="stylesheet" href="leaflet.css"/>
-    <link rel="stylesheet" href="leaflet.label.css"/>
-    <!--[if lte IE 8]>
-        <link rel="stylesheet" href="leaflet/leaflet.ie.css"/>
-    <![endif]-->
     <style>
         .leaflet-map-pane {
             z-index: 2 !important;
@@ -19,11 +16,12 @@
 </head>
 <body style="padding:0; margin:0;">
     <script src="leaflet-src.js"></script>
-    <script src="leaflet.label-src.js"></script>
-    <script src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>
-    <script src="Google.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDd0OmCtL57uGYZ333NuUGwNgaBEjzs6ho"></script>
+    <script src="https://unpkg.com/es6-promise@4.0.5/dist/es6-promise.min.js"></script>
+    <script>ES6Promise.polyfill();</script>
+    <script src="Leaflet.GoogleMutant.js"></script>
     <script src="Bing.js"></script>
-    <div id="map" style="height: 100%; width: 100%;"></div>
+    <div id="map" style="height: 100%; width: 100%; padding: 0px; margin: 0px;"></div>
     <script src="gpxlibrary.js"></script>
 </body>
 </html>

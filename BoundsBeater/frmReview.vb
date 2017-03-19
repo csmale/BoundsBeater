@@ -11,7 +11,7 @@ Public Class frmReview
     Private tagsOSM As New Dictionary(Of String, String)
     Private tagsBDB As New Dictionary(Of String, String)
     Private newOSM As New Dictionary(Of String, String)
-    Private newBDB As New Dictionary(Of String, String)
+    Private rev As New BoundaryDBReviewProvider
 
     Public Sub New(db As BoundaryDB.BoundaryItem)
 
@@ -20,6 +20,7 @@ Public Class frmReview
 
         ' Add any initialization after the InitializeComponent() call.
         xDbRelation = db
+        rev.dbi = db
     End Sub
     Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
         Me.Close()
@@ -39,23 +40,6 @@ Public Class frmReview
             Return
         End Try
 
-        ' tags we will need for certain
-        AddTag("type")
-        AddTag("boundary")
-        AddTag("admin_level")
-        AddTag("designation")
-        AddTag("name")
-        AddTag("council_name")
-        AddTag("council_style")
-        AddTag("borough")
-        AddTag("royal")
-
-        ' tags dependent on the type of boundary
-        If xDbRelation.BoundaryType = BoundaryItem.BoundaryTypes.BT_CivilParish Or
-            xDbRelation.BoundaryType = BoundaryItem.BoundaryTypes.BT_Community Then
-            AddTag("parish_type")
-        End If
-
         ' tags from the current OSM relation
         If Not IsNothing(xRel) Then
             For Each t In xRel.Tags.Keys
@@ -65,76 +49,33 @@ Public Class frmReview
 
         ' tags from osm
         tagsOSM.Clear()
-        newOSM.Clear()
         For Each t In xRel.Tags.Keys
             tagsOSM.Add(t, xRel.Tag(t))
-            newOSM.Add(t, xRel.Tag(t))
         Next
 
-        ' tags derived from database
-        tagsBDB.Clear()
-        newBDB.Clear()
-        tagsBDB("type") = "boundary"
-        tagsBDB("boundary") = "administrative"
-        tagsBDB("name") = xDbRelation.Name
-        If Len(xDbRelation.Name2) > 0 Then
-            tagsBDB("name:en") = xDbRelation.Name
-            tagsBDB("name:cy") = xDbRelation.Name2
-        End If
-        tagsBDB("designation") = BoundaryItem.BoundaryType_ToString(xDbRelation.BoundaryType)
-        If xDbRelation.CouncilStyle <> BoundaryItem.CouncilStyles.CS_Default Then
-            tagsBDB("council_style") = BoundaryItem.CouncilStyle_ToString(xDbRelation.CouncilStyle)
-        End If
-        If xDbRelation.IsBorough Then tagsBDB("borough") = "1"
-        If xDbRelation.IsRoyal Then tagsBDB("royal") = "1"
-        Select Case xDbRelation.BoundaryType
-            Case BoundaryItem.BoundaryTypes.BT_CivilParish
-                tagsBDB("admin_level") = "10"
-                Select Case xDbRelation.ParishType
-                    Case BoundaryItem.ParishTypes.PT_ParishCouncil
-                        tagsBDB("parish_type") = "parish_council"
-                    Case BoundaryItem.ParishTypes.PT_ParishMeeting
-                        tagsBDB("parish_type") = "parish_meeting"
-                    Case BoundaryItem.ParishTypes.PT_JointParishCouncil
-                        tagsBDB("parish_type") = "joint_parish_council"
-                    Case BoundaryItem.ParishTypes.PT_JointParishMeeting
-                        tagsBDB("parish_type") = "joint_parish_meeting"
-                End Select
-            Case BoundaryItem.BoundaryTypes.BT_CeremonialCounty
-                tagsBDB("boundary") = "ceremonial"
-            Case BoundaryItem.BoundaryTypes.BT_Community
-                tagsBDB("admin_level") = "10"
-            Case BoundaryItem.BoundaryTypes.BT_Country
-                tagsBDB("admin_level") = "2"
-            Case BoundaryItem.BoundaryTypes.BT_Liberty
-                tagsBDB("admin_level") = "9"
-            Case BoundaryItem.BoundaryTypes.BT_LondonBorough
-                tagsBDB("admin_level") = "8"
-            Case BoundaryItem.BoundaryTypes.BT_MetroCounty
-                tagsBDB("admin_level") = "6"
-            Case BoundaryItem.BoundaryTypes.BT_MetroDistrict
-                tagsBDB("admin_level") = "8"
-            Case BoundaryItem.BoundaryTypes.BT_NIreDistrict
-                tagsBDB("admin_level") = "8"
-            Case BoundaryItem.BoundaryTypes.BT_Nation
-                tagsBDB("admin_level") = "4"
-            Case BoundaryItem.BoundaryTypes.BT_ParishGroup
-                tagsBDB("admin_level") = "10"
-            Case BoundaryItem.BoundaryTypes.BT_PreservedCounty
-                tagsBDB("boundary") = "ceremonial"
-            Case BoundaryItem.BoundaryTypes.BT_PrincipalArea
-                tagsBDB("admin_level") = "6"
-            Case BoundaryItem.BoundaryTypes.BT_Region
-                tagsBDB("admin_level") = "5"
-            Case BoundaryItem.BoundaryTypes.BT_ScotCouncil
-                tagsBDB("admin_level") = "6"
-            Case BoundaryItem.BoundaryTypes.BT_SuiGeneris
-                tagsBDB("admin_level") = "6"
-            Case BoundaryItem.BoundaryTypes.BT_Unitary
-                tagsBDB("admin_level") = "6"
-            Case BoundaryItem.BoundaryTypes.BT_Unknown
-            Case Else
+        ' tags derived from source db
+        Select Case rev.Process(xRel, tagsBDB)
+            Case OSMReviewResult.OK
+            Case OSMReviewResult.NoData
+            Case OSMReviewResult.WrongType
         End Select
+
+        ' merge in tags from the source db
+        For Each t In tagsBDB.Keys
+            AddTag(t)
+        Next
+
+        ' here be magic - merge the osm data with the source data
+        For Each sTag In TagList
+            ' start with current data
+            If tagsOSM.Keys.Contains(sTag) Then
+                newOSM(sTag) = tagsOSM(sTag)
+            End If
+            ' merge in data from source DB
+            If tagsBDB.Keys.Contains(sTag) Then
+                newOSM(sTag) = tagsBDB(sTag)
+            End If
+        Next
 
         TagList.Sort()
 
@@ -142,7 +83,9 @@ Public Class frmReview
         With lvTagList.Items
             .Clear()
             For Each sTag In TagList
-                .Add(sTag)
+                With .Add(sTag)
+                    .UseItemStyleForSubItems = False
+                End With
             Next
         End With
 
@@ -160,12 +103,21 @@ Public Class frmReview
                 lvi.SubItems.Add("")
             End If
             If newOSM.ContainsKey(sTag) Then
-                lvi.SubItems.Add(newOSM(sTag))
-            Else
-                lvi.SubItems.Add("")
-            End If
-            If newBDB.ContainsKey(sTag) Then
-                lvi.SubItems.Add(newBDB(sTag))
+                With lvi.SubItems.Add(newOSM(sTag))
+                    If tagsOSM.Keys.Contains(sTag) Then
+                        If .Text <> tagsOSM(sTag) Then
+                            lvi.Checked = True
+                            If .Text = "" Then
+                                .BackColor = Color.Red
+                            Else
+                                .BackColor = Color.Yellow
+                            End If
+                        End If
+                    Else
+                        lvi.Checked = True
+                        .BackColor = Color.LightGreen
+                    End If
+                End With
             Else
                 lvi.SubItems.Add("")
             End If
@@ -174,5 +126,9 @@ Public Class frmReview
 
     Private Sub frmReview_Load(sender As Object, e As EventArgs) Handles Me.Load
         populate()
+    End Sub
+
+    Private Sub btnCommit_Click(sender As Object, e As EventArgs) Handles btnCommit.Click
+        MsgBox("commit")
     End Sub
 End Class

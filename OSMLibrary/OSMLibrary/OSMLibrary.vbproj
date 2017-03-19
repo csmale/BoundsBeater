@@ -164,6 +164,7 @@
     <Compile Include="OSMRelationMember.vb" />
     <Compile Include="OSMResolver.vb" />
     <Compile Include="OSMRetriever.vb" />
+    <Compile Include="OSMReviewProvider.vb" />
     <Compile Include="OSMSQLiteCacheProvider.vb" />
     <Compile Include="OSMTag.vb" />
     <Compile Include="OSMTagList.vb" />

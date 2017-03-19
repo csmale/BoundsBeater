@@ -217,7 +217,6 @@ Partial Class frmAnalyze
         Me.tbpMap.Controls.Add(Me.wbMap)
         Me.tbpMap.Location = New System.Drawing.Point(4, 22)
         Me.tbpMap.Name = "tbpMap"
-        Me.tbpMap.Padding = New System.Windows.Forms.Padding(3)
         Me.tbpMap.Size = New System.Drawing.Size(573, 577)
         Me.tbpMap.TabIndex = 1
         Me.tbpMap.Text = "Map"
@@ -227,12 +226,12 @@ Partial Class frmAnalyze
         '
         Me.wbMap.AllowWebBrowserDrop = False
         Me.wbMap.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.wbMap.Location = New System.Drawing.Point(3, 3)
+        Me.wbMap.Location = New System.Drawing.Point(0, 0)
         Me.wbMap.Margin = New System.Windows.Forms.Padding(0)
         Me.wbMap.MinimumSize = New System.Drawing.Size(20, 20)
         Me.wbMap.Name = "wbMap"
         Me.wbMap.ScrollBarsEnabled = False
-        Me.wbMap.Size = New System.Drawing.Size(567, 571)
+        Me.wbMap.Size = New System.Drawing.Size(573, 577)
         Me.wbMap.TabIndex = 0
         '
         'btnUpdate

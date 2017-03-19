@@ -14,10 +14,11 @@
             // m.options.title = feature.properties.name;
             m.options.opacity = 0.01;
             sWidth = feature.properties._bblabel.length * 4;
-            m.bindLabel(feature.properties._bblabel, {
+            m.bindTooltip(feature.properties._bblabel, {
                 noHide: true,
                 direction: "center",
                 offset: [0, -10],
+                permanent: true,
                 className: "label-" + (isParishGroup ? "parish-group" : adminLevel.toString())
             });
         } else if (feature.properties && feature.properties.name) {
@@ -182,17 +183,15 @@ if (useTiles === 'osm') {
     mapAttrib = 'Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>';
 } else {
     alert('unknown tile source: ' + useTiles);
-};
+}
 // var OS25kURL = "http://ooc.openstreetmap.org/os1/{z}/{x}/{y}.jpg";
   var OS25kURL = "http://geo.nls.uk/mapdata2/os/25000/{z}/{x}/{y}.png";
 
-L.Icon.Default.imagePath = "images";
-
 // Possible types: SATELLITE, ROADMAP, HYBRID, TERRAIN
-var googleLayer = new L.Google('ROADMAP');
-var gglSatLayer = new L.Google('SATELLITE');
-var gglHybLayer = new L.Google('HYBRID');
-var gglTerLayer = new L.Google('TERRAIN');
+var googleLayer = new L.GridLayer.GoogleMutant({ type: 'roadmap' });
+var gglSatLayer = new L.GridLayer.GoogleMutant({ type: 'satellite' });
+var gglHybLayer = new L.GridLayer.GoogleMutant({ type: 'hybrid' });
+var gglTerLayer = new L.GridLayer.GoogleMutant({ type: 'terrain' });
 var bingLayerSat = new L.BingLayer("Anwt7CdaZfFM7FsXFu1vWVtkwrpUehyWcDhKaQZWiDBVp1gN8STBRfhAu6m8lMsX", { type: "Aerial" });
 var bingLayerLabels = new L.BingLayer("Anwt7CdaZfFM7FsXFu1vWVtkwrpUehyWcDhKaQZWiDBVp1gN8STBRfhAu6m8lMsX", { type: "AerialWithLabels" });
 
@@ -207,10 +206,10 @@ var overlayMaps = new L.FeatureGroup();
 var baseMaps = {
     "OSM": tLayer,
     "OS25K (OSM)": os25kLayer,
-    "Google Roads": googleLayer,
-    "Google Sat": gglSatLayer,
-    "Google Hybrid": gglHybLayer,
-    "Google Terrain": gglTerLayer,
+//    "Google Roads": googleLayer,
+//    "Google Sat": gglSatLayer,
+//    "Google Hybrid": gglHybLayer,
+//    "Google Terrain": gglTerLayer,
     "Bing Maps": bingLayerSat,
     "Bing with labels": bingLayerLabels
 };
@@ -341,7 +340,7 @@ function drawJSON(j, id) {
     if (arg && arg.properties && arg.properties.admin_level) {
         adminLevel = arg.properties.admin_level;
         //alert("admin level " + adminLevel);
-        if ((isNaN(parseInt(adminLevel)))
+        if (isNaN(parseInt(adminLevel))
             || adminLevel < 0
             || adminLevel >= levelOptions.length) {
             adminLevel = 0;
