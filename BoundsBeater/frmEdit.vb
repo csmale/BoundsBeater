@@ -1,6 +1,6 @@
 ﻿Imports OSMLibrary
 Imports BoundsBeater.BoundaryDB
-
+Imports System.Windows.Input
 
 Public Class frmEdit
     Public xItem As BoundaryItem
@@ -79,7 +79,9 @@ Public Class frmEdit
             .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("City and County", BoundaryItem.CouncilStyles.CS_CityAndCounty))
             .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("City and District", BoundaryItem.CouncilStyles.CS_CityAndDistrict))
             .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("County", BoundaryItem.CouncilStyles.CS_County))
+            .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("County Borough", BoundaryItem.CouncilStyles.CS_CountyBorough))
             .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("Community", BoundaryItem.CouncilStyles.CS_Community))
+            .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("Parish", BoundaryItem.CouncilStyles.CS_Parish))
             .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("Village", BoundaryItem.CouncilStyles.CS_Village))
         End With
         Dim bGotGroup As Boolean = False
@@ -138,6 +140,14 @@ Public Class frmEdit
             txtNotes.Text = .Notes
             txtLat.Text = CStr(.Lat)
             txtLon.Text = CStr(.Lon)
+            txtWebsite.Text = .Website
+            Dim sGSS As String = .ONSCode
+            Dim sGSSPrefix As String = .GSSPrefix
+            If sGSSPrefix <> "" AndAlso sGSS <> "" Then
+                If Strings.Left(sGSS, Len(sGSSPrefix)) <> sGSSPrefix Then
+                    MsgBox($"Warning: GSS code {sGSS} is not appropriate for this boundary type, {sGSSPrefix} expected", MsgBoxStyle.Exclamation)
+                End If
+            End If
         End With
         SwitchNameFields()
     End Sub
@@ -207,6 +217,7 @@ Public Class frmEdit
             .IsCity = chkCity.Checked
             Double.TryParse(txtLat.Text, .Lat)
             Double.TryParse(txtLon.Text, .Lon)
+            .Website = txtWebsite.Text
             .Notes = Trim(txtNotes.Text)
         End With
     End Sub
@@ -245,7 +256,7 @@ Public Class frmEdit
             Return
         End If
         Dim xNewRel As OSMRelation
-        Dim sName As String = "?", sLevel As String = "?"
+        Dim sName As String = "?", sLevel As String = "?", sGSS As String = ""
         If iRel = 0 Then
             If MsgBox("Do you want to remove the OSM relation from this boundary?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
                 Return
@@ -279,11 +290,21 @@ Public Class frmEdit
             End If
             sName = xNewRel.Name()
             sLevel = xNewRel.Tag("admin_level")
+            sGSS = xNewRel.Tag("ref:gss")
         Else
             sName = iRel.ToString()
             sLevel = "unknown"
+            sGSS = ""
         End If
-
+        If sGSS <> "" Then
+            Dim sExpectedGSS As String = xItem.GSSPrefix
+            If sExpectedGSS <> "" Then
+                If Strings.Left(sGSS, Len(sExpectedGSS)) <> sExpectedGSS Then
+                    MsgBox($"Selected relation has inappropriate GSS code {sGSS} for this boundary type - expected {sExpectedGSS}")
+                    Return
+                End If
+            End If
+        End If
         If MsgBox($"Do you want to set the OSM relation to {sName} (level {sLevel})? ", MsgBoxStyle.YesNo, "Change OSM Relation") = MsgBoxResult.Yes Then
             iOriginalRel = iRel
         Else
@@ -406,5 +427,21 @@ Public Class frmEdit
         If Len(sSuffix2) > 0 AndAlso Len(txtName2.Text) > 0 Then
             txtCouncilName2.Text = sSuffix2 & " " & txtName2.Text
         End If
+    End Sub
+
+    Private Sub txtWebsite_Leave(sender As Object, e As EventArgs) Handles txtWebsite.Leave
+        Dim sTmp As String = txtWebsite.Text
+        If sTmp <> "" Then
+            If Strings.Left(sTmp, 7) <> "http://" AndAlso Strings.Left(sTmp, 8) <> "https://" Then
+                MsgBox($"Website URL must start with http:// or https://")
+                txtWebsite.Focus()
+                Return
+            End If
+        End If
+    End Sub
+
+    Private Sub btnOpenWebsite_Click(sender As Object, e As EventArgs) Handles btnOpenWebsite.Click
+        Dim sTmp As String = txtWebsite.Text
+        If Len(sTmp) > 0 Then OpenBrowserAt(sTmp)
     End Sub
 End Class

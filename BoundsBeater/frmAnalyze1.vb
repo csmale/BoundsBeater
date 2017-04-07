@@ -413,6 +413,7 @@ Public Class frmAnalyze
             .SubItems(colCouncilStyle.Index).Text = BoundaryDB.BoundaryItem.CouncilStyle_ToString(p.CouncilStyle)
             .SubItems(colParishType.Index).Text = BoundaryDB.BoundaryItem.ParishType_ToString(p.ParishType)
             .SubItems(colCouncilName.Index).Text = p.CouncilName.ToString
+            .SubItems(colWebsite.Index).Text = p.Website
         End With
     End Sub
     Private Sub ShowOnMap(xRel As OSMRelation)
@@ -1331,6 +1332,26 @@ Public Class frmAnalyze
             End If
         End If
 
+    End Sub
+
+    Private Sub tsmiOpenWebsite_Click(sender As Object, e As EventArgs) Handles tsmiOpenWebsite.Click
+        Dim x As TreeNode = tvList.SelectedNode
+        If x Is Nothing Then Exit Sub
+        Dim p As BoundaryDB.BoundaryItem = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        If p Is Nothing Then Exit Sub
+        If Len(p.Website) > 0 Then OpenBrowserAt(p.Website)
+    End Sub
+
+    Private Sub tsmiChildOpenWebsite_Click(sender As Object, e As EventArgs) Handles tsmiChildOpenWebsite.Click
+        If lvChildren.SelectedItems.Count = 0 Then Return
+        Dim lvi As ListViewItem = lvChildren.SelectedItems(0)
+        If IsNothing(lvi) Then Return
+        Dim x As TreeNode = DirectCast(lvi.Tag, TreeNode)
+        If IsNothing(x) Then Return
+        Dim bi As BoundaryDB.BoundaryItem
+        bi = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        If bi Is Nothing Then Exit Sub
+        If Len(bi.Website) > 0 Then OpenBrowserAt(bi.Website)
     End Sub
 End Class
 Public Class ListViewComparer

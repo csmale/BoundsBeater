@@ -39,6 +39,7 @@ Partial Class frmAnalyze
         Me.colCouncilStyle = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.colParishType = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.colCouncilName = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
+        Me.colWebsite = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.tbpMap = New System.Windows.Forms.TabPage()
         Me.wbMap = New System.Windows.Forms.WebBrowser()
         Me.btnUpdate = New System.Windows.Forms.Button()
@@ -57,11 +58,13 @@ Partial Class frmAnalyze
         Me.tsmiDeepChildReport = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiAddChild = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiReview = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiOpenWebsite = New System.Windows.Forms.ToolStripMenuItem()
         Me.txtAdminLevel = New System.Windows.Forms.TextBox()
         Me.btnHist = New System.Windows.Forms.Button()
         Me.cmsChild = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.tsmiChildEdit = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiChildReport = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiChildOpenWebsite = New System.Windows.Forms.ToolStripMenuItem()
         Me.btnOSM = New System.Windows.Forms.Button()
         Me.btnClear = New System.Windows.Forms.Button()
         Me.sfdReports = New System.Windows.Forms.SaveFileDialog()
@@ -166,7 +169,7 @@ Partial Class frmAnalyze
         'lvChildren
         '
         Me.lvChildren.AllowColumnReorder = True
-        Me.lvChildren.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colName, Me.colOSMID, Me.colType, Me.colGSS, Me.colCouncilStyle, Me.colParishType, Me.colCouncilName})
+        Me.lvChildren.Columns.AddRange(New System.Windows.Forms.ColumnHeader() {Me.colName, Me.colOSMID, Me.colType, Me.colGSS, Me.colCouncilStyle, Me.colParishType, Me.colCouncilName, Me.colWebsite})
         Me.lvChildren.Dock = System.Windows.Forms.DockStyle.Fill
         Me.lvChildren.FullRowSelect = True
         Me.lvChildren.HideSelection = False
@@ -211,6 +214,11 @@ Partial Class frmAnalyze
         '
         Me.colCouncilName.Text = "Council Name"
         Me.colCouncilName.Width = 250
+        '
+        'colWebsite
+        '
+        Me.colWebsite.Text = "Website"
+        Me.colWebsite.Width = 200
         '
         'tbpMap
         '
@@ -277,9 +285,9 @@ Partial Class frmAnalyze
         '
         'cmsNode
         '
-        Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiSearch, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiChildOverviewReport, Me.tsmiDeepChildReport, Me.tsmiAddChild, Me.tsmiReview})
+        Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiSearch, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiChildOverviewReport, Me.tsmiDeepChildReport, Me.tsmiAddChild, Me.tsmiReview, Me.tsmiOpenWebsite})
         Me.cmsNode.Name = "ContextMenuStrip1"
-        Me.cmsNode.Size = New System.Drawing.Size(193, 224)
+        Me.cmsNode.Size = New System.Drawing.Size(193, 246)
         '
         'tsmiFlush
         '
@@ -341,6 +349,12 @@ Partial Class frmAnalyze
         Me.tsmiReview.Size = New System.Drawing.Size(192, 22)
         Me.tsmiReview.Text = "Review OSM"
         '
+        'tsmiOpenWebsite
+        '
+        Me.tsmiOpenWebsite.Name = "tsmiOpenWebsite"
+        Me.tsmiOpenWebsite.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiOpenWebsite.Text = "Go to website"
+        '
         'txtAdminLevel
         '
         Me.txtAdminLevel.Location = New System.Drawing.Point(530, 15)
@@ -359,21 +373,27 @@ Partial Class frmAnalyze
         '
         'cmsChild
         '
-        Me.cmsChild.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiChildEdit, Me.tsmiChildReport})
+        Me.cmsChild.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiChildEdit, Me.tsmiChildReport, Me.tsmiChildOpenWebsite})
         Me.cmsChild.Name = "cmsChild"
-        Me.cmsChild.Size = New System.Drawing.Size(110, 48)
+        Me.cmsChild.Size = New System.Drawing.Size(147, 70)
         '
         'tsmiChildEdit
         '
         Me.tsmiChildEdit.Name = "tsmiChildEdit"
-        Me.tsmiChildEdit.Size = New System.Drawing.Size(109, 22)
+        Me.tsmiChildEdit.Size = New System.Drawing.Size(146, 22)
         Me.tsmiChildEdit.Text = "Edit"
         '
         'tsmiChildReport
         '
         Me.tsmiChildReport.Name = "tsmiChildReport"
-        Me.tsmiChildReport.Size = New System.Drawing.Size(109, 22)
+        Me.tsmiChildReport.Size = New System.Drawing.Size(146, 22)
         Me.tsmiChildReport.Text = "Report"
+        '
+        'tsmiChildOpenWebsite
+        '
+        Me.tsmiChildOpenWebsite.Name = "tsmiChildOpenWebsite"
+        Me.tsmiChildOpenWebsite.Size = New System.Drawing.Size(146, 22)
+        Me.tsmiChildOpenWebsite.Text = "Go to website"
         '
         'btnOSM
         '
@@ -548,4 +568,7 @@ Partial Class frmAnalyze
     Friend WithEvents Panel1 As Panel
     Friend WithEvents btnCentroids As Button
     Friend WithEvents ofdBooundaries As OpenFileDialog
+    Friend WithEvents tsmiOpenWebsite As ToolStripMenuItem
+    Friend WithEvents tsmiChildOpenWebsite As ToolStripMenuItem
+    Friend WithEvents colWebsite As ColumnHeader
 End Class

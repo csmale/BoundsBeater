@@ -55,12 +55,15 @@ Partial Class frmEdit
         Me.txtLat = New System.Windows.Forms.TextBox()
         Me.Label12 = New System.Windows.Forms.Label()
         Me.txtLon = New System.Windows.Forms.TextBox()
+        Me.txtWebsite = New System.Windows.Forms.TextBox()
+        Me.Label13 = New System.Windows.Forms.Label()
+        Me.btnOpenWebsite = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'btnOK
         '
         Me.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK
-        Me.btnOK.Location = New System.Drawing.Point(236, 415)
+        Me.btnOK.Location = New System.Drawing.Point(236, 439)
         Me.btnOK.Name = "btnOK"
         Me.btnOK.Size = New System.Drawing.Size(75, 23)
         Me.btnOK.TabIndex = 0
@@ -70,7 +73,7 @@ Partial Class frmEdit
         'btnCancel
         '
         Me.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel
-        Me.btnCancel.Location = New System.Drawing.Point(136, 415)
+        Me.btnCancel.Location = New System.Drawing.Point(136, 439)
         Me.btnCancel.Name = "btnCancel"
         Me.btnCancel.Size = New System.Drawing.Size(75, 23)
         Me.btnCancel.TabIndex = 1
@@ -247,7 +250,7 @@ Partial Class frmEdit
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(17, 319)
+        Me.Label4.Location = New System.Drawing.Point(17, 343)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(35, 13)
         Me.Label4.TabIndex = 22
@@ -255,7 +258,7 @@ Partial Class frmEdit
         '
         'txtNotes
         '
-        Me.txtNotes.Location = New System.Drawing.Point(58, 319)
+        Me.txtNotes.Location = New System.Drawing.Point(58, 343)
         Me.txtNotes.Multiline = True
         Me.txtNotes.Name = "txtNotes"
         Me.txtNotes.ScrollBars = System.Windows.Forms.ScrollBars.Both
@@ -346,11 +349,39 @@ Partial Class frmEdit
         Me.txtLon.Size = New System.Drawing.Size(148, 20)
         Me.txtLon.TabIndex = 34
         '
+        'txtWebsite
+        '
+        Me.txtWebsite.Location = New System.Drawing.Point(58, 316)
+        Me.txtWebsite.Name = "txtWebsite"
+        Me.txtWebsite.Size = New System.Drawing.Size(343, 20)
+        Me.txtWebsite.TabIndex = 35
+        '
+        'Label13
+        '
+        Me.Label13.AutoSize = True
+        Me.Label13.Location = New System.Drawing.Point(12, 319)
+        Me.Label13.Name = "Label13"
+        Me.Label13.Size = New System.Drawing.Size(46, 13)
+        Me.Label13.TabIndex = 36
+        Me.Label13.Text = "Website"
+        '
+        'btnOpenWebsite
+        '
+        Me.btnOpenWebsite.Location = New System.Drawing.Point(408, 318)
+        Me.btnOpenWebsite.Name = "btnOpenWebsite"
+        Me.btnOpenWebsite.Size = New System.Drawing.Size(17, 25)
+        Me.btnOpenWebsite.TabIndex = 37
+        Me.btnOpenWebsite.Text = "*"
+        Me.btnOpenWebsite.UseVisualStyleBackColor = True
+        '
         'frmEdit
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(433, 446)
+        Me.ClientSize = New System.Drawing.Size(433, 466)
+        Me.Controls.Add(Me.btnOpenWebsite)
+        Me.Controls.Add(Me.Label13)
+        Me.Controls.Add(Me.txtWebsite)
         Me.Controls.Add(Me.txtLon)
         Me.Controls.Add(Me.Label12)
         Me.Controls.Add(Me.txtLat)
@@ -424,4 +455,7 @@ Partial Class frmEdit
     Friend WithEvents txtLat As TextBox
     Friend WithEvents Label12 As Label
     Friend WithEvents txtLon As TextBox
+    Friend WithEvents txtWebsite As TextBox
+    Friend WithEvents Label13 As Label
+    Friend WithEvents btnOpenWebsite As Button
 End Class

@@ -179,7 +179,7 @@ Public Class BoundaryDB
         sTmp = GetTag(xEl, "designation")
         btType = BoundaryItem.DesignationToBoundaryType(sTmp)
         If btType = BoundaryItem.BoundaryTypes.BT_Unknown AndAlso Len(sTmp) > 0 Then
-            MsgBox(String.Format("Unknown designation {0} in relation {1} ({2})", sTmp, bi.OSMRelation, bi.Name))
+            MsgBox($"Unknown designation {sTmp} in relation {bi.OSMRelation} ({bi.Name})")
         End If
         sCouncilName = GetTag(xEl, "council_name:en")
         If Len(sCouncilName) = 0 Then sCouncilName = GetTag(xEl, "council_name")
@@ -196,13 +196,18 @@ Public Class BoundaryDB
         sGSS = GetTag(xEl, "ref:gss")
 
         If Len(sGSS) = 8 Then bi.ONSCode = sGSS
-        If btType <> BoundaryItem.BoundaryTypes.BT_Unknown Then bi.BoundaryType = btType
-        If Len(sCouncilName) > 0 Then bi.CouncilName = sCouncilName
-        If Len(sCouncilNameWelsh) > 0 Then bi.CouncilName2 = sCouncilNameWelsh
+        'If btType <> BoundaryItem.BoundaryTypes.BT_Unknown Then bi.BoundaryType = btType
+        'If Len(sCouncilName) > 0 Then bi.CouncilName = sCouncilName
+        'If Len(sCouncilNameWelsh) > 0 Then bi.CouncilName2 = sCouncilNameWelsh
         If btType = BoundaryItem.BoundaryTypes.BT_CivilParish Then
-            bi.ParishType = ptParishType
+            'bi.ParishType = ptParishType
         End If
-        If csStyle <> BoundaryItem.CouncilStyles.CS_Default Then bi.CouncilStyle = csStyle
+        If Len(bi.Website) = 0 Then
+            sTmp = GetTag(xEl, "website")
+            If sTmp = "" Then sTmp = GetTag(xEl, "url")
+            bi.Website = sTmp
+        End If
+        'If csStyle <> BoundaryItem.CouncilStyles.CS_Default Then bi.CouncilStyle = csStyle
         bi.UpdateXML()
     End Sub
     Private Function GetTag(xElement As XmlElement, sKey As String) As String
@@ -274,7 +279,9 @@ Public Class BoundaryDB
             CS_CityAndCounty
             CS_CityAndDistrict
             CS_County
+            CS_CountyBorough
             CS_Community
+            CS_Parish
             CS_Village
             CS_Neighbourhood
         End Enum
@@ -300,9 +307,11 @@ Public Class BoundaryDB
         Public CouncilStyle As CouncilStyles
         Public Lat As Double
         Public Lon As Double
+        Public Website As String
         Private _BoundaryType As BoundaryTypes
         Private Shared _mapBTString As Dictionary(Of BoundaryTypes, String)
         Private Shared _mapStringBT As Dictionary(Of String, BoundaryTypes)
+        Private Shared _mapBTtoGSSPrefix As Dictionary(Of BoundaryTypes, String)
 
         Public Sub New()
             If _mapBTString Is Nothing Then
@@ -350,6 +359,28 @@ Public Class BoundaryDB
                     .Add("n_ireland_district", BoundaryTypes.BT_NIreDistrict)
                     .Add("parish_group", BoundaryTypes.BT_ParishGroup)
                 End With
+                _mapBTtoGSSPrefix = New Dictionary(Of BoundaryTypes, String)
+                With _mapBTtoGSSPrefix
+                    .Add(BoundaryTypes.BT_Region, "E12")
+                    .Add(BoundaryTypes.BT_Unitary, "E06")
+                    .Add(BoundaryTypes.BT_CivilParish, "E04")
+                    .Add(BoundaryTypes.BT_NonMetroCounty, "E10")
+                    .Add(BoundaryTypes.BT_NonMetroDistrict, "E07")
+                    .Add(BoundaryTypes.BT_MetroCounty, "E11")
+                    .Add(BoundaryTypes.BT_MetroDistrict, "E08")
+                    ' .Add(BoundaryTypes.BT_Nation, "")
+                    ' .Add(BoundaryTypes.BT_CeremonialCounty, "")
+                    ' .Add(BoundaryTypes.BT_SuiGeneris, "")
+                    ' .Add(BoundaryTypes.BT_Liberty, "")
+                    .Add(BoundaryTypes.BT_LondonBorough, "E09")
+                    ' .Add(BoundaryTypes.BT_PreservedCounty, "")
+                    .Add(BoundaryTypes.BT_PrincipalArea, "W06")
+                    .Add(BoundaryTypes.BT_ScotCouncil, "S12")
+                    ' .Add(BoundaryTypes.BT_Country, "")
+                    .Add(BoundaryTypes.BT_Community, "W04")
+                    .Add(BoundaryTypes.BT_NIreDistrict, "N09")
+                    ' .Add(BoundaryTypes.BT_ParishGroup, "")
+                End With
             End If
         End Sub
         Public Property BoundaryType As BoundaryTypes
@@ -372,6 +403,11 @@ Public Class BoundaryDB
                     If _bdb IsNot Nothing Then _bdb.bChanges = True
                 End If
             End Set
+        End Property
+        Public ReadOnly Property GSSPrefix As String
+            Get
+                Return GSSPrefixForBoundaryType(_BoundaryType)
+            End Get
         End Property
         Public ParentCode As String
         Public OSMRelation As Long
@@ -507,8 +543,13 @@ Public Class BoundaryDB
             Notes = NodeText(xBnd.SelectSingleNode("notes"))
             Double.TryParse(NodeText(xBnd.SelectSingleNode("lat")), Lat)
             Double.TryParse(NodeText(xBnd.SelectSingleNode("lon")), Lon)
+            Website = NodeText(xBnd.SelectSingleNode("website"))
             _xNode = xBnd
             Return True
+        End Function
+        Public Shared Function GSSPrefixForBoundaryType(bt As BoundaryTypes) As String
+            If _mapBTtoGSSPrefix.ContainsKey(bt) Then Return _mapBTtoGSSPrefix(bt)
+            Return ""
         End Function
         Public Shared Function BoundaryType_FromString(s As String) As BoundaryTypes
             Dim BoundaryType As BoundaryTypes
@@ -550,7 +591,9 @@ Public Class BoundaryDB
                 Case CouncilStyles.CS_CityAndCounty : sTmp = "city_and_county"
                 Case CouncilStyles.CS_CityAndDistrict : sTmp = "city_and_district"
                 Case CouncilStyles.CS_County : sTmp = "county"
+                Case CouncilStyles.CS_CountyBorough : sTmp = "county_borough"
                 Case CouncilStyles.CS_Community : sTmp = "community"
+                Case CouncilStyles.CS_Parish : sTmp = "parish"
                 Case CouncilStyles.CS_Neighbourhood : sTmp = "neighbourhood"
                 Case CouncilStyles.CS_Village : sTmp = "village"
                 Case Else
@@ -577,8 +620,12 @@ Public Class BoundaryDB
                     xRet = CouncilStyles.CS_CityAndDistrict
                 Case "county"
                     xRet = CouncilStyles.CS_County
+                Case "county_borough"
+                    xRet = CouncilStyles.CS_CountyBorough
                 Case "village"
                     xRet = CouncilStyles.CS_Village
+                Case "parish"
+                    xRet = CouncilStyles.CS_Parish
                 Case Else
                     If Len(s) > 0 Then
                         MsgBox("unknown council style " & s)
@@ -722,6 +769,7 @@ Public Class BoundaryDB
             SetValue(_xNode, "is_city", If(IsCity, "1", "0"))
             SetValue(_xNode, "lat", Lat.ToString)
             SetValue(_xNode, "lon", Lon.ToString)
+            SetValue(_xNode, "website", Website)
             SetValue(_xNode, "notes", Notes)
         End Sub
         Private Sub SetValue(xNode As XmlElement, sKey As String, sValue As String)
