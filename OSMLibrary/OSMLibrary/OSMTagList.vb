@@ -11,4 +11,11 @@
             Return Tags(Key)
         End Get
     End Property
+    Public Function Clone() As OSMTagList
+        Dim x As New OSMTagList
+        For Each y In Tags.Keys
+            x.Tags.Add(y, Tags(y))
+        Next
+        Return x
+    End Function
 End Class

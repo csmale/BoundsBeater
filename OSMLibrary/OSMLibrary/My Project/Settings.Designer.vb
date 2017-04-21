@@ -15,9 +15,9 @@ Option Explicit On
 Namespace My
     
     <Global.System.Runtime.CompilerServices.CompilerGeneratedAttribute(),  _
-     Global.System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.0.0.0"),  _
+     Global.System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.1.0.0"),  _
      Global.System.ComponentModel.EditorBrowsableAttribute(Global.System.ComponentModel.EditorBrowsableState.Advanced)>  _
-    Partial Friend NotInheritable Class MySettings
+    Partial Public NotInheritable Class MySettings
         Inherits Global.System.Configuration.ApplicationSettingsBase
         
         Private Shared defaultInstance As MySettings = CType(Global.System.Configuration.ApplicationSettingsBase.Synchronized(New MySettings()),MySettings)
@@ -56,7 +56,7 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("http://api.openstreetmap.org/api/0.6/")>  _
+         Global.System.Configuration.DefaultSettingValueAttribute("http://api.openstreetmap.org/")>  _
         Public Property OSMBaseApiURL() As String
             Get
                 Return CType(Me("OSMBaseApiURL"),String)
@@ -121,6 +121,30 @@ Namespace My
             End Get
             Set
                 Me("OSMBrowseBaseURL") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("colin.smale@xs4all.nl")>  _
+        Public Property APIUser() As String
+            Get
+                Return CType(Me("APIUser"),String)
+            End Get
+            Set
+                Me("APIUser") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("myspeak1x")>  _
+        Public Property APIPassword() As String
+            Get
+                Return CType(Me("APIPassword"),String)
+            End Get
+            Set
+                Me("APIPassword") = value
             End Set
         End Property
     End Class

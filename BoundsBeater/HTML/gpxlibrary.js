@@ -330,7 +330,7 @@ var layers = new Array();
 function drawJSON(j, id) {
     var arg = eval('(' + j + ')');
     for (var x in layers) {
-        if (x == id) {
+        if (x === id) {
             map.removeLayer(layers[x]);
             break;
         }
@@ -339,12 +339,13 @@ function drawJSON(j, id) {
     var opts;
     if (arg && arg.properties && arg.properties.admin_level) {
         adminLevel = arg.properties.admin_level;
-        //alert("admin level " + adminLevel);
+        // alert("admin level " + adminLevel + " style " + arg.properties.council_style);
         if (isNaN(parseInt(adminLevel))
             || adminLevel < 0
             || adminLevel >= levelOptions.length) {
             adminLevel = 0;
         }
+        // adminLevel += 0; // ensure integer
         opts = levelOptions[adminLevel];
         if (adminLevel == 10) {
             if (arg.properties.council_style == "town") {

@@ -1,5 +1,6 @@
 ﻿Imports System.Xml
 Imports System.Drawing
+Imports OSMLibrary
 
 Public Class OSMNode
     Inherits OSMObject
@@ -24,6 +25,12 @@ Public Class OSMNode
             Return sJSON.ToString
         End Get
     End Property
+    Public Overrides Function Clone() As OSMObject
+        Dim xNew As OSMNode = MyBase.Clone()
+        xNew.UsedByWays.AddRange(UsedByWays)
+        xNew.UsedByRelations.AddRange(UsedByRelations)
+        Return xNew
+    End Function
     Public Overrides ReadOnly Property GeoJSON As String
         Get
             If IsPlaceholder Then

@@ -66,6 +66,17 @@ Public MustInherit Class OSMObject
         End Get
     End Property
     ''' <summary>
+    ''' Returns a shallow clone of the object
+    ''' </summary>
+    ''' <returns></returns>
+    Public Overridable Function Clone() As OSMObject
+        Dim xNew As OSMObject = DirectCast(Me.MemberwiseClone(), OSMObject)
+        xNew.__Tags = __Tags.Clone()
+        Changed = True
+        Return xNew
+    End Function
+
+    ''' <summary>
     ''' Escapes a string for use in JSON, including adding double quotes at the
     ''' start and end.
     ''' </summary>

@@ -624,6 +624,8 @@ Public Class BoundaryDB
                     xRet = CouncilStyles.CS_CountyBorough
                 Case "village"
                     xRet = CouncilStyles.CS_Village
+                Case "neighbourhood"
+                    xRet = CouncilStyles.CS_Neighbourhood
                 Case "parish"
                     xRet = CouncilStyles.CS_Parish
                 Case Else

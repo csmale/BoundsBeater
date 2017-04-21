@@ -82,6 +82,7 @@ Public Class frmEdit
             .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("County Borough", BoundaryItem.CouncilStyles.CS_CountyBorough))
             .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("Community", BoundaryItem.CouncilStyles.CS_Community))
             .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("Parish", BoundaryItem.CouncilStyles.CS_Parish))
+            .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("Neighbourhood", BoundaryItem.CouncilStyles.CS_Neighbourhood))
             .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("Village", BoundaryItem.CouncilStyles.CS_Village))
         End With
         Dim bGotGroup As Boolean = False

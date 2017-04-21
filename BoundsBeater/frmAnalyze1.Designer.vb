@@ -74,6 +74,7 @@ Partial Class frmAnalyze
         Me.scon2 = New System.Windows.Forms.SplitContainer()
         Me.btnCentroids = New System.Windows.Forms.Button()
         Me.ofdBooundaries = New System.Windows.Forms.OpenFileDialog()
+        Me.tsmiChildReview = New System.Windows.Forms.ToolStripMenuItem()
         Me.tabDetail.SuspendLayout()
         Me.tbpChildren.SuspendLayout()
         Me.tbpMap.SuspendLayout()
@@ -174,7 +175,6 @@ Partial Class frmAnalyze
         Me.lvChildren.FullRowSelect = True
         Me.lvChildren.HideSelection = False
         Me.lvChildren.Location = New System.Drawing.Point(3, 3)
-        Me.lvChildren.MultiSelect = False
         Me.lvChildren.Name = "lvChildren"
         Me.lvChildren.Size = New System.Drawing.Size(567, 571)
         Me.lvChildren.TabIndex = 11
@@ -256,103 +256,105 @@ Partial Class frmAnalyze
         Me.chkUpdateAll.AutoSize = True
         Me.chkUpdateAll.Location = New System.Drawing.Point(381, 19)
         Me.chkUpdateAll.Name = "chkUpdateAll"
-        Me.chkUpdateAll.Size = New System.Drawing.Size(110, 17)
+        Me.chkUpdateAll.Size = New System.Drawing.Size(123, 19)
         Me.chkUpdateAll.TabIndex = 13
         Me.chkUpdateAll.Text = "Update/review all"
         Me.chkUpdateAll.UseVisualStyleBackColor = True
         '
         'ssStatus
         '
+        Me.ssStatus.ImageScalingSize = New System.Drawing.Size(20, 20)
         Me.ssStatus.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsProgress, Me.tsStatus})
-        Me.ssStatus.Location = New System.Drawing.Point(0, 648)
+        Me.ssStatus.Location = New System.Drawing.Point(0, 645)
         Me.ssStatus.Name = "ssStatus"
-        Me.ssStatus.Size = New System.Drawing.Size(901, 22)
+        Me.ssStatus.Size = New System.Drawing.Size(901, 25)
         Me.ssStatus.TabIndex = 14
         Me.ssStatus.Text = "StatusStrip1"
         '
         'tsProgress
         '
         Me.tsProgress.Name = "tsProgress"
-        Me.tsProgress.Size = New System.Drawing.Size(100, 16)
+        Me.tsProgress.Size = New System.Drawing.Size(100, 19)
         Me.tsProgress.Step = 1
         Me.tsProgress.Style = System.Windows.Forms.ProgressBarStyle.Continuous
         '
         'tsStatus
         '
         Me.tsStatus.Name = "tsStatus"
-        Me.tsStatus.Size = New System.Drawing.Size(120, 17)
+        Me.tsStatus.Size = New System.Drawing.Size(153, 20)
         Me.tsStatus.Text = "ToolStripStatusLabel1"
         '
         'cmsNode
         '
+        Me.cmsNode.ImageScalingSize = New System.Drawing.Size(20, 20)
         Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiSearch, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiChildOverviewReport, Me.tsmiDeepChildReport, Me.tsmiAddChild, Me.tsmiReview, Me.tsmiOpenWebsite})
         Me.cmsNode.Name = "ContextMenuStrip1"
-        Me.cmsNode.Size = New System.Drawing.Size(193, 246)
+        Me.cmsNode.Size = New System.Drawing.Size(233, 290)
         '
         'tsmiFlush
         '
         Me.tsmiFlush.Name = "tsmiFlush"
-        Me.tsmiFlush.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiFlush.Size = New System.Drawing.Size(232, 26)
         Me.tsmiFlush.Text = "Flush from cache"
         '
         'tsmiEdit
         '
         Me.tsmiEdit.Name = "tsmiEdit"
-        Me.tsmiEdit.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiEdit.Size = New System.Drawing.Size(232, 26)
         Me.tsmiEdit.Text = "Edit"
         '
         'tsmiSearch
         '
         Me.tsmiSearch.Name = "tsmiSearch"
-        Me.tsmiSearch.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiSearch.Size = New System.Drawing.Size(232, 26)
         Me.tsmiSearch.Text = "Search"
         '
         'tsmiShowAll
         '
         Me.tsmiShowAll.Name = "tsmiShowAll"
-        Me.tsmiShowAll.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiShowAll.Size = New System.Drawing.Size(232, 26)
         Me.tsmiShowAll.Text = "Show all on map"
         '
         'tsmiJSON
         '
         Me.tsmiJSON.Name = "tsmiJSON"
-        Me.tsmiJSON.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiJSON.Size = New System.Drawing.Size(232, 26)
         Me.tsmiJSON.Text = "Show JSON"
         '
         'tsmiReport
         '
         Me.tsmiReport.Name = "tsmiReport"
-        Me.tsmiReport.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiReport.Size = New System.Drawing.Size(232, 26)
         Me.tsmiReport.Text = "Report"
         '
         'tsmiChildOverviewReport
         '
         Me.tsmiChildOverviewReport.Name = "tsmiChildOverviewReport"
-        Me.tsmiChildOverviewReport.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiChildOverviewReport.Size = New System.Drawing.Size(232, 26)
         Me.tsmiChildOverviewReport.Text = "Child Overview Report"
         '
         'tsmiDeepChildReport
         '
         Me.tsmiDeepChildReport.Name = "tsmiDeepChildReport"
-        Me.tsmiDeepChildReport.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiDeepChildReport.Size = New System.Drawing.Size(232, 26)
         Me.tsmiDeepChildReport.Text = "Deep Child Report"
         '
         'tsmiAddChild
         '
         Me.tsmiAddChild.Name = "tsmiAddChild"
-        Me.tsmiAddChild.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiAddChild.Size = New System.Drawing.Size(232, 26)
         Me.tsmiAddChild.Text = "Add Child"
         '
         'tsmiReview
         '
         Me.tsmiReview.Name = "tsmiReview"
-        Me.tsmiReview.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiReview.Size = New System.Drawing.Size(232, 26)
         Me.tsmiReview.Text = "Review OSM"
         '
         'tsmiOpenWebsite
         '
         Me.tsmiOpenWebsite.Name = "tsmiOpenWebsite"
-        Me.tsmiOpenWebsite.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiOpenWebsite.Size = New System.Drawing.Size(232, 26)
         Me.tsmiOpenWebsite.Text = "Go to website"
         '
         'txtAdminLevel
@@ -373,26 +375,27 @@ Partial Class frmAnalyze
         '
         'cmsChild
         '
-        Me.cmsChild.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiChildEdit, Me.tsmiChildReport, Me.tsmiChildOpenWebsite})
+        Me.cmsChild.ImageScalingSize = New System.Drawing.Size(20, 20)
+        Me.cmsChild.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiChildEdit, Me.tsmiChildReport, Me.tsmiChildOpenWebsite, Me.tsmiChildReview})
         Me.cmsChild.Name = "cmsChild"
-        Me.cmsChild.Size = New System.Drawing.Size(147, 70)
+        Me.cmsChild.Size = New System.Drawing.Size(182, 136)
         '
         'tsmiChildEdit
         '
         Me.tsmiChildEdit.Name = "tsmiChildEdit"
-        Me.tsmiChildEdit.Size = New System.Drawing.Size(146, 22)
+        Me.tsmiChildEdit.Size = New System.Drawing.Size(181, 26)
         Me.tsmiChildEdit.Text = "Edit"
         '
         'tsmiChildReport
         '
         Me.tsmiChildReport.Name = "tsmiChildReport"
-        Me.tsmiChildReport.Size = New System.Drawing.Size(146, 22)
+        Me.tsmiChildReport.Size = New System.Drawing.Size(181, 26)
         Me.tsmiChildReport.Text = "Report"
         '
         'tsmiChildOpenWebsite
         '
         Me.tsmiChildOpenWebsite.Name = "tsmiChildOpenWebsite"
-        Me.tsmiChildOpenWebsite.Size = New System.Drawing.Size(146, 22)
+        Me.tsmiChildOpenWebsite.Size = New System.Drawing.Size(181, 26)
         Me.tsmiChildOpenWebsite.Text = "Go to website"
         '
         'btnOSM
@@ -477,6 +480,12 @@ Partial Class frmAnalyze
         'ofdBooundaries
         '
         Me.ofdBooundaries.Filter = "CSV Files|*.csv|All Files|*.*"
+        '
+        'tsmiChildReview
+        '
+        Me.tsmiChildReview.Name = "tsmiChildReview"
+        Me.tsmiChildReview.Size = New System.Drawing.Size(181, 26)
+        Me.tsmiChildReview.Text = "OSM Review"
         '
         'frmAnalyze
         '
@@ -571,4 +580,5 @@ Partial Class frmAnalyze
     Friend WithEvents tsmiOpenWebsite As ToolStripMenuItem
     Friend WithEvents tsmiChildOpenWebsite As ToolStripMenuItem
     Friend WithEvents colWebsite As ColumnHeader
+    Friend WithEvents tsmiChildReview As ToolStripMenuItem
 End Class

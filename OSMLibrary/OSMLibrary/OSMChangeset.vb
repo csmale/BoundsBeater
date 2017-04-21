@@ -84,10 +84,12 @@ Public Class OSMChangeset
         x.WriteAttributeString("created_at", CreatedAt.ToUniversalTime.ToString("o"))
         x.WriteAttributeString("closed_at", ClosedAt.ToUniversalTime.ToString("o"))
         x.WriteAttributeString("open", IIf(_IsOpen, "true", "false"))
+        If __Bbox IsNot Nothing Then
+            x.WriteAttributeString("min_lat", __Bbox.MinLat.ToString)
         x.WriteAttributeString("min_lat", __Bbox.MinLat.ToString)
         x.WriteAttributeString("min_lat", __Bbox.MinLat.ToString)
-        x.WriteAttributeString("min_lat", __Bbox.MinLat.ToString)
-        x.WriteAttributeString("min_lat", __Bbox.MinLat.ToString)
+            x.WriteAttributeString("min_lat", __Bbox.MinLat.ToString)
+        End If
         x.WriteAttributeString("comments_count", Comments.Count)
     End Sub
     Public Overrides Sub SerializeEnd(x As XmlTextWriter)

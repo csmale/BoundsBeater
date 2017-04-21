@@ -625,7 +625,7 @@ Public Class frmAnalyze
     End Sub
 
     Private Sub tsmiChildEdit_Click(sender As Object, e As EventArgs) Handles tsmiChildEdit.Click
-        If lvChildren.SelectedItems.Count = 0 Then Return
+        If lvChildren.SelectedItems.Count <> 1 Then Return
         Dim lvi As ListViewItem = lvChildren.SelectedItems(0)
         If IsNothing(lvi) Then Return
         Dim x As TreeNode = DirectCast(lvi.Tag, TreeNode)
@@ -769,7 +769,7 @@ Public Class frmAnalyze
     End Sub
 
     Private Sub tsmiChildReport_Click(sender As Object, e As EventArgs) Handles tsmiChildReport.Click
-        If lvChildren.SelectedItems.Count = 0 Then Return
+        If lvChildren.SelectedItems.Count <> 1 Then Return
         Dim lvi As ListViewItem = lvChildren.SelectedItems(0)
         If IsNothing(lvi) Then Return
         Dim x As TreeNode = DirectCast(lvi.Tag, TreeNode)
@@ -1343,7 +1343,7 @@ Public Class frmAnalyze
     End Sub
 
     Private Sub tsmiChildOpenWebsite_Click(sender As Object, e As EventArgs) Handles tsmiChildOpenWebsite.Click
-        If lvChildren.SelectedItems.Count = 0 Then Return
+        If lvChildren.SelectedItems.Count <> 1 Then Return
         Dim lvi As ListViewItem = lvChildren.SelectedItems(0)
         If IsNothing(lvi) Then Return
         Dim x As TreeNode = DirectCast(lvi.Tag, TreeNode)
@@ -1352,6 +1352,55 @@ Public Class frmAnalyze
         bi = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
         If bi Is Nothing Then Exit Sub
         If Len(bi.Website) > 0 Then OpenBrowserAt(bi.Website)
+    End Sub
+
+    Private Sub tsmiChildReview_Click(sender As Object, e As EventArgs) Handles tsmiChildReview.Click
+        If lvChildren.SelectedItems.Count < 1 Then Return
+        Dim items As New List(Of BoundaryDB.BoundaryItem)
+        Dim x As TreeNode
+        Dim bi As BoundaryDB.BoundaryItem
+
+        For Each lvi As ListViewItem In lvChildren.SelectedItems
+            x = DirectCast(lvi.Tag, TreeNode)
+            If x IsNot Nothing Then
+                bi = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+                If bi IsNot Nothing Then
+                    If bi.OSMRelation > 0 Then
+                        items.Add(bi)
+                    End If
+                End If
+            End If
+        Next
+        Dim f As New frmReview(items)
+        f.ShowDialog()
+    End Sub
+
+    Private Sub cmsChild_Opening(sender As Object, e As CancelEventArgs) Handles cmsChild.Opening
+        tsmiChildEdit.Enabled = (lvChildren.SelectedItems.Count = 1)
+        tsmiChildOpenWebsite.Enabled = (lvChildren.SelectedItems.Count = 1)
+        tsmiChildOverviewReport.Enabled = (lvChildren.SelectedItems.Count = 1)
+        tsmiChildReport.Enabled = (lvChildren.SelectedItems.Count = 1)
+        tsmiChildReview.Enabled = (lvChildren.SelectedItems.Count >= 1)
+    End Sub
+
+    Private Sub cmsNode_Opening(sender As Object, e As CancelEventArgs) Handles cmsNode.Opening
+        tsmiAddChild.Enabled = (tvList.SelectedNode IsNot Nothing)
+        tsmiDeepChildReport.Enabled = (tvList.SelectedNode IsNot Nothing)
+        tsmiFlush.Enabled = (tvList.SelectedNode IsNot Nothing)
+        tsmiJSON.Enabled = (tvList.SelectedNode IsNot Nothing)
+        tsmiOpenWebsite.Enabled = (tvList.SelectedNode IsNot Nothing)
+        tsmiReport.Enabled = (tvList.SelectedNode IsNot Nothing)
+        tsmiReview.Enabled = (tvList.SelectedNode IsNot Nothing)
+        tsmiSearch.Enabled = (tvList.SelectedNode IsNot Nothing)
+        tsmiShowAll.Enabled = (tvList.SelectedNode IsNot Nothing)
+    End Sub
+
+    Private Sub lvChildren_KeyDown(sender As Object, e As KeyEventArgs) Handles lvChildren.KeyDown
+        If e.KeyData = (Keys.A Or Keys.Control) Then
+            For Each item In lvChildren.Items
+                item.Selected = True
+            Next
+        End If
     End Sub
 End Class
 Public Class ListViewComparer

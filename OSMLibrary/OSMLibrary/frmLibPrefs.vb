@@ -13,6 +13,8 @@ Public Class frmLibPrefs
             .OSMBaseApiURL = txtOsmApiBaseUrl.Text
             .OSMLibUserAgent = txtUserAgent.Text
             .OSMXapiBaseApiURL = txtXapiBaseUrl.Text
+            .APIUser = txtOsmUser.Text
+            .APIPassword = txtOsmPassword.Text
         End With
         Me.DialogResult = System.Windows.Forms.DialogResult.OK
         Me.Close()
@@ -30,6 +32,8 @@ Public Class frmLibPrefs
             txtOsmApiBaseUrl.Text = .OSMBaseApiURL
             txtUserAgent.Text = .OSMLibUserAgent
             txtXapiBaseUrl.Text = .OSMXapiBaseApiURL
+            txtOsmUser.Text = .APIUser
+            txtOsmPassword.Text = .APIPassword
         End With
     End Sub
 

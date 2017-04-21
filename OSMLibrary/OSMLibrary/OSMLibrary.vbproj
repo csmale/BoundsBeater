@@ -168,6 +168,7 @@
     <Compile Include="OSMSQLiteCacheProvider.vb" />
     <Compile Include="OSMTag.vb" />
     <Compile Include="OSMTagList.vb" />
+    <Compile Include="OSMUpdater.vb" />
     <Compile Include="OSMUser.vb" />
     <Compile Include="OSMWay.vb" />
     <Compile Include="OSMWebException.vb" />
@@ -190,7 +191,7 @@
       <LastGenOutput>Application.Designer.vb</LastGenOutput>
     </None>
     <None Include="My Project\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
       <CustomToolNamespace>My</CustomToolNamespace>
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>

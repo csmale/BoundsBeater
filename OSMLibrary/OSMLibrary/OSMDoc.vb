@@ -256,6 +256,7 @@ Public Class OSMDoc
     End Function
     Public Function SaveXML(sFile As String, Optional UseVersions As Boolean = False) As Boolean
         Dim x As XmlTextWriter
+        Dim bRet As Boolean
 
         Try
             x = New XmlTextWriter(sFile, System.Text.Encoding.UTF8)
@@ -263,10 +264,19 @@ Public Class OSMDoc
             MsgBox(e.Message)
             Return False
         End Try
-
-        'write header
         x.Formatting = Formatting.Indented
         x.WriteStartDocument(True)
+
+        bRet = SaveXML(x, UseVersions)
+
+        x.WriteEndDocument()
+        x.Close()
+        Return bRet
+    End Function
+
+    Public Function SaveXML(x As XmlWriter, Optional UseVersions As Boolean = False) As Boolean
+        'write header
+
         x.WriteStartElement("osm")
         x.WriteAttributeString("version", "0.6")
         x.WriteAttributeString("generator", "BoundsBeater")
@@ -311,8 +321,6 @@ Public Class OSMDoc
         Next
         'write trailer
         x.WriteEndElement()
-        x.WriteEndDocument()
-        x.Close()
         Return True
     End Function
     Public Sub ClearChangedFlags()

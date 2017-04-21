@@ -41,6 +41,7 @@ Public Class BoundaryDBReviewProvider
     Private Const TYPE As String = "type"
     Private Const UNITARY_AUTHORITY As String = "unitary_authority"
     Private Const VILLAGE As String = "village"
+    Private Const WEBSITE As String = "website"
     Private Const YES As String = "yes"
 
 
@@ -61,6 +62,7 @@ Public Class BoundaryDBReviewProvider
         Add(BOUNDARY, ADMINISTRATIVE)
         AddNonEmpty(COUNCIL_NAME, dbi.CouncilName)
         AddNonEmpty(NAME, dbi.Name)
+        AddNonEmpty(WEBSITE, dbi.Website)
         If dbi.IsRoyal Then Add(ROYAL, YES)
 
         Select Case dbi.BoundaryType
@@ -125,20 +127,17 @@ Public Class BoundaryDBReviewProvider
             Debug.Print($"UpdateGSS: DB value {dbi.ONSCode} does not match required prefix {Prefix}")
             Return
         End If
+        Add(REF_GSS, dbi.ONSCode)
         If Len(sGSS) > 0 Then ' there is a value in OSM already
             If Left(sGSS, Len(Prefix)) = Prefix Then ' looks possibly valid
                 If sGSS > dbi.ONSCode Then ' database out of date?
                     Debug.Print($"UpdateGSS: OSM value {sGSS} seems newer than DB value {dbi.ONSCode}")
                 ElseIf sGSS < dbi.ONSCode Then ' database is newer
                     Debug.Print($"UpdateGSS: OSM value {sGSS} seems older than DB value {dbi.ONSCode}, map update required?")
-                Else
-                    Add(REF_GSS, dbi.ONSCode)
                 End If
             Else
                 Debug.Print($"UpdateGSS: OSM value {sGSS} does not match required prefix {Prefix}")
             End If
-        Else ' no current value in OSM
-            Add(REF_GSS, dbi.ONSCode)
         End If
     End Sub
     Private Sub DoCouncilStyle()
@@ -166,7 +165,7 @@ Public Class BoundaryDBReviewProvider
         Select Case dbi.ParishType
             Case BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil : Add(PARISH_TYPE, JOINT_PARISH_COUNCIL)
             Case BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishMeeting : Add(PARISH_TYPE, JOINT_PARISH_MEETING)
-            Case BoundaryDB.BoundaryItem.ParishTypes.PT_ParishCouncil : Add(PARISH_TYPE, PARISH_COUNCIL)
+            ' Case BoundaryDB.BoundaryItem.ParishTypes.PT_ParishCouncil : Add(PARISH_TYPE, PARISH_COUNCIL)
             Case BoundaryDB.BoundaryItem.ParishTypes.PT_ParishMeeting : Add(PARISH_TYPE, PARISH_MEETING)
         End Select
         DoCouncilStyle()
@@ -209,7 +208,7 @@ Public Class BoundaryDBReviewProvider
         Add(ADMIN_LEVEL, "6")
         Add(DESIGNATION, METRO_DISTRICT)
         DoCouncilStyle()
-        UpdateGSS("E07")
+        UpdateGSS("E08")
         Return OSMReviewResult.OK
     End Function
     Private Function ProcessNonMetroCounty() As OSMReviewResult
@@ -222,7 +221,7 @@ Public Class BoundaryDBReviewProvider
         Add(ADMIN_LEVEL, "8")
         Add(DESIGNATION, NON_METRO_DISTRICT)
         DoCouncilStyle()
-        UpdateGSS("E08")
+        UpdateGSS("E07")
         Return OSMReviewResult.OK
     End Function
     Private Function ProcessUnitary() As OSMReviewResult

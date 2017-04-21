@@ -26,6 +26,12 @@ Public Class OSMRelation
             Return sJSON.ToString
         End Get
     End Property
+    Public Overrides Function Clone() As OSMObject
+        Dim xNew As OSMRelation = MyBase.Clone()
+        xNew.UsedByRelations.AddRange(UsedByRelations)
+        ' xNew.Members.AddRange(Members)
+        Return xNew
+    End Function
     Public Overrides ReadOnly Property GeoJSON As String
         Get
             Dim sJSON As New System.Text.StringBuilder

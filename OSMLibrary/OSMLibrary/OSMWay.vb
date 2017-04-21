@@ -1,6 +1,7 @@
 ﻿Imports System.Xml
 Imports System.Drawing
 Imports System.Text
+Imports OSMLibrary
 
 Public Class OSMWay
     Inherits OSMObject
@@ -24,7 +25,11 @@ Public Class OSMWay
             Return __Bbox
         End Get
     End Property
+    Public Overrides Function Clone() As OSMObject
+        Dim xNew As OSMWay = MyBase.Clone()
 
+        Return xNew
+    End Function
     Public Overrides ReadOnly Property JSON As String
         Get
             Dim sbJSON As New StringBuilder

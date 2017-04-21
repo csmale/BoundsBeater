@@ -1,6 +1,7 @@
 ﻿Imports System.Net
 Imports System.IO
 Imports System.Security
+Imports System.Xml
 ''' <summary>
 ''' OSMApi wraps OSM API v0.6
 ''' </summary>
@@ -9,12 +10,12 @@ Public Class OSMApi
     ''' Base URL for the OSM API.
     ''' </summary>
     ''' <returns></returns>
-    Public Property BaseURL As String = My.Settings.OSMBaseApiURL
+    Public Property BaseURL As String = My.Settings.OSMBaseApiURL & "/api/0.6/"
     ''' <summary>
     ''' Credentials for authentication to the OSM API.
     ''' </summary>
     ''' <returns></returns>
-    Public Property Credentials As NetworkCredential
+    Public Property Credentials As NetworkCredential = New NetworkCredential(My.Settings.APIUser, My.Settings.APIPassword)
     ''' <summary>
     ''' User Agent string for HTTP headers.
     ''' </summary>
@@ -36,6 +37,14 @@ Public Class OSMApi
     ''' </summary>
     ''' <returns>Timeout in milliseconds</returns>
     Public Property Timeout As Integer = My.Settings.OSMApiTimeout
+    ''' <summary>
+    ''' Container to persist cookies between requests within this instance of OSMApi
+    ''' </summary>
+    Public ReadOnly CookieContainer As CookieContainer = New CookieContainer
+    ''' <summary>
+    ''' Credential cache to help with redirects
+    ''' </summary>
+    Public ReadOnly CredentialCache As New CredentialCache
     ''' <summary>
     ''' Creates an OSMApi object.
     ''' </summary>
@@ -112,68 +121,139 @@ Public Class OSMApi
         Return sTmp
     End Function
 
-    Private Function DoOSMRequest(sURL As String, ByRef sContentType As String, ByRef iStatusCode As Integer, Optional sPayload As String = "") As String
+    Public Function GetPermissions() As List(Of String)
+        Dim l As New List(Of String)
+        Dim sContentType As String = ""
+        Dim iStatusCode As Integer = 0
+        Dim sTmp As String
+        sTmp = DoOSMRequest(BaseURL & "/api/0.6/permissions", sContentType, iStatusCode)
+        Dim xDoc As New XmlDocument()
+        xDoc.LoadXml(sTmp)
+        For Each x As XmlElement In xDoc.SelectNodes("/osm/permissions/permission")
+            l.Add(x.GetAttribute("name"))
+        Next
+        Return l
+    End Function
+
+    Private Function GetNewRequest(sURL As String) As HttpWebRequest
+        Dim req As HttpWebRequest = HttpWebRequest.Create(sURL)
+        req.CookieContainer = CookieContainer
+        req.UserAgent = UserAgent
+        req.Credentials = CredentialCache
+        req.Timeout = Timeout
+        req.AutomaticDecompression = DecompressionMethods.Deflate Or DecompressionMethods.GZip
+        req.AllowAutoRedirect = False
+        Return req
+    End Function
+    Private Sub AddAuthHeader(req As HttpWebRequest)
+        Dim cre As String
+        Dim bytes As Byte()
+        Dim base64 As String
+        cre = $"{Credentials.UserName}:{Credentials.Password}"
+        bytes = System.Text.Encoding.ASCII.GetBytes(cre)
+        base64 = Convert.ToBase64String(bytes)
+        req.Headers.Add("Authorization”, "Basic " + base64)
+    End Sub
+    Public Function DoOSMRequest(sURL As String, ByRef sContentType As String, ByRef iStatusCode As Integer, Optional sPayload As String = "", Optional Verb As String = "POST") As String
         Dim req As HttpWebRequest = Nothing
         Dim resp As HttpWebResponse = Nothing
         Dim sResp As String
         Dim iStartTime As Integer
         Dim iEndTime As Integer
+        Dim sMethod As String
 
-        Debug.Print("Retrieving " & sURL)
-        Try
-            req = WebRequest.Create(sURL)
-            req.UserAgent = UserAgent
-            req.Credentials = Credentials
-            req.Timeout = Timeout
-            If Len(sPayload) = 0 Then
-                req.Method = "GET"
-            Else
-                req.Method = "PUT"
-                req.ContentType = "application/xml"
-                req.ContentLength = Len(sPayload)
-                With req.GetRequestStream
-                    ' .Write(sPayload.ToArray)
-                End With
+        Dim Uri As New Uri(sURL)
+        Dim AuthUri As New Uri($"http://{Uri.Host}/")
+        Dim MaxRedirect As Integer = 3
+        Dim nRedirect As Integer = 0
+        Dim bFinished As Boolean
 
+        _LastError = ""
+
+        If Len(sPayload) = 0 Then
+            sMethod = "GET"
+        Else
+            sMethod = Verb
+        End If
+        If Credentials IsNot Nothing Then
+            If CredentialCache.GetCredential(AuthUri, "Basic") Is Nothing Then
+                CredentialCache.Add(AuthUri, "Basic", Credentials)
             End If
-        Catch e As WebException
-            Debug.Print(e.Message)
-            If IsNothing(req) Then Return Nothing
-        End Try
+        End If
 
+        bFinished = False
+        req = GetNewRequest(sURL)
+        Do While Not bFinished
+            Debug.Print($"Accessing {sMethod} {sURL}")
+            Try
+                If Credentials IsNot Nothing Then
+                    AddAuthHeader(req)
+                    req.PreAuthenticate = True
+                End If
+                req.Method = sMethod
+                If Len(sPayload) > 0 Then
+                    ' req.KeepAlive = False
+                    ' req.Pipelined = False
+                    Dim b() As Byte
+                    b = System.Text.Encoding.UTF8.GetBytes(sPayload)
+                    req.ContentLength = b.Length
+                    If Len(sContentType) > 0 Then
+                        req.ContentType = sContentType
+                    Else
+                        req.ContentType = "application/xml; charset=utf-8"
+                    End If
+                    With req.GetRequestStream
+                        .Write(b, 0, b.Length)
+                        .Close()
+                    End With
+                End If
+            Catch e As WebException
+                _LastError = e.Message
+                Return Nothing
+            End Try
 
-        iStartTime = Environment.TickCount
-        Try
-            resp = req.GetResponse
-        Catch e As WebException
-            Debug.Print(e.Message)
+            ' get the response
+            ' note that just about anything apart from "200 OK" will throw an exception. OSM actually communicates valueable stuff with
+            ' status codes 405-499!
+            iStartTime = Environment.TickCount
+            Try
+                resp = req.GetResponse
+            Catch e As WebException
+                resp = e.Response
+                If resp Is Nothing Then
+                    Throw New WebException(e.Message, e)
+                End If
+            End Try
 
-            'if the object has been deleted, we get a 410 Gone, plus a free WebException for our troubles.
-            If IsNothing(resp) Then
-                Throw New OSMWebException("Unknown error", e)
-            Else
-                If resp.StatusCode = 410 Then
-                    Throw New OSMWebException("Object deleted", e)
+            iEndTime = Environment.TickCount
+
+            Debug.Print("HTTP status " & resp.StatusCode & " (" & resp.StatusDescription & ") in " & (iEndTime - iStartTime) & "ms from " & sURL)
+
+            If resp.StatusCode = HttpStatusCode.OK Then Exit Do
+            If resp.StatusCode = HttpStatusCode.Moved Or resp.StatusCode = HttpStatusCode.MovedPermanently Then
+                nRedirect = nRedirect + 1
+                If nRedirect >= MaxRedirect Then
+                    _LastError = "Too many redirects"
+                    Throw New WebException("Too many redirects", 1000)
+                End If
+                req = GetNewRequest(resp.GetResponseHeader("Location"))
+                AuthUri = New Uri(resp.GetResponseHeader("Location"))
+                If Credentials IsNot Nothing Then
+                    If CredentialCache.GetCredential(AuthUri, "Basic") Is Nothing Then
+                        CredentialCache.Add(AuthUri, "Basic", Credentials)
+                    End If
                 End If
             End If
+        Loop
 
-            Return Nothing
-        End Try
-        iEndTime = Environment.TickCount
         iStatusCode = resp.StatusCode
         sContentType = resp.ContentType
 
-        Debug.Print("HTTP status " & resp.StatusCode & "(" & resp.StatusDescription & ") in " & (iEndTime - iStartTime) & "ms")
-        If resp.StatusCode <> 200 Then
-            Debug.Print("HTTP status " & resp.StatusCode & "(" & resp.StatusDescription & ") on " & sURL)
-            Throw New OSMWebException("Bad HTTP Status " & resp.StatusCode.ToString())
-            Return Nothing
+        If resp.StatusCode <> HttpStatusCode.OK Then
+            _LastError = resp.StatusDescription
+            Throw New WebException(resp.StatusDescription, resp.StatusCode)
         End If
-        If Left(resp.ContentType, 8) <> "text/xml" And resp.ContentType <> "application/osm3s+xml" Then
-            Debug.Print("HTTP returned content type " & resp.ContentType & " on " & sURL)
-            Throw New OSMWebException("Unexpected content type " & resp.ContentType)
-            Return Nothing
-        End If
+
         Dim rs As Stream
         Dim rsr As StreamReader
         rs = resp.GetResponseStream
@@ -181,72 +261,25 @@ Public Class OSMApi
         sResp = rsr.ReadToEnd
         rs.Close()
         resp.Close()
+        resp.Dispose()
         Return sResp
     End Function
 
     Public Function GetOSM(sUrl As String) As OSMDoc
-        Dim req As HttpWebRequest = Nothing
-        Dim resp As HttpWebResponse = Nothing
         Dim sResp As String
-        Dim iStartTime As Integer
-        Dim iEndTime As Integer
+        Dim sContentType As String = ""
+        Dim iStatusCode As Integer = 0
 
-        _LastError = ""
-        Debug.Print("Retrieving " & sUrl)
         Try
-            req = WebRequest.Create(sUrl)
-            req.Method = "GET"
-        Catch e As WebException
-            Debug.Print(e.Message)
-            _LastError = e.Message
-            Return Nothing
+            sResp = DoOSMRequest(sUrl, sContentType, iStatusCode)
+        Catch e As Exception
+            Throw e
         End Try
 
-        req.UserAgent = UserAgent
-        req.Credentials = Credentials
-        req.Timeout = Timeout
-        req.AutomaticDecompression = DecompressionMethods.Deflate Or DecompressionMethods.GZip
-        iStartTime = Environment.TickCount
-        Try
-            resp = req.GetResponse
-        Catch e As WebException
-            Debug.Print(e.Message)
-            'if the object has been deleted, we get a 410 Gone, plus a free WebException for our troubles.
-            If IsNothing(resp) Then
-                _LastError = e.Message
-                Throw New OSMWebException("Unknown error", e)
-            Else
-                If resp.StatusCode = 404 Then
-                    _LastError = "Not found"
-                    Throw New OSMWebException("Object not found", e)
-                ElseIf resp.StatusCode = 410 Then
-                    _LastError = "Deleted"
-                    Throw New OSMWebException("Object deleted", e)
-                End If
-                Return Nothing
-            End If
-        End Try
-        iEndTime = Environment.TickCount
-        Debug.Print("HTTP status " & resp.StatusCode & "(" & resp.StatusDescription & ") in " & (iEndTime - iStartTime) & "ms")
-        If resp.StatusCode <> 200 Then
-            Debug.Print("HTTP status " & resp.StatusCode & "(" & resp.StatusDescription & ") on " & sUrl)
-            _LastError = resp.StatusDescription
-            Throw New OSMWebException("Bad HTTP Status " & resp.StatusCode.ToString())
+        If iStatusCode <> 200 Then
             Return Nothing
         End If
-        If Left(resp.ContentType, 8) <> "text/xml" And resp.ContentType <> "application/osm3s+xml" Then
-            Debug.Print("HTTP returned content type " & resp.ContentType & " on " & sUrl)
-            _LastError = "Unexpected content type " & resp.ContentType
-            Throw New OSMWebException("Unexpected content type " & resp.ContentType)
-            Return Nothing
-        End If
-        Dim rs As Stream
-        Dim rsr As StreamReader
-        rs = resp.GetResponseStream
-        rsr = New StreamReader(rs)
-        sResp = rsr.ReadToEnd
-        rs.Close()
-        resp.Close()
+
         Dim xDoc As New OSMDoc
         If xDoc.LoadXML(sResp) Then
             Return xDoc
