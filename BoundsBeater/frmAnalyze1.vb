@@ -677,6 +677,7 @@ Public Class frmAnalyze
         End If
         Dim iChild As Long
         For Each xChild As TreeNode In x.Nodes
+            If xChild.Tag Is Nothing Then Continue For
             p = DirectCast(xChild.Tag, BoundaryDB.BoundaryItem)
             iChild = p.OSMRelation
             If iChild > 0 Then

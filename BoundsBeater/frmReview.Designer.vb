@@ -22,6 +22,7 @@ Partial Class frmReview
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Me.lvTagList = New System.Windows.Forms.ListView()
         Me.colTag = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.colOSM = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
@@ -31,12 +32,18 @@ Partial Class frmReview
         Me.TableLayoutPanel1 = New System.Windows.Forms.TableLayoutPanel()
         Me.FlowLayoutPanel1 = New System.Windows.Forms.FlowLayoutPanel()
         Me.btnCommit = New System.Windows.Forms.Button()
-        Me.lblTitle = New System.Windows.Forms.Label()
         Me.btnNext = New System.Windows.Forms.Button()
-        Me.txtChangesetComment = New System.Windows.Forms.TextBox()
         Me.btnNewChangeset = New System.Windows.Forms.Button()
+        Me.lblTitle = New System.Windows.Forms.Label()
+        Me.txtChangesetComment = New System.Windows.Forms.TextBox()
+        Me.cmsTagAction = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.cmsiKeepOsm = New System.Windows.Forms.ToolStripMenuItem()
+        Me.cmsiTakeSource = New System.Windows.Forms.ToolStripMenuItem()
+        Me.cmsiCustom = New System.Windows.Forms.ToolStripMenuItem()
+        Me.cmsiDeleteTag = New System.Windows.Forms.ToolStripMenuItem()
         Me.TableLayoutPanel1.SuspendLayout()
         Me.FlowLayoutPanel1.SuspendLayout()
+        Me.cmsTagAction.SuspendLayout()
         Me.SuspendLayout()
         '
         'lvTagList
@@ -47,7 +54,7 @@ Partial Class frmReview
         Me.lvTagList.FullRowSelect = True
         Me.lvTagList.Location = New System.Drawing.Point(3, 103)
         Me.lvTagList.Name = "lvTagList"
-        Me.lvTagList.Size = New System.Drawing.Size(796, 200)
+        Me.lvTagList.Size = New System.Drawing.Size(1044, 200)
         Me.lvTagList.Sorting = System.Windows.Forms.SortOrder.Ascending
         Me.lvTagList.TabIndex = 0
         Me.lvTagList.UseCompatibleStateImageBehavior = False
@@ -88,6 +95,7 @@ Partial Class frmReview
         Me.TableLayoutPanel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink
         Me.TableLayoutPanel1.ColumnCount = 1
         Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle())
+        Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20.0!))
         Me.TableLayoutPanel1.Controls.Add(Me.lvTagList, 0, 2)
         Me.TableLayoutPanel1.Controls.Add(Me.FlowLayoutPanel1, 0, 3)
         Me.TableLayoutPanel1.Controls.Add(Me.lblTitle, 0, 0)
@@ -100,7 +108,7 @@ Partial Class frmReview
         Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50.0!))
         Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle())
         Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50.0!))
-        Me.TableLayoutPanel1.Size = New System.Drawing.Size(802, 349)
+        Me.TableLayoutPanel1.Size = New System.Drawing.Size(1050, 349)
         Me.TableLayoutPanel1.TabIndex = 2
         '
         'FlowLayoutPanel1
@@ -112,7 +120,7 @@ Partial Class frmReview
         Me.FlowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill
         Me.FlowLayoutPanel1.Location = New System.Drawing.Point(3, 309)
         Me.FlowLayoutPanel1.Name = "FlowLayoutPanel1"
-        Me.FlowLayoutPanel1.Size = New System.Drawing.Size(796, 44)
+        Me.FlowLayoutPanel1.Size = New System.Drawing.Size(1044, 44)
         Me.FlowLayoutPanel1.TabIndex = 1
         '
         'btnCommit
@@ -124,15 +132,6 @@ Partial Class frmReview
         Me.btnCommit.Text = "Commit + Next"
         Me.btnCommit.UseVisualStyleBackColor = True
         '
-        'lblTitle
-        '
-        Me.lblTitle.AutoSize = True
-        Me.lblTitle.Location = New System.Drawing.Point(3, 0)
-        Me.lblTitle.Name = "lblTitle"
-        Me.lblTitle.Size = New System.Drawing.Size(67, 15)
-        Me.lblTitle.TabIndex = 2
-        Me.lblTitle.Text = "Reviewing:"
-        '
         'btnNext
         '
         Me.btnNext.Location = New System.Drawing.Point(105, 3)
@@ -141,15 +140,6 @@ Partial Class frmReview
         Me.btnNext.TabIndex = 3
         Me.btnNext.Text = "Next"
         Me.btnNext.UseVisualStyleBackColor = True
-        '
-        'txtChangesetComment
-        '
-        Me.txtChangesetComment.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.txtChangesetComment.Location = New System.Drawing.Point(3, 53)
-        Me.txtChangesetComment.Multiline = True
-        Me.txtChangesetComment.Name = "txtChangesetComment"
-        Me.txtChangesetComment.Size = New System.Drawing.Size(796, 44)
-        Me.txtChangesetComment.TabIndex = 3
         '
         'btnNewChangeset
         '
@@ -160,17 +150,67 @@ Partial Class frmReview
         Me.btnNewChangeset.Text = "New Changeset"
         Me.btnNewChangeset.UseVisualStyleBackColor = True
         '
+        'lblTitle
+        '
+        Me.lblTitle.AutoSize = True
+        Me.lblTitle.Location = New System.Drawing.Point(3, 0)
+        Me.lblTitle.Name = "lblTitle"
+        Me.lblTitle.Size = New System.Drawing.Size(67, 15)
+        Me.lblTitle.TabIndex = 2
+        Me.lblTitle.Text = "Reviewing:"
+        '
+        'txtChangesetComment
+        '
+        Me.txtChangesetComment.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.txtChangesetComment.Location = New System.Drawing.Point(3, 53)
+        Me.txtChangesetComment.Multiline = True
+        Me.txtChangesetComment.Name = "txtChangesetComment"
+        Me.txtChangesetComment.Size = New System.Drawing.Size(1044, 44)
+        Me.txtChangesetComment.TabIndex = 3
+        '
+        'cmsTagAction
+        '
+        Me.cmsTagAction.ImageScalingSize = New System.Drawing.Size(20, 20)
+        Me.cmsTagAction.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.cmsiKeepOsm, Me.cmsiTakeSource, Me.cmsiDeleteTag, Me.cmsiCustom})
+        Me.cmsTagAction.Name = "cmsTagAction"
+        Me.cmsTagAction.Size = New System.Drawing.Size(203, 108)
+        '
+        'cmsiKeepOsm
+        '
+        Me.cmsiKeepOsm.Name = "cmsiKeepOsm"
+        Me.cmsiKeepOsm.Size = New System.Drawing.Size(202, 26)
+        Me.cmsiKeepOsm.Text = "Keep OSM Value"
+        '
+        'cmsiTakeSource
+        '
+        Me.cmsiTakeSource.Name = "cmsiTakeSource"
+        Me.cmsiTakeSource.Size = New System.Drawing.Size(202, 26)
+        Me.cmsiTakeSource.Text = "Take Source Value"
+        '
+        'cmsiCustom
+        '
+        Me.cmsiCustom.Name = "cmsiCustom"
+        Me.cmsiCustom.Size = New System.Drawing.Size(202, 26)
+        Me.cmsiCustom.Text = "Custom Value"
+        '
+        'cmsiDeleteTag
+        '
+        Me.cmsiDeleteTag.Name = "cmsiDeleteTag"
+        Me.cmsiDeleteTag.Size = New System.Drawing.Size(202, 26)
+        Me.cmsiDeleteTag.Text = "Delete Tag"
+        '
         'frmReview
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(802, 349)
+        Me.ClientSize = New System.Drawing.Size(1050, 349)
         Me.Controls.Add(Me.TableLayoutPanel1)
         Me.Name = "frmReview"
         Me.Text = "OSM Reviewer"
         Me.TableLayoutPanel1.ResumeLayout(False)
         Me.TableLayoutPanel1.PerformLayout()
         Me.FlowLayoutPanel1.ResumeLayout(False)
+        Me.cmsTagAction.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -189,4 +229,9 @@ Partial Class frmReview
     Friend WithEvents btnNext As Button
     Friend WithEvents txtChangesetComment As TextBox
     Friend WithEvents btnNewChangeset As Button
+    Friend WithEvents cmsTagAction As ContextMenuStrip
+    Friend WithEvents cmsiKeepOsm As ToolStripMenuItem
+    Friend WithEvents cmsiTakeSource As ToolStripMenuItem
+    Friend WithEvents cmsiCustom As ToolStripMenuItem
+    Friend WithEvents cmsiDeleteTag As ToolStripMenuItem
 End Class

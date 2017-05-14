@@ -229,7 +229,7 @@ Public Class OSMApi
 
             Debug.Print("HTTP status " & resp.StatusCode & " (" & resp.StatusDescription & ") in " & (iEndTime - iStartTime) & "ms from " & sURL)
 
-            If resp.StatusCode = HttpStatusCode.OK Then Exit Do
+
             If resp.StatusCode = HttpStatusCode.Moved Or resp.StatusCode = HttpStatusCode.MovedPermanently Then
                 nRedirect = nRedirect + 1
                 If nRedirect >= MaxRedirect Then
@@ -243,6 +243,8 @@ Public Class OSMApi
                         CredentialCache.Add(AuthUri, "Basic", Credentials)
                     End If
                 End If
+            Else
+                Exit Do
             End If
         Loop
 
@@ -273,7 +275,7 @@ Public Class OSMApi
         Try
             sResp = DoOSMRequest(sUrl, sContentType, iStatusCode)
         Catch e As Exception
-            Throw e
+            Return Nothing
         End Try
 
         If iStatusCode <> 200 Then

@@ -20,6 +20,13 @@ Public Class frmReview
     Private u As OSMUpdater
     Public ChangesetComment As String
     Const MIN_COMMENT_LENGTH As Integer = 10
+    'declare a global variable to store the column index
+    Private lviCurrent As ListViewItem
+    Private Shared colourAdded As Color = Color.Green
+    Private Shared colourChanged As Color = Color.Yellow
+    Private Shared colourDeleted As Color = Color.Red
+    Private Shared colourLeave As Color = Color.White
+    Const FinalSubitem As Integer = 3
 
     Public Sub New(db As BoundaryDB.BoundaryItem)
 
@@ -160,15 +167,15 @@ Public Class frmReview
                     If tagsOSM.Keys.Contains(sTag) Then
                         If .Text <> tagsOSM(sTag) Then
                             If .Text = "" Then
-                                .BackColor = Color.Red
+                                .BackColor = colourDeleted
                             Else
-                                .BackColor = Color.Yellow
+                                .BackColor = colourChanged
                             End If
                         End If
                     Else
                         If Len(newOSM(sTag)) > 0 Then
                             lvi.Checked = True
-                            .BackColor = Color.LightGreen
+                            .BackColor = colourAdded
                         End If
                     End If
                 End With
@@ -276,5 +283,112 @@ Public Class frmReview
             btnNewChangeset.Enabled = False
             u.Close()
         End If
+    End Sub
+
+    Private Sub lvTagList_MouseUp(sender As Object, e As MouseEventArgs) Handles lvTagList.MouseUp
+        If e.Button <> MouseButtons.Right Then Return
+        Dim CurrentSB As ListViewItem.ListViewSubItem
+        ' check where clicked
+        lviCurrent = lvTagList.GetItemAt(e.X, e.Y)     ' which listviewitem was clicked
+        If lviCurrent Is Nothing Then Return
+        CurrentSB = lviCurrent.GetSubItemAt(e.X, e.Y)  ' which subitem was clicked
+        If CurrentSB Is Nothing Then Return
+        cmsTagAction.Show(MousePosition)
+    End Sub
+
+    Private Sub cmsiCustom_Click(sender As Object, e As EventArgs) Handles cmsiCustom.Click
+        If lviCurrent Is Nothing Then Return
+        Dim sTmp As String
+        sTmp = InputBox($"Enter new custom value for {lviCurrent.Text}", $"Tag: {lviCurrent.Text}", lviCurrent.SubItems(FinalSubitem).Text)
+        If Len(sTmp) = 0 Then Return
+        Dim sTag As String = lviCurrent.Text
+        Dim sVal As String
+        If tagsOSM.ContainsKey(sTag) Then
+            sVal = tagsOSM(sTag)
+        Else
+            sVal = ""
+        End If
+
+        With lviCurrent.SubItems(FinalSubitem)
+            If sVal = "" Then
+                .BackColor = colourAdded
+                lviCurrent.Checked = True
+            ElseIf sVal = sTmp Then
+                .BackColor = colourLeave
+                lviCurrent.Checked = False
+            Else
+                .BackColor = colourChanged
+                lviCurrent.Checked = True
+            End If
+            .Text = sTmp
+            newOSM(sTag) = sTmp
+        End With
+    End Sub
+
+    Private Sub cmsiDeleteTag_Click(sender As Object, e As EventArgs) Handles cmsiDeleteTag.Click
+        If lviCurrent Is Nothing Then Return
+        Dim sTag As String = lviCurrent.Text
+        Dim sVal As String
+        If tagsOSM.ContainsKey(sTag) Then
+            sVal = tagsOSM(sTag)
+        Else
+            sVal = ""
+        End If
+        With lviCurrent.SubItems(FinalSubitem)
+            If sVal = "" Then
+                .BackColor = colourLeave
+                lviCurrent.Checked = False
+            Else
+                .BackColor = colourDeleted
+                lviCurrent.Checked = True
+            End If
+            .Text = ""
+            newOSM(sTag) = ""
+        End With
+    End Sub
+
+    Private Sub cmsiKeepOsm_Click(sender As Object, e As EventArgs) Handles cmsiKeepOsm.Click
+        If lviCurrent Is Nothing Then Return
+        Dim sTag As String = lviCurrent.Text
+        Dim sVal As String
+        If tagsOSM.ContainsKey(sTag) Then
+            sVal = tagsOSM(sTag)
+        Else
+            sVal = ""
+        End If
+        With lviCurrent.SubItems(FinalSubitem)
+            .Text = tagsOSM(sTag)
+            newOSM(sTag) = tagsOSM(sTag)
+            .BackColor = colourLeave
+        End With
+        lviCurrent.Checked = False
+    End Sub
+
+    Private Sub cmsiTakeSource_Click(sender As Object, e As EventArgs) Handles cmsiTakeSource.Click
+        If lviCurrent Is Nothing Then Return
+        Dim sTag As String = lviCurrent.Text
+        Dim sVal As String
+        If tagsOSM.ContainsKey(sTag) Then
+            sVal = tagsOSM(sTag)
+        Else
+            sVal = ""
+        End If
+        Dim sNew As String
+        If tagsBDB.ContainsKey(sTag) Then
+            sNew = tagsBDB(sTag)
+        Else
+            sNew = ""
+        End If
+        With lviCurrent.SubItems(FinalSubitem)
+            If sVal <> sNew Then
+                .BackColor = colourChanged
+                lviCurrent.Checked = True
+            Else
+                .BackColor = colourLeave
+                lviCurrent.Checked = False
+            End If
+            .Text = sNew
+            newOSM(sTag) = sNew
+        End With
     End Sub
 End Class
