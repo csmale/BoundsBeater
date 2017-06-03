@@ -171,4 +171,39 @@ delete existing thing
 ID and version must match
 lat/lon must be present
 #End If
+    ''' <summary>
+    ''' Upload an osmChange file
+    ''' </summary>
+    ''' <param name="sXML">The osmChange data</param>
+    ''' <returns></returns>
+    Public Function UploadOSC(sXML As String) As Boolean
+        If ChangesetID = 0 Then Return False
+        Dim xDoc As New XmlDocument
+        xDoc.LoadXml(sXML)
+        Return UploadOSC(xDoc)
+    End Function
+
+    Public Function UploadOSC(XML As XmlDocument) As Boolean
+        If ChangesetID = 0 Then Return False
+        If XML.DocumentElement.Name <> "osmChange" Then
+            Return False
+        End If
+        For Each x As XmlElement In XML.SelectNodes("relation|way|node")
+            Dim cs As XmlNode = x.GetAttributeNode("changeset")
+            If cs IsNot Nothing Then
+                cs.InnerText = ChangesetID.ToString
+            End If
+        Next
+        Dim sPayload As String = XML.InnerText
+        Dim ContentType As String = ""
+        Dim Status As Integer = 0
+        Dim sTmp As String
+        Try
+            sTmp = api.DoOSMRequest(api.BaseURL & $"api/0.6/changeset/{ChangesetID}/upload", ContentType, Status, sPayload, "POST")
+        Catch e As Exception
+            MsgBox(e.Message)
+            Return False
+        End Try
+        Return True
+    End Function
 End Class

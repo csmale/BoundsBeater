@@ -46,6 +46,7 @@ Public Class frmEdit
             .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Joint Parish Council", BoundaryItem.ParishTypes.PT_JointParishCouncil))
             .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Joint Parish Meeting", BoundaryItem.ParishTypes.PT_JointParishMeeting))
             .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Parish Meeting", BoundaryItem.ParishTypes.PT_ParishMeeting))
+            .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Lands Common", BoundaryItem.ParishTypes.PT_LandsCommon))
             .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("N/A", BoundaryItem.ParishTypes.PT_NA))
         End With
         With cbType.Items
@@ -91,7 +92,7 @@ Public Class frmEdit
             If x.Parent Is xItem.Parent Then
                 If x.BoundaryType = BoundaryItem.BoundaryTypes.BT_ParishGroup Then
                     _groups.Add(x)
-                    If x.Name = xItem.CouncilName Then xSelected = x
+                    If x.CouncilName = xItem.CouncilName Then xSelected = x
                 End If
             End If
         Next
@@ -107,7 +108,7 @@ Public Class frmEdit
         End If
 
         cbGroup.DataSource = _groups
-        cbGroup.DisplayMember = "Name"
+        cbGroup.DisplayMember = "CouncilName"
         cbGroup.ValueMember = "ONSCode"
         cbGroup.SelectedItem = xSelected
         With xItem

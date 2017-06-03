@@ -34,7 +34,7 @@ Public Class frmMatch
         If sGSS <> "" AndAlso lblGSS.Text <> "" AndAlso sGSS <> lblGSS.Text Then
             ' GSS code is different!!!
             If MsgBox(String.Format("GSS code is different: Database has {0}, selected has {1}. Update database?", lblGSS.Text, sGSS), MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
-                CType(lvAreas.SelectedItems(0).Tag, BoundaryDB.BoundaryItem).ONSCode = sGSS
+                CType(lvAreas.SelectedItems(0).Tag, BoundaryDB.BoundaryItem).ONSCode = lblGSS.Text
             End If
         End If
         Me.DialogResult = Windows.Forms.DialogResult.OK

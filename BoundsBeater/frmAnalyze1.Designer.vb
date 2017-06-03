@@ -65,6 +65,7 @@ Partial Class frmAnalyze
         Me.tsmiChildEdit = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiChildReport = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiChildOpenWebsite = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiChildReview = New System.Windows.Forms.ToolStripMenuItem()
         Me.btnOSM = New System.Windows.Forms.Button()
         Me.btnClear = New System.Windows.Forms.Button()
         Me.sfdReports = New System.Windows.Forms.SaveFileDialog()
@@ -73,8 +74,9 @@ Partial Class frmAnalyze
         Me.scon1 = New System.Windows.Forms.SplitContainer()
         Me.scon2 = New System.Windows.Forms.SplitContainer()
         Me.btnCentroids = New System.Windows.Forms.Button()
-        Me.ofdBooundaries = New System.Windows.Forms.OpenFileDialog()
-        Me.tsmiChildReview = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ofdBoundaries = New System.Windows.Forms.OpenFileDialog()
+        Me.btnUpload = New System.Windows.Forms.Button()
+        Me.ofdUpload = New System.Windows.Forms.OpenFileDialog()
         Me.tabDetail.SuspendLayout()
         Me.tbpChildren.SuspendLayout()
         Me.tbpMap.SuspendLayout()
@@ -256,7 +258,7 @@ Partial Class frmAnalyze
         Me.chkUpdateAll.AutoSize = True
         Me.chkUpdateAll.Location = New System.Drawing.Point(381, 19)
         Me.chkUpdateAll.Name = "chkUpdateAll"
-        Me.chkUpdateAll.Size = New System.Drawing.Size(123, 19)
+        Me.chkUpdateAll.Size = New System.Drawing.Size(110, 17)
         Me.chkUpdateAll.TabIndex = 13
         Me.chkUpdateAll.Text = "Update/review all"
         Me.chkUpdateAll.UseVisualStyleBackColor = True
@@ -281,7 +283,7 @@ Partial Class frmAnalyze
         'tsStatus
         '
         Me.tsStatus.Name = "tsStatus"
-        Me.tsStatus.Size = New System.Drawing.Size(153, 20)
+        Me.tsStatus.Size = New System.Drawing.Size(120, 20)
         Me.tsStatus.Text = "ToolStripStatusLabel1"
         '
         'cmsNode
@@ -289,72 +291,72 @@ Partial Class frmAnalyze
         Me.cmsNode.ImageScalingSize = New System.Drawing.Size(20, 20)
         Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiSearch, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiChildOverviewReport, Me.tsmiDeepChildReport, Me.tsmiAddChild, Me.tsmiReview, Me.tsmiOpenWebsite})
         Me.cmsNode.Name = "ContextMenuStrip1"
-        Me.cmsNode.Size = New System.Drawing.Size(233, 290)
+        Me.cmsNode.Size = New System.Drawing.Size(193, 246)
         '
         'tsmiFlush
         '
         Me.tsmiFlush.Name = "tsmiFlush"
-        Me.tsmiFlush.Size = New System.Drawing.Size(232, 26)
+        Me.tsmiFlush.Size = New System.Drawing.Size(192, 22)
         Me.tsmiFlush.Text = "Flush from cache"
         '
         'tsmiEdit
         '
         Me.tsmiEdit.Name = "tsmiEdit"
-        Me.tsmiEdit.Size = New System.Drawing.Size(232, 26)
+        Me.tsmiEdit.Size = New System.Drawing.Size(192, 22)
         Me.tsmiEdit.Text = "Edit"
         '
         'tsmiSearch
         '
         Me.tsmiSearch.Name = "tsmiSearch"
-        Me.tsmiSearch.Size = New System.Drawing.Size(232, 26)
+        Me.tsmiSearch.Size = New System.Drawing.Size(192, 22)
         Me.tsmiSearch.Text = "Search"
         '
         'tsmiShowAll
         '
         Me.tsmiShowAll.Name = "tsmiShowAll"
-        Me.tsmiShowAll.Size = New System.Drawing.Size(232, 26)
+        Me.tsmiShowAll.Size = New System.Drawing.Size(192, 22)
         Me.tsmiShowAll.Text = "Show all on map"
         '
         'tsmiJSON
         '
         Me.tsmiJSON.Name = "tsmiJSON"
-        Me.tsmiJSON.Size = New System.Drawing.Size(232, 26)
+        Me.tsmiJSON.Size = New System.Drawing.Size(192, 22)
         Me.tsmiJSON.Text = "Show JSON"
         '
         'tsmiReport
         '
         Me.tsmiReport.Name = "tsmiReport"
-        Me.tsmiReport.Size = New System.Drawing.Size(232, 26)
+        Me.tsmiReport.Size = New System.Drawing.Size(192, 22)
         Me.tsmiReport.Text = "Report"
         '
         'tsmiChildOverviewReport
         '
         Me.tsmiChildOverviewReport.Name = "tsmiChildOverviewReport"
-        Me.tsmiChildOverviewReport.Size = New System.Drawing.Size(232, 26)
+        Me.tsmiChildOverviewReport.Size = New System.Drawing.Size(192, 22)
         Me.tsmiChildOverviewReport.Text = "Child Overview Report"
         '
         'tsmiDeepChildReport
         '
         Me.tsmiDeepChildReport.Name = "tsmiDeepChildReport"
-        Me.tsmiDeepChildReport.Size = New System.Drawing.Size(232, 26)
+        Me.tsmiDeepChildReport.Size = New System.Drawing.Size(192, 22)
         Me.tsmiDeepChildReport.Text = "Deep Child Report"
         '
         'tsmiAddChild
         '
         Me.tsmiAddChild.Name = "tsmiAddChild"
-        Me.tsmiAddChild.Size = New System.Drawing.Size(232, 26)
+        Me.tsmiAddChild.Size = New System.Drawing.Size(192, 22)
         Me.tsmiAddChild.Text = "Add Child"
         '
         'tsmiReview
         '
         Me.tsmiReview.Name = "tsmiReview"
-        Me.tsmiReview.Size = New System.Drawing.Size(232, 26)
+        Me.tsmiReview.Size = New System.Drawing.Size(192, 22)
         Me.tsmiReview.Text = "Review OSM"
         '
         'tsmiOpenWebsite
         '
         Me.tsmiOpenWebsite.Name = "tsmiOpenWebsite"
-        Me.tsmiOpenWebsite.Size = New System.Drawing.Size(232, 26)
+        Me.tsmiOpenWebsite.Size = New System.Drawing.Size(192, 22)
         Me.tsmiOpenWebsite.Text = "Go to website"
         '
         'txtAdminLevel
@@ -378,25 +380,31 @@ Partial Class frmAnalyze
         Me.cmsChild.ImageScalingSize = New System.Drawing.Size(20, 20)
         Me.cmsChild.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiChildEdit, Me.tsmiChildReport, Me.tsmiChildOpenWebsite, Me.tsmiChildReview})
         Me.cmsChild.Name = "cmsChild"
-        Me.cmsChild.Size = New System.Drawing.Size(182, 136)
+        Me.cmsChild.Size = New System.Drawing.Size(147, 92)
         '
         'tsmiChildEdit
         '
         Me.tsmiChildEdit.Name = "tsmiChildEdit"
-        Me.tsmiChildEdit.Size = New System.Drawing.Size(181, 26)
+        Me.tsmiChildEdit.Size = New System.Drawing.Size(146, 22)
         Me.tsmiChildEdit.Text = "Edit"
         '
         'tsmiChildReport
         '
         Me.tsmiChildReport.Name = "tsmiChildReport"
-        Me.tsmiChildReport.Size = New System.Drawing.Size(181, 26)
+        Me.tsmiChildReport.Size = New System.Drawing.Size(146, 22)
         Me.tsmiChildReport.Text = "Report"
         '
         'tsmiChildOpenWebsite
         '
         Me.tsmiChildOpenWebsite.Name = "tsmiChildOpenWebsite"
-        Me.tsmiChildOpenWebsite.Size = New System.Drawing.Size(181, 26)
+        Me.tsmiChildOpenWebsite.Size = New System.Drawing.Size(146, 22)
         Me.tsmiChildOpenWebsite.Text = "Go to website"
+        '
+        'tsmiChildReview
+        '
+        Me.tsmiChildReview.Name = "tsmiChildReview"
+        Me.tsmiChildReview.Size = New System.Drawing.Size(146, 22)
+        Me.tsmiChildReview.Text = "OSM Review"
         '
         'btnOSM
         '
@@ -409,7 +417,7 @@ Partial Class frmAnalyze
         '
         'btnClear
         '
-        Me.btnClear.Location = New System.Drawing.Point(767, 11)
+        Me.btnClear.Location = New System.Drawing.Point(751, 7)
         Me.btnClear.Name = "btnClear"
         Me.btnClear.Size = New System.Drawing.Size(49, 19)
         Me.btnClear.TabIndex = 17
@@ -477,21 +485,25 @@ Partial Class frmAnalyze
         Me.btnCentroids.Text = "Centroids"
         Me.btnCentroids.UseVisualStyleBackColor = True
         '
-        'ofdBooundaries
+        'ofdBoundaries
         '
-        Me.ofdBooundaries.Filter = "CSV Files|*.csv|All Files|*.*"
+        Me.ofdBoundaries.Filter = "CSV Files|*.csv|All Files|*.*"
         '
-        'tsmiChildReview
+        'btnUpload
         '
-        Me.tsmiChildReview.Name = "tsmiChildReview"
-        Me.tsmiChildReview.Size = New System.Drawing.Size(181, 26)
-        Me.tsmiChildReview.Text = "OSM Review"
+        Me.btnUpload.Location = New System.Drawing.Point(795, 5)
+        Me.btnUpload.Name = "btnUpload"
+        Me.btnUpload.Size = New System.Drawing.Size(34, 23)
+        Me.btnUpload.TabIndex = 21
+        Me.btnUpload.Text = "Up"
+        Me.btnUpload.UseVisualStyleBackColor = True
         '
         'frmAnalyze
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(901, 670)
+        Me.Controls.Add(Me.btnUpload)
         Me.Controls.Add(Me.btnCentroids)
         Me.Controls.Add(Me.Panel1)
         Me.Controls.Add(Me.btnClear)
@@ -576,9 +588,11 @@ Partial Class frmAnalyze
     Friend WithEvents scon2 As SplitContainer
     Friend WithEvents Panel1 As Panel
     Friend WithEvents btnCentroids As Button
-    Friend WithEvents ofdBooundaries As OpenFileDialog
+    Friend WithEvents ofdBoundaries As OpenFileDialog
     Friend WithEvents tsmiOpenWebsite As ToolStripMenuItem
     Friend WithEvents tsmiChildOpenWebsite As ToolStripMenuItem
     Friend WithEvents colWebsite As ColumnHeader
     Friend WithEvents tsmiChildReview As ToolStripMenuItem
+    Friend WithEvents btnUpload As Button
+    Friend WithEvents ofdUpload As OpenFileDialog
 End Class

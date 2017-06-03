@@ -22,11 +22,11 @@ Public Class frmAnalyze
     Const DUMMY_MARKER As String = "dummy"
     Dim bAllowExpandCollapse As Boolean = False
     Dim bExpanding As Boolean = False
-    Dim x As New System.Data.SQLite.SQLiteConnection()
+    ' Dim x As New System.Data.SQLite.SQLiteConnection()
 
     Private Sub testpbf()
         Dim x As New OSMPBF.Blob
-        Dim sc As New ProtoBuf.SerializationContext
+        ' Dim sc As New ProtoBuf.SerializationContext
         'Dim tm As New TypeModel()
         'Dim z As New ProtoBuf.ProtoReader(IStream, t, sc)
     End Sub
@@ -1074,7 +1074,7 @@ Public Class frmAnalyze
         Dim xRel As OSMRelation
         Dim xResolver As OSMResolver = Nothing
 
-        sName = xItem.Name
+        sName = xItem.CouncilName
         xGroup = xItem
         xItem = xItem.Parent    ' up to district/unitary
         For Each d In xDB.Items.Values
@@ -1308,7 +1308,7 @@ Public Class frmAnalyze
             Exit Sub
         End If
         sLatLong = My.Settings.LatLongFile
-        With ofdBooundaries
+        With ofdBoundaries
             .Title = "Import Lat/Lon from GSS CSV File"
             If Len(sLatLong) > 0 Then
                 fi = New System.IO.FileInfo(sLatLong)
@@ -1402,6 +1402,17 @@ Public Class frmAnalyze
                 item.Selected = True
             Next
         End If
+    End Sub
+
+    Private Sub btnUpload_Click(sender As Object, e As EventArgs) Handles btnUpload.Click
+        With ofdUpload
+            .Title = "Select osmChange file to upload"
+            .Filter = "OSM Change files(*.osc)|*.osc|All files|*.*"
+            .FileName = ""
+            If .ShowDialog() = DialogResult.OK Then
+
+            End If
+        End With
     End Sub
 End Class
 Public Class ListViewComparer

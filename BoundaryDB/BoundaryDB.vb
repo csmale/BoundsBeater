@@ -301,10 +301,10 @@ Public Class BoundaryDB
             LT_ElectedMayor
             LT_LordProvost
         End Enum
-        Public CouncilName As String
-        Public CouncilName2 As String
-        Public ParishType As ParishTypes
-        Public CouncilStyle As CouncilStyles
+        Public Property CouncilName As String
+        Public Property CouncilName2 As String
+        Public Property ParishType As ParishTypes
+        Public Property CouncilStyle As CouncilStyles
         Public Lat As Double
         Public Lon As Double
         Public Website As String
