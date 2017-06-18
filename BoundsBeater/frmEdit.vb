@@ -43,9 +43,9 @@ Public Class frmEdit
         With cbParishType.Items
             .Clear()
             .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Parish Council", BoundaryItem.ParishTypes.PT_ParishCouncil))
+            .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Parish Meeting", BoundaryItem.ParishTypes.PT_ParishMeeting))
             .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Joint Parish Council", BoundaryItem.ParishTypes.PT_JointParishCouncil))
             .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Joint Parish Meeting", BoundaryItem.ParishTypes.PT_JointParishMeeting))
-            .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Parish Meeting", BoundaryItem.ParishTypes.PT_ParishMeeting))
             .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Lands Common", BoundaryItem.ParishTypes.PT_LandsCommon))
             .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("N/A", BoundaryItem.ParishTypes.PT_NA))
         End With

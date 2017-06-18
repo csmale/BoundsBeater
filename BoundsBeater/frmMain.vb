@@ -47,6 +47,15 @@ Public Class frmMain
     Private Sub frmMain_Load(sender As Object, e As EventArgs) Handles Me.Load
         InitSettings()
         lblStatus.Text = "Please load a file"
+        Dim ver As String
+        If (System.Deployment.Application.ApplicationDeployment.IsNetworkDeployed) Then
+            With System.Deployment.Application.ApplicationDeployment.CurrentDeployment.CurrentVersion
+                ver = "V" & .Major & "." & .Minor & "." & .Build & "." & .Revision
+            End With
+        Else
+            ver = "(unknown version)"
+        End If
+        Me.Text += " " + ver
         btnReport.Enabled = False
     End Sub
 
