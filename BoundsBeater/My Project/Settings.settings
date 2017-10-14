@@ -35,5 +35,8 @@
     <Setting Name="LatLongFile" Type="System.String" Scope="User">
       <Value Profile="(Default)">C:\Users\Colin\Downloads\Parishes_December_2016_Full_Extent_Boundaries_in_England_and_Wales.csv</Value>
     </Setting>
+    <Setting Name="AnalyzeUrl" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://ra.osmsurround.org/analyzeRelation?relationId={id}&amp;noCache=true&amp;_noCache=on</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

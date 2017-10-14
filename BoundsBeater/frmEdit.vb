@@ -6,6 +6,7 @@ Public Class frmEdit
     Public xItem As BoundaryItem
     Public xDB As BoundaryDB
     Public sOriginalGSS As String
+    Public GssPrefix As String
     Private iOriginalRel As Long
     Public Retriever As OSMRetriever
     Public RelChangeAllowed As Boolean = True
@@ -35,6 +36,7 @@ Public Class frmEdit
     End Class
     Private Sub frmEdit_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         If xItem Is Nothing Then Return
+        chkDeleted.Checked = xItem.IsDeleted
         sOriginalGSS = xItem.ONSCode
         iOriginalRel = xItem.OSMRelation
         cbGroup.Left = txtCouncilName.Left
@@ -47,6 +49,7 @@ Public Class frmEdit
             .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Joint Parish Council", BoundaryItem.ParishTypes.PT_JointParishCouncil))
             .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Joint Parish Meeting", BoundaryItem.ParishTypes.PT_JointParishMeeting))
             .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Lands Common", BoundaryItem.ParishTypes.PT_LandsCommon))
+            .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("Welsh Community Council", BoundaryItem.ParishTypes.PT_CommunityCouncil))
             .Add(New GenericListItem(Of BoundaryItem.ParishTypes)("N/A", BoundaryItem.ParishTypes.PT_NA))
         End With
         With cbType.Items
@@ -74,6 +77,7 @@ Public Class frmEdit
         With cbStyle.Items
             .Clear()
             .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("(default)", BoundaryItem.CouncilStyles.CS_Default))
+            .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("District", BoundaryItem.CouncilStyles.CS_District))
             .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("Borough", BoundaryItem.CouncilStyles.CS_Borough))
             .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("Town", BoundaryItem.CouncilStyles.CS_Town))
             .Add(New GenericListItem(Of BoundaryItem.CouncilStyles)("City", BoundaryItem.CouncilStyles.CS_City))
@@ -88,12 +92,10 @@ Public Class frmEdit
         End With
         Dim bGotGroup As Boolean = False
         Dim xSelected As BoundaryItem = Nothing
-        For Each x In xDB.Items.Values
-            If x.Parent Is xItem.Parent Then
-                If x.BoundaryType = BoundaryItem.BoundaryTypes.BT_ParishGroup Then
-                    _groups.Add(x)
-                    If x.CouncilName = xItem.CouncilName Then xSelected = x
-                End If
+        For Each x In xItem.Parent.Children
+            If x.BoundaryType = BoundaryItem.BoundaryTypes.BT_ParishGroup Then
+                _groups.Add(x)
+                If x.CouncilName = xItem.CouncilName Then xSelected = x
             End If
         Next
         If xSelected Is Nothing _
@@ -166,8 +168,29 @@ Public Class frmEdit
             cbGroup.Visible = False
             txtCouncilName.Visible = True
             btnNewGroup.Visible = False
+            If bt = BoundaryItem.BoundaryTypes.BT_ParishGroup Then
+                If txtGSS.Text = "" Then txtGSS.Text = CreateGroupID()
+            Else
+                txtGSS.Text = sOriginalGSS
+            End If
         End If
     End Sub
+
+    Private Function CreateGroupID() As String
+        Dim iMax As Integer = 0
+        Dim i As Integer
+        Dim sTmp As String
+        If GssPrefix = "" Then Return ""
+        For Each x In xDB.Items.Values
+            If x.ONSCode.StartsWith(GssPrefix) Then
+                sTmp = Mid(x.ONSCode, Len(GssPrefix) + 1)
+                If Integer.TryParse(sTmp, i) Then
+                    If i > iMax Then iMax = i
+                End If
+            End If
+        Next
+        Return $"{GssPrefix}{iMax + 1:000}"
+    End Function
 
     Private Sub btnOK_Click(sender As Object, e As EventArgs) Handles btnOK.Click
         Dim lTmp As Long
@@ -199,6 +222,7 @@ Public Class frmEdit
             Return
         End If
         With xItem
+            .IsDeleted = chkDeleted.Checked
             .Name = Trim(txtName.Text)
             .Name2 = Trim(txtName2.Text)
             If Long.TryParse(txtRelID.Text, lTmp) Then .OSMRelation = lTmp
@@ -372,14 +396,25 @@ Public Class frmEdit
                     End Select
                 End If
             Case BoundaryItem.BoundaryTypes.BT_ParishGroup
-                sSuffix = "Parish Council"
-            Case BoundaryItem.BoundaryTypes.BT_MetroDistrict, BoundaryItem.BoundaryTypes.BT_NonMetroDistrict
+                Select Case parishType
+                    Case BoundaryItem.ParishTypes.PT_ParishCouncil
+                        sSuffix = "Parish Council"
+                    Case BoundaryItem.ParishTypes.PT_ParishMeeting
+                        sSuffix = "Parish Meeting"
+                End Select
+            Case BoundaryItem.BoundaryTypes.BT_NonMetroDistrict
                 If chkCity.Checked Then
                     sSuffix = "City Council"
                 ElseIf chkBorough.Checked Then
                     sSuffix = "Borough Council"
                 Else
                     sSuffix = "District Council"
+                End If
+            Case BoundaryItem.BoundaryTypes.BT_MetroDistrict
+                If chkCity.Checked Then
+                    sSuffix = "City Council"
+                Else
+                    sSuffix = "Council"
                 End If
             Case BoundaryItem.BoundaryTypes.BT_Unitary
                 If chkCity.Checked Then

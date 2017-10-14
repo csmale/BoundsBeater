@@ -136,7 +136,11 @@ Public Class frmAnalyze
             If xRing.isClosed Then
                 sLine = sLine & " (closed)"
             Else
-                sLine = sLine & " (NOT closed)"
+                If xRing.Head.ExtremelyCloseTo(xRing.Tail) Then
+                    sLine = sLine & " (NOT closed - head/tail node not shared)"
+                Else
+                    sLine = sLine & " (NOT closed - missing segment)"
+                End If
             End If
             sTmp = sTmp & vbCrLf & sLine
         Next
@@ -386,6 +390,7 @@ Public Class frmAnalyze
         For Each x As TreeNode In n.Nodes
             p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
             If Not p Is Nothing Then
+                If Not chkShowDeleted.Checked AndAlso p.IsDeleted Then Continue For
                 Dim lvi As ListViewItem = lvChildren.Items.Add("")
                 lvChildren.ContextMenuStrip = cmsChild
                 LoadChildListItem(lvChildren, lvi, p)
@@ -401,6 +406,7 @@ Public Class frmAnalyze
     ''' <param name="p">BoundaryItem to use</param>
     Private Sub LoadChildListItem(lv As ListView, lvi As ListViewItem, p As BoundaryDB.BoundaryItem)
         With lvi
+            If p.IsDeleted Then .ForeColor = Color.Red Else .ForeColor = Color.Black
             .Text = p.Name
             If .SubItems.Count = 1 Then
                 For i = 1 To lvi.ListView.Columns.Count - 1
@@ -633,18 +639,24 @@ Public Class frmAnalyze
         Dim bi As BoundaryDB.BoundaryItem
         bi = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
         If IsNothing(bi) Then Exit Sub
+        Dim wasDeleted As Boolean = bi.IsDeleted
         If bi.Edit(xRetriever) Then
-            LoadChildListItem(lvChildren, lvi, bi)
+            If chkShowDeleted.Checked Or Not bi.IsDeleted Then
+                LoadChildListItem(lvChildren, lvi, bi)
+            ElseIf (Not wasDeleted) And bi.IsDeleted Then
+                ' delete from listview
+                lvi.Remove()
+            End If
             ' reload current lv item
             If Not (x Is Nothing) Then
-                Dim xNode As TreeNode = x
-                Do Until xNode Is Nothing
-                    LoadTreeNodeText(xNode)
-                    xNode = xNode.Parent
-                Loop
-                '                tvList.Sort()
+                    Dim xNode As TreeNode = x
+                    Do Until xNode Is Nothing
+                        LoadTreeNodeText(xNode)
+                        xNode = xNode.Parent
+                    Loop
+                    '                tvList.Sort()
+                End If
             End If
-        End If
     End Sub
 
     Private Sub tsmiEdit_Click(sender As Object, e As EventArgs) Handles tsmiEdit.Click
@@ -679,6 +691,7 @@ Public Class frmAnalyze
         For Each xChild As TreeNode In x.Nodes
             If xChild.Tag Is Nothing Then Continue For
             p = DirectCast(xChild.Tag, BoundaryDB.BoundaryItem)
+            If p.IsDeleted Then Continue For
             iChild = p.OSMRelation
             If iChild > 0 Then
                 ShowRelation(iChild)
@@ -816,6 +829,12 @@ Public Class frmAnalyze
         Dim xItem As New BoundaryDB.BoundaryItem(xDB)
         xItem.Parent = p
         xItem.ParentCode = p.ONSCode
+        Select Case p.BoundaryType
+            Case BoundaryDB.BoundaryItem.BoundaryTypes.BT_Unitary,
+                 BoundaryDB.BoundaryItem.BoundaryTypes.BT_MetroDistrict,
+                 BoundaryDB.BoundaryItem.BoundaryTypes.BT_NonMetroDistrict
+                xItem.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish
+        End Select
         If xItem.Edit() Then
             xDB.Items.Add(xItem.ONSCode, xItem)
             tvn = x.Nodes.Add(xItem.ONSCode, "")
@@ -1012,6 +1031,7 @@ Public Class frmAnalyze
         Dim xList As New SortedList(Of String, BoundaryDB.BoundaryItem)
         Dim sName As String
         For Each xChild In xItem.Children
+            If (Not chkShowDeleted.Checked) AndAlso xChild.IsDeleted Then Continue For
             sName = xChild.Name & xChild.TypeCode
             If xList.ContainsKey(sName) Then
                 MsgBox($"Duplicate node name {sName}", MsgBoxStyle.Exclamation Or MsgBoxStyle.OkOnly)
@@ -1068,41 +1088,32 @@ Public Class frmAnalyze
         End If
     End Sub
     Private Sub ShowParishGroup(xItem As BoundaryDB.BoundaryItem)
-        Dim sName As String
-        Dim xGroup As BoundaryDB.BoundaryItem
         Dim rTemp As OSMRelation = Nothing
         Dim xRel As OSMRelation
         Dim xResolver As OSMResolver = Nothing
+        Dim parts As List(Of BoundaryDB.BoundaryItem)
 
-        sName = xItem.CouncilName
-        xGroup = xItem
-        xItem = xItem.Parent    ' up to district/unitary
-        For Each d In xDB.Items.Values
-            If d.Parent Is xItem Then
-                If d.OSMRelation > 0 Then
-                    If d.ParishType = BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil OrElse
-                        d.ParishType = BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishMeeting Then
-                        If d.CouncilName = sName Then
-                            xRel = DirectCast(xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, d.OSMRelation), OSMRelation)
-                            If xRel Is Nothing Then
-                                MsgBox($"Unable to retrieve relation #{d.OSMRelation} ({d.Name})")
-                            End If
-                            If rTemp Is Nothing Then
-                                rTemp = xRel
-                            Else
-                                rTemp = rTemp.Combine(xRel)
-                            End If
-                        End If
-                    End If
-                End If
+        parts = xDB.GetGroupedParishes(xItem)
+        If parts Is Nothing Then Exit Sub
+
+        For Each d In parts
+            xRel = DirectCast(xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, d.OSMRelation), OSMRelation)
+            If xRel Is Nothing Then
+                MsgBox($"Unable to retrieve relation #{d.OSMRelation} ({d.Name})")
+            End If
+            If rTemp Is Nothing Then
+                rTemp = xRel
+            Else
+                rTemp = rTemp.Combine(xRel)
             End If
         Next
+
         If rTemp Is Nothing Then Exit Sub
         Try
             rTemp.Tags.Add("admin_level", New OSMTag("admin_level", "10"))
             rTemp.Tags.Add("parish_type", New OSMTag("parish_type", "parish_group")) ' special value to trigger javascript
-            rTemp.Tags.Add("ref:gss", New OSMTag("ref:gss", xGroup.ONSCode))
-            rTemp.Tags.Add("name", New OSMTag("name", xGroup.Name))
+            rTemp.Tags.Add("ref:gss", New OSMTag("ref:gss", xItem.ONSCode))
+            rTemp.Tags.Add("name", New OSMTag("name", xItem.Name))
         Catch
         End Try
 
@@ -1112,7 +1123,7 @@ Public Class frmAnalyze
         If xResolver IsNot Nothing Then
             Dim sJson As String
             sJson = xResolver.GeoJSON
-            ShowJSON(sJson, xGroup.ONSCode)
+            ShowJSON(sJson, xItem.ONSCode)
         End If
     End Sub
     Private Sub frmAnalyze_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
@@ -1366,6 +1377,7 @@ Public Class frmAnalyze
             If x IsNot Nothing Then
                 bi = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
                 If bi IsNot Nothing Then
+                    If bi.IsDeleted Then Continue For
                     If bi.OSMRelation > 0 Then
                         items.Add(bi)
                     End If
@@ -1380,6 +1392,8 @@ Public Class frmAnalyze
         tsmiChildEdit.Enabled = (lvChildren.SelectedItems.Count = 1)
         tsmiChildOpenWebsite.Enabled = (lvChildren.SelectedItems.Count = 1)
         tsmiChildOverviewReport.Enabled = (lvChildren.SelectedItems.Count = 1)
+        tsmiChildAnalyze.Enabled = (lvChildren.SelectedItems.Count = 1)
+        tsmiChildShowInOsm.Enabled = (lvChildren.SelectedItems.Count = 1)
         tsmiChildReport.Enabled = (lvChildren.SelectedItems.Count = 1)
         tsmiChildReview.Enabled = (lvChildren.SelectedItems.Count >= 1)
     End Sub
@@ -1390,6 +1404,8 @@ Public Class frmAnalyze
         tsmiFlush.Enabled = (tvList.SelectedNode IsNot Nothing)
         tsmiJSON.Enabled = (tvList.SelectedNode IsNot Nothing)
         tsmiOpenWebsite.Enabled = (tvList.SelectedNode IsNot Nothing)
+        tsmiAnalyze.Enabled = (tvList.SelectedNode IsNot Nothing)
+        tsmiShowInOsm.Enabled = (tvList.SelectedNode IsNot Nothing)
         tsmiReport.Enabled = (tvList.SelectedNode IsNot Nothing)
         tsmiReview.Enabled = (tvList.SelectedNode IsNot Nothing)
         tsmiSearch.Enabled = (tvList.SelectedNode IsNot Nothing)
@@ -1413,6 +1429,67 @@ Public Class frmAnalyze
 
             End If
         End With
+    End Sub
+
+    Private Sub chkShowDeleted_CheckedChanged(sender As Object, e As EventArgs) Handles chkShowDeleted.CheckedChanged
+        ReloadTV(xDB)
+        Dim tvn As TreeNode = tvList.SelectedNode
+        If tvn Is Nothing Then Return
+        ShowChildren(tvn)
+    End Sub
+
+    Private Sub tsmiShowInOsm_Click(sender As Object, e As EventArgs) Handles tsmiShowInOsm.Click
+        Dim x As TreeNode = tvList.SelectedNode
+        If x Is Nothing Then Return
+        Dim p As BoundaryDB.BoundaryItem = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        If p Is Nothing Then Return
+        If p.OSMRelation = 0 Then Return
+        Dim sUrl As String = OSMObject.BrowseURL(OSMObject.ObjectType.Relation, p.OSMRelation)
+        If Len(sUrl) > 0 Then OpenBrowserAt(sUrl)
+    End Sub
+
+    Private Sub tsmiAnalyze_Click(sender As Object, e As EventArgs) Handles tsmiAnalyze.Click
+        Dim x As TreeNode = tvList.SelectedNode
+        If x Is Nothing Then Return
+        Dim p As BoundaryDB.BoundaryItem = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        If p Is Nothing Then Return
+        If p.OSMRelation = 0 Then Return
+        Dim sUrl As String = AnalyzeUrl(p.OSMRelation)
+        If Len(sUrl) > 0 Then OpenBrowserAt(sUrl)
+    End Sub
+
+    Private Function AnalyzeUrl(ID As Long) As String
+        Dim sUrl = My.Settings.AnalyzeUrl
+        sUrl = Replace(sUrl, "{id}", ID.ToString())
+        Return sUrl
+    End Function
+
+    Private Sub tsmiChildAnalyze_Click(sender As Object, e As EventArgs) Handles tsmiChildAnalyze.Click
+        If lvChildren.SelectedItems.Count <> 1 Then Return
+        Dim lvi As ListViewItem = lvChildren.SelectedItems(0)
+        If IsNothing(lvi) Then Return
+        Dim x As TreeNode = DirectCast(lvi.Tag, TreeNode)
+        If IsNothing(x) Then Return
+        Dim bi As BoundaryDB.BoundaryItem
+        bi = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        If bi Is Nothing Then Exit Sub
+        If bi.OSMRelation = 0 Then Return
+        Dim sUrl As String = AnalyzeUrl(bi.OSMRelation)
+        If Len(sUrl) > 0 Then OpenBrowserAt(sUrl)
+    End Sub
+
+    Private Sub tsmiChildShowInOsm_Click(sender As Object, e As EventArgs) Handles tsmiChildShowInOsm.Click
+        If lvChildren.SelectedItems.Count <> 1 Then Return
+        Dim lvi As ListViewItem = lvChildren.SelectedItems(0)
+        If IsNothing(lvi) Then Return
+        Dim x As TreeNode = DirectCast(lvi.Tag, TreeNode)
+        If IsNothing(x) Then Return
+        Dim bi As BoundaryDB.BoundaryItem
+        bi = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        If bi Is Nothing Then Exit Sub
+        If bi.OSMRelation = 0 Then Return
+        Dim sUrl As String = OSMObject.BrowseURL(OSMObject.ObjectType.Relation, bi.OSMRelation)
+        If Len(sUrl) > 0 Then OpenBrowserAt(sUrl)
     End Sub
 End Class
 Public Class ListViewComparer

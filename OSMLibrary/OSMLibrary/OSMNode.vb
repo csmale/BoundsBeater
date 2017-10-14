@@ -78,7 +78,9 @@ Public Class OSMNode
             Return False
         End If
         'Return (n.Lat = Lat) And (n.Lon = Lon)
-        Return (Me.ID = n.ID)
+        ' Return (Me.ID = n.ID)
+        ' is it within 2m?
+        Return (DistanceTo(n) < 2.0)
     End Function
     Public Overrides ReadOnly Property Bbox As BBox
         Get
@@ -88,13 +90,13 @@ Public Class OSMNode
             Return __Bbox
         End Get
     End Property
-    Public Function MakeBBox(r As Double)
+    Public Function MakeBBox(r As Double) As BBox
         Dim bb As New BBox
         bb.MinLon = Lon - r
         bb.MinLat = Lat - r
         bb.MaxLon = Lon + r
         bb.MaxLat = Lat + r
-        Return (bb)
+        Return bb
     End Function
     Public Overrides ReadOnly Property Centroid As PointF
         Get
@@ -103,13 +105,19 @@ Public Class OSMNode
     End Property
     Public Overrides Sub SerializeMe(x As XmlTextWriter)
     End Sub
-    Public ReadOnly Property DistanceTo(x As OSMNode) As Double
+
+    ''' <summary>
+    ''' Returns the distance in metres from this node to the given node
+    ''' </summary>
+    ''' <param name="x"></param>
+    ''' <returns></returns>
+    Public ReadOnly Property DistanceTo(other As OSMNode) As Double
         Get
-            Dim R As Double = 6371000
-            Dim dLat As Double = DegreeToRadian(x.Lat - Lat)
-            Dim dLon As Double = DegreeToRadian(x.Lon - Lon)
+            Const R As Double = 6371000
+            Dim dLat As Double = DegreeToRadian(other.Lat - Lat)
+            Dim dLon As Double = DegreeToRadian(other.Lon - Lon)
             Dim lat1 As Double = DegreeToRadian(Lat)
-            Dim lat2 As Double = DegreeToRadian(x.Lat)
+            Dim lat2 As Double = DegreeToRadian(other.Lat)
 
             Dim a As Double = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
                 Math.Sin(dLon / 2) * Math.Sin(dLon / 2) * Math.Cos(lat1) * Math.Cos(lat2)
@@ -117,6 +125,12 @@ Public Class OSMNode
             Return R * c
         End Get
     End Property
+
+    ''' <summary>
+    ''' Converts an angle in degrees to radians
+    ''' </summary>
+    ''' <param name="degree"></param>
+    ''' <returns></returns>
     Public Shared Function DegreeToRadian(ByVal degree As Double) As Double
         Const x As Double = Math.PI / 180.0
         Return x * degree

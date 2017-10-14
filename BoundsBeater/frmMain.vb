@@ -186,8 +186,10 @@ Public Class frmMain
                 xRel = Nothing
             Else
                 xRel = tmpDoc.Relations(iRelID)
+                If xRel Is Nothing Then Exit Sub
                 xRel.LoadNeighbours()
             End If
+            If xRel Is Nothing Then Exit Sub
         Else
             If oDoc Is Nothing Then
                 Exit Sub

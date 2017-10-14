@@ -8,7 +8,7 @@ Public MustInherit Class OSMObject
         Relation
         Changeset
     End Enum
-    Public BrowseBaseUrl As String = My.Settings.OSMBrowseBaseURL
+    Public Shared BrowseBaseUrl As String = My.Settings.OSMBrowseBaseURL
     Public ID As Long
     Public Version As ULong
     Public UID As ULong
@@ -258,7 +258,20 @@ Public MustInherit Class OSMObject
             Else
                 sType = "??"
             End If
-            Return BrowseBaseUrl & sType & "/" & ID.ToString()
+            Return BrowseURL(sType, ID)
+        End Get
+    End Property
+    Public Shared ReadOnly Property BrowseURL(iType As OSMObject.ObjectType, ID As Long) As String
+        Get
+            Return BrowseURL(ObjectTypeString(iType), ID)
+        End Get
+    End Property
+    Public Shared ReadOnly Property BrowseURL(sType As String, ID As Long) As String
+        Get
+            Dim sUrl As String
+            sUrl = Replace(BrowseBaseUrl, "{type}", sType)
+            sUrl = Replace(sUrl, "{id}", ID.ToString())
+            Return sUrl
         End Get
     End Property
     ''' <summary>

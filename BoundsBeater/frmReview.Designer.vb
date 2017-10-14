@@ -39,8 +39,9 @@ Partial Class frmReview
         Me.cmsTagAction = New System.Windows.Forms.ContextMenuStrip(Me.components)
         Me.cmsiKeepOsm = New System.Windows.Forms.ToolStripMenuItem()
         Me.cmsiTakeSource = New System.Windows.Forms.ToolStripMenuItem()
-        Me.cmsiCustom = New System.Windows.Forms.ToolStripMenuItem()
         Me.cmsiDeleteTag = New System.Windows.Forms.ToolStripMenuItem()
+        Me.cmsiCustom = New System.Windows.Forms.ToolStripMenuItem()
+        Me.chkSkipNoChange = New System.Windows.Forms.CheckBox()
         Me.TableLayoutPanel1.SuspendLayout()
         Me.FlowLayoutPanel1.SuspendLayout()
         Me.cmsTagAction.SuspendLayout()
@@ -117,6 +118,7 @@ Partial Class frmReview
         Me.FlowLayoutPanel1.Controls.Add(Me.btnNext)
         Me.FlowLayoutPanel1.Controls.Add(Me.btnNewChangeset)
         Me.FlowLayoutPanel1.Controls.Add(Me.btnClose)
+        Me.FlowLayoutPanel1.Controls.Add(Me.chkSkipNoChange)
         Me.FlowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill
         Me.FlowLayoutPanel1.Location = New System.Drawing.Point(3, 309)
         Me.FlowLayoutPanel1.Name = "FlowLayoutPanel1"
@@ -155,7 +157,7 @@ Partial Class frmReview
         Me.lblTitle.AutoSize = True
         Me.lblTitle.Location = New System.Drawing.Point(3, 0)
         Me.lblTitle.Name = "lblTitle"
-        Me.lblTitle.Size = New System.Drawing.Size(67, 15)
+        Me.lblTitle.Size = New System.Drawing.Size(60, 13)
         Me.lblTitle.TabIndex = 2
         Me.lblTitle.Text = "Reviewing:"
         '
@@ -173,31 +175,41 @@ Partial Class frmReview
         Me.cmsTagAction.ImageScalingSize = New System.Drawing.Size(20, 20)
         Me.cmsTagAction.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.cmsiKeepOsm, Me.cmsiTakeSource, Me.cmsiDeleteTag, Me.cmsiCustom})
         Me.cmsTagAction.Name = "cmsTagAction"
-        Me.cmsTagAction.Size = New System.Drawing.Size(203, 108)
+        Me.cmsTagAction.Size = New System.Drawing.Size(169, 92)
         '
         'cmsiKeepOsm
         '
         Me.cmsiKeepOsm.Name = "cmsiKeepOsm"
-        Me.cmsiKeepOsm.Size = New System.Drawing.Size(202, 26)
+        Me.cmsiKeepOsm.Size = New System.Drawing.Size(168, 22)
         Me.cmsiKeepOsm.Text = "Keep OSM Value"
         '
         'cmsiTakeSource
         '
         Me.cmsiTakeSource.Name = "cmsiTakeSource"
-        Me.cmsiTakeSource.Size = New System.Drawing.Size(202, 26)
+        Me.cmsiTakeSource.Size = New System.Drawing.Size(168, 22)
         Me.cmsiTakeSource.Text = "Take Source Value"
-        '
-        'cmsiCustom
-        '
-        Me.cmsiCustom.Name = "cmsiCustom"
-        Me.cmsiCustom.Size = New System.Drawing.Size(202, 26)
-        Me.cmsiCustom.Text = "Custom Value"
         '
         'cmsiDeleteTag
         '
         Me.cmsiDeleteTag.Name = "cmsiDeleteTag"
-        Me.cmsiDeleteTag.Size = New System.Drawing.Size(202, 26)
+        Me.cmsiDeleteTag.Size = New System.Drawing.Size(168, 22)
         Me.cmsiDeleteTag.Text = "Delete Tag"
+        '
+        'cmsiCustom
+        '
+        Me.cmsiCustom.Name = "cmsiCustom"
+        Me.cmsiCustom.Size = New System.Drawing.Size(168, 22)
+        Me.cmsiCustom.Text = "Custom Value"
+        '
+        'chkSkipNoChange
+        '
+        Me.chkSkipNoChange.AutoSize = True
+        Me.chkSkipNoChange.Location = New System.Drawing.Point(411, 3)
+        Me.chkSkipNoChange.Name = "chkSkipNoChange"
+        Me.chkSkipNoChange.Size = New System.Drawing.Size(118, 17)
+        Me.chkSkipNoChange.TabIndex = 5
+        Me.chkSkipNoChange.Text = "Skip If No Changes"
+        Me.chkSkipNoChange.UseVisualStyleBackColor = True
         '
         'frmReview
         '
@@ -210,6 +222,7 @@ Partial Class frmReview
         Me.TableLayoutPanel1.ResumeLayout(False)
         Me.TableLayoutPanel1.PerformLayout()
         Me.FlowLayoutPanel1.ResumeLayout(False)
+        Me.FlowLayoutPanel1.PerformLayout()
         Me.cmsTagAction.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
@@ -234,4 +247,5 @@ Partial Class frmReview
     Friend WithEvents cmsiTakeSource As ToolStripMenuItem
     Friend WithEvents cmsiCustom As ToolStripMenuItem
     Friend WithEvents cmsiDeleteTag As ToolStripMenuItem
+    Friend WithEvents chkSkipNoChange As CheckBox
 End Class

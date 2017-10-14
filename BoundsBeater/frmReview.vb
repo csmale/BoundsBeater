@@ -7,6 +7,7 @@ Public Class frmReview
     Private iRel As Long
     Private ItemList() As BoundaryItem
     Private CurrentItem As Integer = 0
+    Private CurrentHasChanges As Boolean
     Private xDbRelation As BoundaryItem
     Private TagList As List(Of String)
     Private xRetriever As New OSMRetriever
@@ -89,6 +90,7 @@ Public Class frmReview
         tagsBDB = New Dictionary(Of String, String)
         newOSM = New Dictionary(Of String, String)
         TagList = New List(Of String)
+        CurrentHasChanges = False
 
         Try
             xDoc = xRetriever.API.GetOSMDoc(OSMObject.ObjectType.Relation, iRel, False)
@@ -171,10 +173,12 @@ Public Class frmReview
                             Else
                                 .BackColor = colourChanged
                             End If
+                            CurrentHasChanges = True
                         End If
                     Else
                         If Len(newOSM(sTag)) > 0 Then
                             lvi.Checked = True
+                            CurrentHasChanges = True
                             .BackColor = colourAdded
                         End If
                     End If
@@ -188,6 +192,7 @@ Public Class frmReview
     Private Sub frmReview_Load(sender As Object, e As EventArgs) Handles Me.Load
         txtChangesetComment.Text = ChangesetComment
         btnNewChangeset.Enabled = False
+        chkSkipNoChange.Checked = True
         NextItem()
     End Sub
 
@@ -263,8 +268,11 @@ Public Class frmReview
 
         If bSuccess Then
             If btnNext.Enabled Then
-                CurrentItem = CurrentItem + 1
-                NextItem()
+                Do
+                    CurrentItem = CurrentItem + 1
+                    NextItem()
+                    If (Not btnNext.Enabled) Then Exit Do
+                Loop Until (Not chkSkipNoChange.Checked) OrElse CurrentHasChanges
             Else
                 u.Close()
                 Me.Close()
@@ -273,8 +281,11 @@ Public Class frmReview
     End Sub
 
     Private Sub btnNext_Click(sender As Object, e As EventArgs) Handles btnNext.Click
-        CurrentItem = CurrentItem + 1
-        NextItem()
+        Do
+            CurrentItem = CurrentItem + 1
+            NextItem()
+            If (Not btnNext.Enabled) Then Exit Do
+        Loop Until (Not chkSkipNoChange.Checked) OrElse CurrentHasChanges
     End Sub
 
     Private Sub btnNewChangeset_Click(sender As Object, e As EventArgs) Handles btnNewChangeset.Click

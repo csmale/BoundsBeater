@@ -146,21 +146,21 @@ relOptions = {
       }
   ];
 var townOptions = {
-    color: 'Teal',
-    weight: 4,
+    color: 'Red',
+    weight: 3,
       fillColor: 'Teal',
       fillOpacity: 0.3,
       pointToLayer: labelRelation
 };
   var cityOptions = {
-      color: 'Orange',
-      weight: 4,
+      color: 'Red',
+      weight: 3,
       fillColor: 'Orange',
       fillOpacity: 0.3,
       pointToLayer: labelRelation
   };
   var pmeetingOptions = {
-      color: "#7fff00",
+      color: 'Red',
       weight: 2,
       fillColor: "#7fff00",
       fillOpacity: 0.3,
@@ -350,7 +350,7 @@ function drawJSON(j, id) {
         if (adminLevel == 10) {
             if (arg.properties.council_style == "town") {
                 opts = townOptions;
-            } else if (arg.properties.council_style == "city") {
+            } else if (arg.properties.council_style == "city" || arg.properties.council_style == "city_and_county" || arg.properties.council_style == "city_and_district") {
                 opts = cityOptions;
             } else if (arg.properties.parish_type == "parish_meeting") {
                 opts = pmeetingOptions;
@@ -359,7 +359,7 @@ function drawJSON(j, id) {
                 isParishGroup = true;
             }
         } else if (adminLevel == 8 || adminLevel == 6) {
-            if (arg.properties.council_style == "city") {
+            if (arg.properties.council_style == "city" || arg.properties.council_style == "city_and_county" || arg.properties.council_style == "city_and_district") {
                 opts = cityOptions;
             }
         }

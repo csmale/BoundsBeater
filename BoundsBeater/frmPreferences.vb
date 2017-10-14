@@ -7,6 +7,7 @@ Public Class frmPreferences
         My.Settings.OSMCache = txtOSMCacheFile.Text
         My.Settings.BoundaryXML = txtUKBoundsFile.Text
         My.Settings.xapiAPI = txtXapiBaseUrl.Text
+        My.Settings.AnalyzeUrl = txtAnalyzeBaseUrl.Text
         My.Settings.NominatimURL = txtNominatimURL.Text
         My.Settings.Save()
         Me.DialogResult = System.Windows.Forms.DialogResult.OK
@@ -23,6 +24,7 @@ Public Class frmPreferences
         txtOSMCacheFile.Text = My.Settings.OSMCache
         txtUKBoundsFile.Text = My.Settings.BoundaryXML
         txtXapiBaseUrl.Text = My.Settings.xapiAPI
+        txtAnalyzeBaseUrl.Text = My.Settings.AnalyzeUrl
         txtNominatimURL.Text = My.Settings.NominatimURL
     End Sub
 

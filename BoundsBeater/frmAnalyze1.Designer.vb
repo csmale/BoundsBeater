@@ -54,6 +54,8 @@ Partial Class frmAnalyze
         Me.tsmiShowAll = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiJSON = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiReport = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiShowInOsm = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiAnalyze = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiChildOverviewReport = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiDeepChildReport = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiAddChild = New System.Windows.Forms.ToolStripMenuItem()
@@ -77,6 +79,9 @@ Partial Class frmAnalyze
         Me.ofdBoundaries = New System.Windows.Forms.OpenFileDialog()
         Me.btnUpload = New System.Windows.Forms.Button()
         Me.ofdUpload = New System.Windows.Forms.OpenFileDialog()
+        Me.chkShowDeleted = New System.Windows.Forms.CheckBox()
+        Me.tsmiChildShowInOsm = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiChildAnalyze = New System.Windows.Forms.ToolStripMenuItem()
         Me.tabDetail.SuspendLayout()
         Me.tbpChildren.SuspendLayout()
         Me.tbpMap.SuspendLayout()
@@ -256,7 +261,7 @@ Partial Class frmAnalyze
         'chkUpdateAll
         '
         Me.chkUpdateAll.AutoSize = True
-        Me.chkUpdateAll.Location = New System.Drawing.Point(381, 19)
+        Me.chkUpdateAll.Location = New System.Drawing.Point(381, 14)
         Me.chkUpdateAll.Name = "chkUpdateAll"
         Me.chkUpdateAll.Size = New System.Drawing.Size(110, 17)
         Me.chkUpdateAll.TabIndex = 13
@@ -269,7 +274,7 @@ Partial Class frmAnalyze
         Me.ssStatus.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsProgress, Me.tsStatus})
         Me.ssStatus.Location = New System.Drawing.Point(0, 645)
         Me.ssStatus.Name = "ssStatus"
-        Me.ssStatus.Size = New System.Drawing.Size(901, 25)
+        Me.ssStatus.Size = New System.Drawing.Size(1133, 25)
         Me.ssStatus.TabIndex = 14
         Me.ssStatus.Text = "StatusStrip1"
         '
@@ -289,9 +294,9 @@ Partial Class frmAnalyze
         'cmsNode
         '
         Me.cmsNode.ImageScalingSize = New System.Drawing.Size(20, 20)
-        Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiSearch, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiChildOverviewReport, Me.tsmiDeepChildReport, Me.tsmiAddChild, Me.tsmiReview, Me.tsmiOpenWebsite})
+        Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiSearch, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiShowInOsm, Me.tsmiAnalyze, Me.tsmiChildOverviewReport, Me.tsmiDeepChildReport, Me.tsmiAddChild, Me.tsmiReview, Me.tsmiOpenWebsite})
         Me.cmsNode.Name = "ContextMenuStrip1"
-        Me.cmsNode.Size = New System.Drawing.Size(193, 246)
+        Me.cmsNode.Size = New System.Drawing.Size(193, 290)
         '
         'tsmiFlush
         '
@@ -328,6 +333,18 @@ Partial Class frmAnalyze
         Me.tsmiReport.Name = "tsmiReport"
         Me.tsmiReport.Size = New System.Drawing.Size(192, 22)
         Me.tsmiReport.Text = "Report"
+        '
+        'tsmiShowInOsm
+        '
+        Me.tsmiShowInOsm.Name = "tsmiShowInOsm"
+        Me.tsmiShowInOsm.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiShowInOsm.Text = "Show in OSM"
+        '
+        'tsmiAnalyze
+        '
+        Me.tsmiAnalyze.Name = "tsmiAnalyze"
+        Me.tsmiAnalyze.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiAnalyze.Text = "Analyze"
         '
         'tsmiChildOverviewReport
         '
@@ -378,9 +395,9 @@ Partial Class frmAnalyze
         'cmsChild
         '
         Me.cmsChild.ImageScalingSize = New System.Drawing.Size(20, 20)
-        Me.cmsChild.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiChildEdit, Me.tsmiChildReport, Me.tsmiChildOpenWebsite, Me.tsmiChildReview})
+        Me.cmsChild.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiChildEdit, Me.tsmiChildReport, Me.tsmiChildOpenWebsite, Me.tsmiChildReview, Me.tsmiChildShowInOsm, Me.tsmiChildAnalyze})
         Me.cmsChild.Name = "cmsChild"
-        Me.cmsChild.Size = New System.Drawing.Size(147, 92)
+        Me.cmsChild.Size = New System.Drawing.Size(147, 136)
         '
         'tsmiChildEdit
         '
@@ -498,11 +515,34 @@ Partial Class frmAnalyze
         Me.btnUpload.Text = "Up"
         Me.btnUpload.UseVisualStyleBackColor = True
         '
+        'chkShowDeleted
+        '
+        Me.chkShowDeleted.AutoSize = True
+        Me.chkShowDeleted.Location = New System.Drawing.Point(896, 7)
+        Me.chkShowDeleted.Name = "chkShowDeleted"
+        Me.chkShowDeleted.Size = New System.Drawing.Size(121, 17)
+        Me.chkShowDeleted.TabIndex = 22
+        Me.chkShowDeleted.Text = "Show Deleted Items"
+        Me.chkShowDeleted.UseVisualStyleBackColor = True
+        '
+        'tsmiChildShowInOsm
+        '
+        Me.tsmiChildShowInOsm.Name = "tsmiChildShowInOsm"
+        Me.tsmiChildShowInOsm.Size = New System.Drawing.Size(146, 22)
+        Me.tsmiChildShowInOsm.Text = "Show in OSM"
+        '
+        'tsmiChildAnalyze
+        '
+        Me.tsmiChildAnalyze.Name = "tsmiChildAnalyze"
+        Me.tsmiChildAnalyze.Size = New System.Drawing.Size(146, 22)
+        Me.tsmiChildAnalyze.Text = "Analyze"
+        '
         'frmAnalyze
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(901, 670)
+        Me.ClientSize = New System.Drawing.Size(1133, 670)
+        Me.Controls.Add(Me.chkShowDeleted)
         Me.Controls.Add(Me.btnUpload)
         Me.Controls.Add(Me.btnCentroids)
         Me.Controls.Add(Me.Panel1)
@@ -595,4 +635,9 @@ Partial Class frmAnalyze
     Friend WithEvents tsmiChildReview As ToolStripMenuItem
     Friend WithEvents btnUpload As Button
     Friend WithEvents ofdUpload As OpenFileDialog
+    Friend WithEvents chkShowDeleted As CheckBox
+    Friend WithEvents tsmiShowInOsm As ToolStripMenuItem
+    Friend WithEvents tsmiAnalyze As ToolStripMenuItem
+    Friend WithEvents tsmiChildShowInOsm As ToolStripMenuItem
+    Friend WithEvents tsmiChildAnalyze As ToolStripMenuItem
 End Class

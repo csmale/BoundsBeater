@@ -207,6 +207,7 @@ Public Class BoundaryDBReviewProvider
     Private Function ProcessMetroDistrict() As OSMReviewResult
         Add(ADMIN_LEVEL, "6")
         Add(DESIGNATION, METRO_DISTRICT)
+        If dbi.IsBorough Then Add(BOROUGH, YES)
         DoCouncilStyle()
         UpdateGSS("E08")
         Return OSMReviewResult.OK
@@ -220,6 +221,7 @@ Public Class BoundaryDBReviewProvider
     Private Function ProcessNonMetroDistrict() As OSMReviewResult
         Add(ADMIN_LEVEL, "8")
         Add(DESIGNATION, NON_METRO_DISTRICT)
+        If dbi.IsBorough Then Add(BOROUGH, YES)
         DoCouncilStyle()
         UpdateGSS("E07")
         Return OSMReviewResult.OK

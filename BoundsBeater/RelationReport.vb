@@ -218,7 +218,9 @@ Public Class RelationReport
         xFile.WriteAttributeString("content", "text/html; charset=UTF-8")
         xFile.WriteEndElement()
         xFile.WriteStartElement("head")
-        xFile.WriteElementString("title", xRel.Tag("name"))
+        sName = xRel.Tag("name")
+        If Len(sName) = 0 Then sName = $"Unnamed relation {xRel.ID}"
+        xFile.WriteElementString("title", sName)
 
         xFile.WriteEndElement() ' head
         xFile.WriteStartElement("body")
@@ -228,6 +230,7 @@ Public Class RelationReport
         PutAnchor(xFile, xRel.BrowseURL, xRel.ID.ToString)
         xFile.WriteString(" (" & xRel.Tag("type") & ")")
         xFile.WriteEndElement()
+
         xFile.WriteElementString("h2", "Boundary type: " & xRel.Tag("boundary"))
         xFile.WriteElementString("h2", "Name: " & xRel.Tag("name"))
         xFile.WriteStartElement("h2")
@@ -242,16 +245,37 @@ Public Class RelationReport
         xFile.WriteElementString("h3", "Source: " & xRel.Tag("source"))
         xFile.WriteElementString("h3", "Version " & xRel.Version & ", last modified: " & xRel.Timestamp & " by: " & xRel.User)
 
+        If xRel.Tags.Count > 0 Then
+            xFile.WriteStartElement("table")
+            xFile.WriteAttributeString("border", "1")
+            xFile.WriteStartElement("thead")
+            xFile.WriteStartElement("tr")
+            xFile.WriteElementString("th", "Tag")
+            xFile.WriteElementString("th", "Value")
+            xFile.WriteEndElement() ' tr
+            xFile.WriteEndElement() ' thead
+            xFile.WriteStartElement("tbody")
+
+            For Each t In xRel.Tags.Keys
+                xFile.WriteStartElement("tr")
+                xFile.WriteElementString("td", t)
+                xFile.WriteElementString("td", xRel.Tag(t))
+                xFile.WriteEndElement() ' tr
+            Next
+
+            xFile.WriteEndElement() ' tbody
+            xFile.WriteEndElement() ' table
+        End If
 
         If xResolver.Mode = OSMResolver.ResolverMode.Polygon Then
             For i = 0 To xResolver.Rings.Count - 1
                 xRing = xResolver.Rings(i)
                 xFile.WriteStartElement("h4")
                 If xRing.isClosed Then
-                    xFile.WriteString(String.Format("Ring {0} ({1}) closed, {2} ways, length {3:F0}m, end node ", i, xRing.Role, xRing.Ways.Count, xRing.Length))
+                    xFile.WriteString(String.Format("Ring {0} ({1}) closed, {2} ways, {4} nodes, length {3:F0}m, end node ", i, xRing.Role, xRing.Ways.Count, xRing.Length, xRing.NodeList.Count))
                     PutAnchor(xFile, xRing.Head.BrowseURL, xRing.Head.ID.ToString())
                 Else
-                    xFile.WriteString(String.Format("Ring {0} ({1}) not closed, {2} ways, length {3:F0}m, from node ", i, xRing.Role, xRing.Ways.Count, xRing.Length))
+                    xFile.WriteString(String.Format("Ring {0} ({1}) not closed, {2} ways, {4} nodes, length {3:F0}m, from node ", i, xRing.Role, xRing.Ways.Count, xRing.Length, xRing.NodeList.Count))
                     PutAnchor(xFile, xRing.Head.BrowseURL, xRing.Head.ID.ToString())
                     xFile.WriteString(" to ")
                     PutAnchor(xFile, xRing.Tail.BrowseURL, xRing.Tail.ID.ToString())
@@ -356,7 +380,6 @@ Public Class RelationReport
         xFile.WriteAttributeString("border", "1")
         xFile.WriteStartElement("thead")
         xFile.WriteStartElement("tr")
-        xFile.WriteEndElement() ' tr
         xFile.WriteElementString("th", "Ring")
         xFile.WriteElementString("th", "ID")
         xFile.WriteElementString("th", "lvl")
@@ -370,6 +393,7 @@ Public Class RelationReport
         xFile.WriteElementString("th", "Other rels")
         xFile.WriteElementString("th", "Last mod")
         xFile.WriteElementString("th", "By")
+        xFile.WriteEndElement() ' tr
         xFile.WriteEndElement() ' thead
         xFile.WriteStartElement("tbody")
 #If False Then

@@ -39,6 +39,8 @@ Partial Class frmPreferences
         Me.btnLibPrefs = New System.Windows.Forms.Button()
         Me.txtNominatimURL = New System.Windows.Forms.TextBox()
         Me.Label5 = New System.Windows.Forms.Label()
+        Me.Label6 = New System.Windows.Forms.Label()
+        Me.txtAnalyzeBaseUrl = New System.Windows.Forms.TextBox()
         Me.TableLayoutPanel1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -50,7 +52,7 @@ Partial Class frmPreferences
         Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
         Me.TableLayoutPanel1.Controls.Add(Me.OK_Button, 0, 0)
         Me.TableLayoutPanel1.Controls.Add(Me.Cancel_Button, 1, 0)
-        Me.TableLayoutPanel1.Location = New System.Drawing.Point(277, 247)
+        Me.TableLayoutPanel1.Location = New System.Drawing.Point(277, 304)
         Me.TableLayoutPanel1.Name = "TableLayoutPanel1"
         Me.TableLayoutPanel1.RowCount = 1
         Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
@@ -129,7 +131,7 @@ Partial Class frmPreferences
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(19, 201)
+        Me.Label4.Location = New System.Drawing.Point(19, 261)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(107, 13)
         Me.Label4.TabIndex = 7
@@ -137,7 +139,7 @@ Partial Class frmPreferences
         '
         'txtMaxCacheAge
         '
-        Me.txtMaxCacheAge.Location = New System.Drawing.Point(19, 217)
+        Me.txtMaxCacheAge.Location = New System.Drawing.Point(19, 277)
         Me.txtMaxCacheAge.Name = "txtMaxCacheAge"
         Me.txtMaxCacheAge.Size = New System.Drawing.Size(100, 20)
         Me.txtMaxCacheAge.TabIndex = 8
@@ -166,7 +168,7 @@ Partial Class frmPreferences
         '
         'btnLibPrefs
         '
-        Me.btnLibPrefs.Location = New System.Drawing.Point(22, 253)
+        Me.btnLibPrefs.Location = New System.Drawing.Point(22, 313)
         Me.btnLibPrefs.Name = "btnLibPrefs"
         Me.btnLibPrefs.Size = New System.Drawing.Size(115, 23)
         Me.btnLibPrefs.TabIndex = 11
@@ -175,7 +177,7 @@ Partial Class frmPreferences
         '
         'txtNominatimURL
         '
-        Me.txtNominatimURL.Location = New System.Drawing.Point(19, 170)
+        Me.txtNominatimURL.Location = New System.Drawing.Point(19, 230)
         Me.txtNominatimURL.Name = "txtNominatimURL"
         Me.txtNominatimURL.Size = New System.Drawing.Size(404, 20)
         Me.txtNominatimURL.TabIndex = 12
@@ -183,11 +185,27 @@ Partial Class frmPreferences
         'Label5
         '
         Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(16, 153)
+        Me.Label5.Location = New System.Drawing.Point(16, 213)
         Me.Label5.Name = "Label5"
         Me.Label5.Size = New System.Drawing.Size(174, 13)
         Me.Label5.TabIndex = 13
         Me.Label5.Text = "Nominatim URL for Search function"
+        '
+        'Label6
+        '
+        Me.Label6.AutoSize = True
+        Me.Label6.Location = New System.Drawing.Point(16, 159)
+        Me.Label6.Name = "Label6"
+        Me.Label6.Size = New System.Drawing.Size(96, 13)
+        Me.Label6.TabIndex = 14
+        Me.Label6.Text = "Analyze Base URL"
+        '
+        'txtAnalyzeBaseUrl
+        '
+        Me.txtAnalyzeBaseUrl.Location = New System.Drawing.Point(22, 176)
+        Me.txtAnalyzeBaseUrl.Name = "txtAnalyzeBaseUrl"
+        Me.txtAnalyzeBaseUrl.Size = New System.Drawing.Size(401, 20)
+        Me.txtAnalyzeBaseUrl.TabIndex = 15
         '
         'frmPreferences
         '
@@ -195,7 +213,9 @@ Partial Class frmPreferences
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.CancelButton = Me.Cancel_Button
-        Me.ClientSize = New System.Drawing.Size(435, 284)
+        Me.ClientSize = New System.Drawing.Size(435, 341)
+        Me.Controls.Add(Me.txtAnalyzeBaseUrl)
+        Me.Controls.Add(Me.Label6)
         Me.Controls.Add(Me.Label5)
         Me.Controls.Add(Me.txtNominatimURL)
         Me.Controls.Add(Me.btnLibPrefs)
@@ -239,4 +259,6 @@ Partial Class frmPreferences
     Friend WithEvents btnLibPrefs As Button
     Friend WithEvents txtNominatimURL As TextBox
     Friend WithEvents Label5 As Label
+    Friend WithEvents Label6 As Label
+    Friend WithEvents txtAnalyzeBaseUrl As TextBox
 End Class

@@ -23,7 +23,7 @@
       <Value Profile="(Default)">30000</Value>
     </Setting>
     <Setting Name="OSMBrowseBaseURL" Type="System.String" Scope="User">
-      <Value Profile="(Default)">http://www.openstreetmap.org/</Value>
+      <Value Profile="(Default)">http://www.openstreetmap.org/{type}/{id}</Value>
     </Setting>
     <Setting Name="APIUser" Type="System.String" Scope="User">
       <Value Profile="(Default)">colin.smale@xs4all.nl</Value>
