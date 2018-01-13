@@ -2,6 +2,9 @@
 Imports System.Drawing
 Imports System.Linq.Expressions
 
+''' <summary>
+''' Represents an OSM Relation
+''' </summary>
 Public Class OSMRelation
     Inherits OSMObject
     Public UsedByRelations As New List(Of OSMRelation)
@@ -27,7 +30,7 @@ Public Class OSMRelation
         End Get
     End Property
     Public Overrides Function Clone() As OSMObject
-        Dim xNew As OSMRelation = MyBase.Clone()
+        Dim xNew As OSMRelation = DirectCast(MyBase.Clone(), OSMRelation)
         xNew.UsedByRelations.AddRange(UsedByRelations)
         ' xNew.Members.AddRange(Members)
         Return xNew
@@ -100,7 +103,7 @@ Public Class OSMRelation
         Dim xMbr As OSMRelationMember
         Dim xObj As OSMObject
         Dim sType As String, sRef As String, sRole As String
-        Dim iRef As ULong
+        Dim iRef As Long
         If Doc Is Nothing Then
             Exit Sub
         End If
@@ -108,7 +111,7 @@ Public Class OSMRelation
             sType = xNode.GetAttribute("type")
             sRole = xNode.GetAttribute("role")
             sRef = xNode.GetAttribute("ref")
-            iRef = ULong.Parse(sRef)
+            iRef = Long.Parse(sRef)
             xObj = Nothing
             Select Case sType
                 Case "node"
@@ -119,7 +122,7 @@ Public Class OSMRelation
                         xObj = New OSMNode
                         xObj.ID = iRef
                         xObj.Doc = Doc
-                        Doc.Nodes.Add(iRef, xObj)
+                        Doc.Nodes.Add(iRef, DirectCast(xObj, OSMNode))
                         Debug.Assert(xObj.IsPlaceholder)
                     End If
                     DirectCast(xObj, OSMNode).UsedByRelations.Add(Me)
@@ -131,7 +134,7 @@ Public Class OSMRelation
                         xObj = New OSMWay
                         xObj.ID = iRef
                         xObj.Doc = Doc
-                        Doc.Ways.Add(iRef, xObj)
+                        Doc.Ways.Add(iRef, DirectCast(xObj, OSMWay))
                         Debug.Assert(xObj.IsPlaceholder)
                     End If
                     DirectCast(xObj, OSMWay).UsedByRelations.Add(Me)
@@ -143,7 +146,7 @@ Public Class OSMRelation
                         xObj = New OSMRelation
                         xObj.ID = iRef
                         xObj.Doc = Doc
-                        Doc.Relations.Add(iRef, xObj)
+                        Doc.Relations.Add(iRef, DirectCast(xObj, OSMRelation))
                         Debug.Assert(xObj.IsPlaceholder)
                     End If
                     DirectCast(xObj, OSMRelation).UsedByRelations.Add(Me)
@@ -187,13 +190,13 @@ Public Class OSMRelation
         End If
         Return sName
     End Function
-    Public Overrides ReadOnly Property Centroid As PointF
+    Public Overrides ReadOnly Property Centroid As DPoint
         Get
             Dim bb As BBox = Me.BBox
-            Return New PointF((bb.MinLon + bb.MaxLon) / 2.0, (bb.MinLat + bb.MaxLat) / 2.0)
+            Return New DPoint((bb.MinLon + bb.MaxLon) / 2.0, (bb.MinLat + bb.MaxLat) / 2.0)
         End Get
     End Property
-    Public Overrides Sub SerializeMe(x As XmlTextWriter)
+    Public Overrides Sub SerializeMe(x As XmlWriter)
         For Each m As OSMRelationMember In Members
             x.WriteStartElement("member")
             x.WriteAttributeString("type", m.TypeString)
@@ -277,7 +280,7 @@ Public Class OSMRelation
                         End If
                         r.SetRole("inner")
                         For Each m In Members
-                            If m.Type = ObjectType.Way AndAlso r.Ways.Contains(m.Member) Then
+                            If m.Type = ObjectType.Way AndAlso r.Ways.Contains(DirectCast(m.Member, OSMWay)) Then
                                 m.Role = "inner"
                             End If
                         Next

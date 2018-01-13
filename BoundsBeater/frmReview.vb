@@ -4,6 +4,7 @@ Imports System.Net
 
 Public Class frmReview
     Private sBaseTitle As String
+    Private sSubTitle As String
     Private iRel As Long
     Private ItemList() As BoundaryItem
     Private CurrentItem As Integer = 0
@@ -29,7 +30,7 @@ Public Class frmReview
     Private Shared colourLeave As Color = Color.White
     Const FinalSubitem As Integer = 3
 
-    Public Sub New(db As BoundaryDB.BoundaryItem)
+    Public Sub New(db As BoundaryDB.BoundaryItem, Optional sTitle As String = "")
 
         ' This call is required by the designer.
         InitializeComponent()
@@ -37,18 +38,20 @@ Public Class frmReview
         ' Add any initialization after the InitializeComponent() call.
         ItemList = {db}
         sBaseTitle = Me.Text
+        sSubTitle = sTitle
         NextItem()
     End Sub
-    Public Sub New(dblist() As BoundaryItem)
+    Public Sub New(dblist() As BoundaryItem, Optional sTitle As String = "")
         ' This call is required by the designer.
         InitializeComponent()
 
         ' Add any initialization after the InitializeComponent() call.
         ItemList = dblist
         sBaseTitle = Me.Text
+        sSubTitle = sTitle
         NextItem()
     End Sub
-    Public Sub New(dblist As List(Of BoundaryItem))
+    Public Sub New(dblist As List(Of BoundaryItem), Optional sTitle As String = "")
         ' This call is required by the designer.
         InitializeComponent()
 
@@ -60,6 +63,7 @@ Public Class frmReview
             i = i + 1
         Next
         sBaseTitle = Me.Text
+        sSubTitle = sTitle
         NextItem()
     End Sub
     Private Sub NextItem()
@@ -67,7 +71,7 @@ Public Class frmReview
         rev.dbi = ItemList(CurrentItem)
         populate()
         btnNext.Enabled = CurrentItem < (ItemList.Length - 1)
-        Me.Text = $"{sBaseTitle} - Object {CurrentItem + 1} of {ItemList.Length}"
+        Me.Text = $"{sBaseTitle} - Object {CurrentItem + 1} of {ItemList.Length}{sSubTitle}"
     End Sub
     Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
         If u?.ChangesetID = 0 Then

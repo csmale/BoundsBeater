@@ -1,10 +1,12 @@
 ﻿Imports OSMLibrary
 Imports System.Xml
 Imports System.IO
-Imports System.Data.SQLite
+' Imports System.Data.SQLite
 Imports Microsoft.VisualBasic.FileIO
 
-
+''' <summary>
+''' Main form
+''' </summary>
 Public Class frmMain
     Dim WithEvents oDoc As OSMDoc
     Dim log As myLogger
@@ -17,17 +19,27 @@ Public Class frmMain
     End Sub
 
     Private Sub btnOpen_Click(sender As Object, e As EventArgs) Handles btnOpen.Click
+        Dim bRes As Boolean
         With OpenFileDialog1
-            .Filter = "OSM Files (*.osm)|*.osm"
+            .FileName = ""
+            .Filter = "OSM Files (*.osm,*.pbf)|*.osm;*.pbf"
             If .ShowDialog = Windows.Forms.DialogResult.OK Then
                 oDoc = New OSMDoc()
-                lblStatus.Text = "Loading " & .FileName
+                lblStatus.Text = $"Loading { .FileName}"
                 Application.DoEvents()
-                oDoc.LoadBigXML(.FileName)
-                lblStatus.Text = "Loaded " & .FileName & "; " & oDoc.Relations.Count & " relations."
-                btnReport.Enabled = True
-                LoadTree()
-                LoadList()
+                If Strings.LCase(Strings.Right(.FileName, 4)) = ".pbf" Then
+                    bRes = oDoc.LoadPBF(.FileName)
+                ElseIf Strings.LCase(Strings.Right(.FileName, 4)) = ".osm" Then
+                    bRes = oDoc.LoadBigXML(.FileName)
+                End If
+                If bRes Then
+                    lblStatus.Text = $"Loaded { .FileName};  {oDoc.Relations.Count} relations."
+                    btnReport.Enabled = True
+                    LoadTree()
+                    LoadList()
+                Else
+                    lblStatus.Text = $"Failed to load { .FileName}"
+                End If
             End If
         End With
     End Sub
@@ -71,7 +83,7 @@ Public Class frmMain
         iRelID = Long.Parse(txtID.Text)
         r = oDoc.Relations(iRelID)
         If IsNothing(r) Then
-            MsgBox("Cannot find relation #" & iRelID & " in file.")
+            MsgBox($"Cannot find relation #{iRelID} in file.")
             Exit Sub
         End If
         Dim res As New OSMResolver
@@ -117,9 +129,9 @@ Public Class frmMain
         Application.DoEvents()
     End Sub
 
-    Private Sub oDoc_LoadProgress(nRels As ULong, nWays As ULong, nNodes As ULong) Handles oDoc.LoadProgress
+    Private Sub oDoc_LoadProgress(nRels As Integer, nWays As Integer, nNodes As Integer) Handles oDoc.LoadProgress
         If (nNodes Mod 100) = 0 Then
-            lblStatus.Text = "Loaded " & nRels & " relations, " & nWays & " ways, " & nNodes & " nodes..."
+            lblStatus.Text = $"Loaded {nRels} relations, {nWays} ways, {nNodes} nodes..."
             Application.DoEvents()
         End If
     End Sub
@@ -271,7 +283,7 @@ Public Class frmMain
             If Len(sTag) > 0 Then  'we should have a parent
                 If tvDir.Nodes.ContainsKey(sTag) Then
                     xPar = tvDir.Nodes(tvDir.Nodes.IndexOfKey(sTag))
-                    xPar.Nodes.Add(xNode.Clone)
+                    xPar.Nodes.Add(DirectCast(xNode.Clone(), TreeNode))
                 End If
             End If
         Next
@@ -295,10 +307,10 @@ Public Class frmMain
         iWayID = Long.Parse(txtWayID.Text)
         w = TryCast(xRetriever.GetOSMObject(OSMObject.ObjectType.Way, iWayID, True), OSMWay)
         If IsNothing(w) Then
-            MsgBox("Cannot find way #" & iWayID & " in file.")
+            MsgBox($"Cannot find way #{iWayID} in file.")
             Exit Sub
         End If
-        MsgBox("Way #" & iWayID.ToString & " contains " & w.Nodes.Count & " nodes and is " & Math.Round(w.Length).ToString & "m long")
+        MsgBox($"Way #{iWayID.ToString} contains {w.Nodes.Count} nodes and is {Math.Round(w.Length).ToString}m long")
     End Sub
 
     Private Sub btnTest_Click(sender As Object, e As EventArgs) Handles btnTest.Click

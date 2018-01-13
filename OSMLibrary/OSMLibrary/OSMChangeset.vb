@@ -76,23 +76,24 @@ Public Class OSMChangeset
             Return __Bbox
         End Get
     End Property
-    Public Overrides ReadOnly Property Centroid As Drawing.PointF
+    Public Overrides ReadOnly Property Centroid As DPoint
         Get
+            Return New DPoint(0.0, 0.0)
         End Get
     End Property
-    Public Overrides Sub SerializeMe(x As XmlTextWriter)
+    Public Overrides Sub SerializeMe(x As XmlWriter)
         x.WriteAttributeString("created_at", CreatedAt.ToUniversalTime.ToString("o"))
         x.WriteAttributeString("closed_at", ClosedAt.ToUniversalTime.ToString("o"))
-        x.WriteAttributeString("open", IIf(_IsOpen, "true", "false"))
+        x.WriteAttributeString("open", DirectCast(IIf(_IsOpen, "true", "false"), String))
         If __Bbox IsNot Nothing Then
             x.WriteAttributeString("min_lat", __Bbox.MinLat.ToString)
-        x.WriteAttributeString("min_lat", __Bbox.MinLat.ToString)
-        x.WriteAttributeString("min_lat", __Bbox.MinLat.ToString)
+            x.WriteAttributeString("min_lat", __Bbox.MinLat.ToString)
+            x.WriteAttributeString("min_lat", __Bbox.MinLat.ToString)
             x.WriteAttributeString("min_lat", __Bbox.MinLat.ToString)
         End If
-        x.WriteAttributeString("comments_count", Comments.Count)
+        x.WriteAttributeString("comments_count", Comments.Count.ToString)
     End Sub
-    Public Overrides Sub SerializeEnd(x As XmlTextWriter)
+    Public Overrides Sub SerializeEnd(x As XmlWriter)
         If _Comments.Count > 0 Then
             x.WriteStartElement("discussion")
             For Each xCom As OSMChangesetComment In _Comments
@@ -101,12 +102,12 @@ Public Class OSMChangeset
             x.WriteEndElement()
         End If
     End Sub
- 
+
 End Class
 
 Public Class OSMUpdateableChangeset
     Inherits OSMChangeset
-    Public Function Open()
+    Public Function Open() As Boolean
         Dim xCS As XmlDocument
         Dim ms As New System.IO.MemoryStream
         Dim xWriter As New XmlTextWriter(ms, System.Text.Encoding.UTF8)
@@ -126,9 +127,9 @@ Public Class OSMUpdateableChangeset
         End With
 
     End Function
-    Public Function Close()
+    Public Sub Close()
 
-    End Function
+    End Sub
     Public Function NewComment() As OSMChangesetComment
         Dim x As New OSMChangesetComment(Me)
         _Comments.Add(x)
@@ -152,7 +153,7 @@ Public Class OSMChangesetComment
         End Get
     End Property
 
-    Public Sub Serialize(x As XmlTextWriter)
+    Public Sub Serialize(x As XmlWriter)
         x.WriteStartElement("comment")
         x.WriteAttributeString("date", Timestamp.ToUniversalTime.ToString("o"))
         x.WriteAttributeString("uid", UID.ToString)

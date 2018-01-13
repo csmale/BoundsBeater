@@ -10,7 +10,7 @@ Public Class OSMApi
     ''' Base URL for the OSM API.
     ''' </summary>
     ''' <returns></returns>
-    Public Property BaseURL As String = My.Settings.OSMBaseApiURL & "/api/0.6/"
+    Public Property BaseURL As String = My.Settings.OSMBaseApiURL
     ''' <summary>
     ''' Credentials for authentication to the OSM API.
     ''' </summary>
@@ -26,7 +26,7 @@ Public Class OSMApi
     ''' </summary>
     ''' <returns></returns>
     Public Property XapiBaseURL As String = My.Settings.OSMXapiBaseApiURL
-    Private sLogFile As String = "OSMAPI.log"
+    Private Shared sLogFile As String = "OSMAPI.log"
     ''' <summary>
     ''' Description of the most recent error from the OSM API.
     ''' </summary>
@@ -126,7 +126,7 @@ Public Class OSMApi
         Dim sContentType As String = ""
         Dim iStatusCode As Integer = 0
         Dim sTmp As String
-        sTmp = DoOSMRequest(BaseURL & "/api/0.6/permissions", sContentType, iStatusCode)
+        sTmp = DoOSMRequest(BaseURL & "/permissions", sContentType, iStatusCode)
         Dim xDoc As New XmlDocument()
         xDoc.LoadXml(sTmp)
         For Each x As XmlElement In xDoc.SelectNodes("/osm/permissions/permission")
@@ -135,8 +135,8 @@ Public Class OSMApi
         Return l
     End Function
 
-    Private Function GetNewRequest(sURL As String) As HttpWebRequest
-        Dim req As HttpWebRequest = HttpWebRequest.Create(sURL)
+    Private Function GetNewRequest(sURL As String) As WebRequest
+        Dim req As HttpWebRequest = DirectCast(HttpWebRequest.Create(sURL), HttpWebRequest)
         req.CookieContainer = CookieContainer
         req.UserAgent = UserAgent
         req.Credentials = CredentialCache
@@ -145,7 +145,7 @@ Public Class OSMApi
         req.AllowAutoRedirect = False
         Return req
     End Function
-    Private Sub AddAuthHeader(req As HttpWebRequest)
+    Private Sub AddAuthHeader(req As WebRequest)
         Dim cre As String
         Dim bytes As Byte()
         Dim base64 As String
@@ -182,9 +182,10 @@ Public Class OSMApi
         End If
 
         bFinished = False
-        req = GetNewRequest(sURL)
+        req = DirectCast(GetNewRequest(sURL), HttpWebRequest)
         Do While Not bFinished
             Debug.Print($"Accessing {sMethod} {sURL}")
+            OSMLibraryLogger.WriteEntry($"Accessing {sMethod} {sURL}", TraceEventType.Information)
             Try
                 If Credentials IsNot Nothing Then
                     AddAuthHeader(req)
@@ -208,6 +209,7 @@ Public Class OSMApi
                     End With
                 End If
             Catch e As WebException
+                OSMLibraryLogger.WriteException(e, TraceEventType.Error, "sending request")
                 _LastError = e.Message
                 Return Nothing
             End Try
@@ -217,26 +219,27 @@ Public Class OSMApi
             ' status codes 405-499!
             iStartTime = Environment.TickCount
             Try
-                resp = req.GetResponse
+                resp = DirectCast(req.GetResponse, HttpWebResponse)
             Catch e As WebException
-                resp = e.Response
+                resp = DirectCast(e.Response, HttpWebResponse)
                 If resp Is Nothing Then
+                    OSMLibraryLogger.WriteException(e, TraceEventType.Error, "No response.")
                     Throw New WebException(e.Message, e)
                 End If
             End Try
 
             iEndTime = Environment.TickCount
 
-            Debug.Print("HTTP status " & resp.StatusCode & " (" & resp.StatusDescription & ") in " & (iEndTime - iStartTime) & "ms from " & sURL)
-
+            Debug.Print($"HTTP status {CInt(resp.StatusCode)} ({resp.StatusDescription}) in {(iEndTime - iStartTime)}ms from {sURL}")
+            OSMLibraryLogger.WriteEntry($"HTTP status {CInt(resp.StatusCode)} ({resp.StatusDescription}) in {(iEndTime - iStartTime)}ms from {sURL}")
 
             If resp.StatusCode = HttpStatusCode.Moved Or resp.StatusCode = HttpStatusCode.MovedPermanently Then
                 nRedirect = nRedirect + 1
                 If nRedirect >= MaxRedirect Then
                     _LastError = "Too many redirects"
-                    Throw New WebException("Too many redirects", 1000)
+                    Throw New WebException("Too many redirects")
                 End If
-                req = GetNewRequest(resp.GetResponseHeader("Location"))
+                req = DirectCast(GetNewRequest(resp.GetResponseHeader("Location")), HttpWebRequest)
                 AuthUri = New Uri(resp.GetResponseHeader("Location"))
                 If Credentials IsNot Nothing Then
                     If CredentialCache.GetCredential(AuthUri, "Basic") Is Nothing Then
@@ -253,7 +256,7 @@ Public Class OSMApi
 
         If resp.StatusCode <> HttpStatusCode.OK Then
             _LastError = resp.StatusDescription
-            Throw New WebException(resp.StatusDescription, resp.StatusCode)
+            Throw New WebException(resp.StatusDescription)
         End If
 
         Dim rs As Stream
@@ -261,6 +264,7 @@ Public Class OSMApi
         rs = resp.GetResponseStream
         rsr = New StreamReader(rs)
         sResp = rsr.ReadToEnd
+        OSMLibraryLogger.WriteEntry($"Response {Len(sResp)} bytes")
         rs.Close()
         resp.Close()
         resp.Dispose()
@@ -316,9 +320,9 @@ Public Class OSMApi
     Public Function OpenChangeset(xChg As OSMUpdateableChangeset) As Long
 
     End Function
-    Public Function CloseChangeset(xchg As OSMUpdateableChangeset)
+    Public Sub CloseChangeset(xchg As OSMUpdateableChangeset)
 
-    End Function
+    End Sub
     ' search through XAPI
     ' setting value must end in the question mark, e.g. http://www.overpass-api.de/api/xapi?
     Public Function GetXapi(sXapiParams As String) As OSMDoc

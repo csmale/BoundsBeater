@@ -38,5 +38,11 @@
     <Setting Name="AnalyzeUrl" Type="System.String" Scope="User">
       <Value Profile="(Default)">http://ra.osmsurround.org/analyzeRelation?relationId={id}&amp;noCache=true&amp;_noCache=on</Value>
     </Setting>
+    <Setting Name="BrowseZoom" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">14</Value>
+    </Setting>
+    <Setting Name="frmAnalyze_MinMax" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

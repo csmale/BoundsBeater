@@ -10,16 +10,35 @@ Public Class OSMSQLiteCacheProvider
         Throw New NotImplementedException()
     End Sub
 
-    Public Function GetByDate() As OSMCacheRecord Implements IOSMCacheProvider.GetByDate
+    Public Function GetByDate(t As OSMObject.ObjectType, ID As Long, AsOf As Date) As OSMCacheRecord Implements IOSMCacheProvider.GetByDate
         Throw New NotImplementedException()
+        Dim sSql As String
+        sSql = <![CDATA[
+            SELECT v.value from osmobjver v
+            WHERE v.Type=@type AND v.ID=@ID
+            AND v.Version = (SELECT MAX(o.Version) from OSMObjectVer o where o.type+id=type+id and o.date<date)
+         ]]>.Value
     End Function
 
-    Public Function GetByVersion() As OSMCacheRecord Implements IOSMCacheProvider.GetByVersion
+    Public Function GetByVersion(t As OSMObject.ObjectType, ID As Long, Version As Long) As OSMCacheRecord Implements IOSMCacheProvider.GetByVersion
         Throw New NotImplementedException()
+        Dim sSql As String
+        sSql = <![CDATA[
+            SELECT v.value from osmobjver v
+            WHERE v.Type=@type AND v.ID=@ID AND v.Version = @ID
+         ]]>.Value
     End Function
 
-    Public Function GetLatest(t As OSMObject.ObjectType, ID As ULong) As OSMCacheRecord Implements IOSMCacheProvider.GetLatest
+    Public Function GetLatest(t As OSMObject.ObjectType, ID As Long) As OSMCacheRecord Implements IOSMCacheProvider.GetLatest
         Throw New NotImplementedException()
+        Dim sSql As String
+        sSql = <![CDATA[
+            SELECT o.value from osmobj o
+            WHERE o.Type=@type AND o.ID=@ID AND o.Version = 
+                (SELECT Version FROM osmobjver v
+                WHERE o.Type=v.Type AND o.ID=v.ID)
+         ]]>.Value
+
     End Function
 
     Public Function Upsert(Data As OSMCacheRecord) As Object Implements IOSMCacheProvider.Upsert
@@ -46,14 +65,13 @@ table OSMOBJ
 
 #End If
     Dim sqlConn As SQLiteConnection
-        Dim myCompressionLevel As System.IO.Compression.CompressionLevel = Compression.CompressionLevel.Optimal
+    Dim myCompressionLevel As System.IO.Compression.CompressionLevel = Compression.CompressionLevel.Optimal
 
-        Public Sub New(CacheFile As String, Optional Create As Boolean = False)
-            Open(CacheFile, Create)
-        End Sub
+    Public Sub New(CacheFile As String, Optional Create As Boolean = False)
+        Open(CacheFile, Create)
+    End Sub
     Public Function Open(CacheFile As String, Optional Create As Boolean = False) As Boolean Implements IOSMCacheProvider.Open
         Dim xcs As New SQLiteConnectionStringBuilder
-
         If Not System.IO.File.Exists(CacheFile) Then
             If Create Then
                 SQLiteConnection.CreateFile(CacheFile)
@@ -151,11 +169,18 @@ table OSMOBJ
                 sqlCmd.Parameters.AddWithValue("@lastcheck", Now())
                 iRows = sqlCmd.ExecuteNonQuery()
                 If iRows = 1 Then
-                    sqlCmd.CommandText = "UPDATE osmobj SET Version = @version, LastCheck=@lastcheck WHERE Type=@type AND ID=@id AND Version<@version"
+                sqlCmd.CommandText = <![CDATA[
+                        UPDATE osmobj
+                        SET Version = @version, LastCheck=@lastcheck
+                        WHERE Type=@type AND ID=@id AND Version<@version
+                ]]>.Value()
+                iRows = sqlCmd.ExecuteNonQuery()
+                If iRows = 0 Then
+                    sqlCmd.CommandText = <![CDATA[
+                        INSERT INTO osmobj (Type, ID, Version, Lastcheck)
+                        VALUES (@type,@id,@version,@lastcheck)
+                    ]]>.Value()
                     iRows = sqlCmd.ExecuteNonQuery()
-                    If iRows = 0 Then
-                        sqlCmd.CommandText = "INSERT INTO osmobj (Type, ID, Version, Lastcheck) VALUES (@type,@id,@version,@lastcheck)"
-                        iRows = sqlCmd.ExecuteNonQuery()
                     End If
                 End If
                 sqlTxn.Commit()
@@ -173,9 +198,16 @@ table OSMOBJ
         sqlCmd.Parameters.AddWithValue("@type", OSMObject.ObjectTypeChar(Type))
         sqlCmd.Parameters.AddWithValue("@version", Version)
         If Version = 0 Then ' latest version
-            sqlCmd.CommandText = "SELECT V.Value FROM osmobjver V, osmobj O WHERE v.Type=o.Type AND v.ID=o.ID AND v.Version = o.Version AND o.Type=@type AND o.ID=@id"
+            sqlCmd.CommandText = <![CDATA[
+                SELECT V.Value FROM osmobjver V, osmobj O
+                WHERE v.Type=o.Type AND v.ID=o.ID AND v.Version = o.Version"
+                And o.Type=@type AND o.ID=@id
+                ]]>.Value()
         Else ' specific version
-            sqlCmd.CommandText = "SELECT V.Value FROM osmobjver V WHERE v.Type=@type AND v.ID=@id AND v.Version = @version"
+            sqlCmd.CommandText = <![CDATA[
+                SELECT V.Value FROM osmobjver V
+                WHERE v.Type=@type AND v.ID=@id AND v.Version = @version
+                ]]>.Value()
         End If
         oTmp = sqlCmd.ExecuteScalar()
         Return oTmp

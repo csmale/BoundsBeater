@@ -55,7 +55,7 @@ Public Class OSMUpdater
         Dim Status As Integer = 0
         Dim iNew As Long = 0
         Try
-            sTmp = api.DoOSMRequest(api.BaseURL & "/api/0.6/changeset/create", ContentType, Status, sPayload, "PUT")
+            sTmp = api.DoOSMRequest(api.BaseURL & "/changeset/create", ContentType, Status, sPayload, "PUT")
         Catch e As Exception
             MsgBox(e.Message)
             Return 0
@@ -73,7 +73,7 @@ Public Class OSMUpdater
         Dim ContentType As String = ""
         Dim Status As Integer = 0
         If ChangesetID <> 0 Then
-            api.DoOSMRequest(api.BaseURL & $"/api/0.6/changeset/{ChangesetID}/close", ContentType, Status, " ", "PUT")
+            api.DoOSMRequest(api.BaseURL & $"/changeset/{ChangesetID}/close", ContentType, Status, " ", "PUT")
             _ChangesetID = 0
         End If
     End Function
@@ -83,10 +83,11 @@ Public Class OSMUpdater
         Dim sPayload As String, sTmp As String
         Dim sb As New StringBuilder()
         Dim sw As New StringWriter(sb)
-        Dim writer As XmlTextWriter = New XmlTextWriter(sw)
         ' write the XML to the writer here
-        writer.Formatting = Formatting.Indented
-        writer.Indentation = 4
+        Dim writer As XmlTextWriter = New XmlTextWriter(sw) With {
+            .Formatting = Formatting.Indented,
+            .Indentation = 4
+        }
         writer.WriteStartElement("osm")
         O.Serialize(writer)
         writer.WriteEndElement()
@@ -95,7 +96,7 @@ Public Class OSMUpdater
         Dim Status As Integer = 0
         Dim iNew As Long = 0
         Try
-            sTmp = api.DoOSMRequest(api.BaseURL & $"/api/0.6/relation/create", ContentType, Status, sPayload, "PUT")
+            sTmp = api.DoOSMRequest(api.BaseURL & $"/relation/create", ContentType, Status, sPayload, "PUT")
         Catch e As Exception
             MsgBox(e.Message)
             Return False
@@ -112,10 +113,11 @@ Public Class OSMUpdater
         Dim sPayload As String, sTmp As String
         Dim sb As New StringBuilder()
         Dim sw As New StringWriter(sb)
-        Dim writer As XmlTextWriter = New XmlTextWriter(sw)
         ' write the XML to the writer here
-        writer.Formatting = Formatting.Indented
-        writer.Indentation = 4
+        Dim writer As XmlTextWriter = New XmlTextWriter(sw) With {
+            .Formatting = Formatting.Indented,
+            .Indentation = 4
+        }
         writer.WriteStartElement("osm")
         o.Serialize(writer)
         writer.WriteEndElement()
@@ -124,7 +126,7 @@ Public Class OSMUpdater
         Dim Status As Integer = 0
         Dim iNew As Long = 0
         Try
-            sTmp = api.DoOSMRequest(api.BaseURL & $"api/0.6/relation/{o.ID}", ContentType, Status, sPayload, "PUT")
+            sTmp = api.DoOSMRequest(api.BaseURL & $"/relation/{o.ID}", ContentType, Status, sPayload, "PUT")
         Catch e As Exception
             MsgBox(e.Message)
             Return False
@@ -199,7 +201,7 @@ lat/lon must be present
         Dim Status As Integer = 0
         Dim sTmp As String
         Try
-            sTmp = api.DoOSMRequest(api.BaseURL & $"api/0.6/changeset/{ChangesetID}/upload", ContentType, Status, sPayload, "POST")
+            sTmp = api.DoOSMRequest(api.BaseURL & $"/changeset/{ChangesetID}/upload", ContentType, Status, sPayload, "POST")
         Catch e As Exception
             MsgBox(e.Message)
             Return False

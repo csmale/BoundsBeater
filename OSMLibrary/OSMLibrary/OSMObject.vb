@@ -9,8 +9,12 @@ Public MustInherit Class OSMObject
         Changeset
     End Enum
     Public Shared BrowseBaseUrl As String = My.Settings.OSMBrowseBaseURL
+    Public Shared BrowseLatLonBaseUrl As String = My.Settings.OSMBrowseLatLon
+    Public Shared EditLatLonBaseUrl As String = My.Settings.OSMEditLatLon
+    Public Shared BrowseZoom As Integer = My.Settings.OSMBrowseZoom
+    Public Shared MinEditZoom As Integer = My.Settings.MinEditZoom
     Public ID As Long
-    Public Version As ULong
+    Public Version As Long
     Public UID As ULong
     Public User As String
     Public Changeset As ULong
@@ -38,7 +42,7 @@ Public MustInherit Class OSMObject
     Public MustOverride ReadOnly Property JSON As String
     Public MustOverride ReadOnly Property GeoJSON As String
     Public MustOverride ReadOnly Property Bbox As BBox
-    Public MustOverride ReadOnly Property Centroid As PointF
+    Public MustOverride ReadOnly Property Centroid As DPoint
 
     Public Sub New()
         Cached = Now
@@ -51,10 +55,13 @@ Public MustInherit Class OSMObject
     ''' Indicates if the object is a placeholder, i.e. has not been fully populated.
     ''' </summary>
     ''' <returns>True if the object is a placeholder</returns>
-    Public ReadOnly Property IsPlaceholder As Boolean
+    Public Property IsPlaceholder As Boolean
         Get
             Return __Placeholder
         End Get
+        Set(value As Boolean)
+            __Placeholder = value
+        End Set
     End Property
     ''' <summary>
     ''' Indicates if the history of the object has been loaded, and not just the latest version.
@@ -170,6 +177,15 @@ Public MustInherit Class OSMObject
         End Get
     End Property
     ''' <summary>
+    ''' Returns a string representing the object type of this object
+    ''' </summary>
+    ''' <returns>A string: way, node, relation, changeset or unknown</returns>
+    Public ReadOnly Property TypeString As String
+        Get
+            Return OSMObject.ObjectTypeString(Type)
+        End Get
+    End Property
+    ''' <summary>
     ''' Returns a single character string representing the object type
     ''' </summary>
     ''' <param name="t">An <c>ObjectType</c> value</param>
@@ -195,16 +211,16 @@ Public MustInherit Class OSMObject
     ''' <param name="x">The XML node containing the object data</param>
     Public Sub LoadGenericXML(x As Xml.XmlNode)
         Dim sTmp As String
-        ID = CLng(x.Attributes("id").InnerText)
-        UID = CLng(GetAttr(x, "uid", "0"))
+        ID = Long.Parse(x.Attributes("id").InnerText)
+        UID = ULong.Parse(GetAttr(x, "uid", "0"))
         If Not IsNothing(Doc) And UID <> 0 Then
             If Not Doc.Users.ContainsKey(UID) Then
                 Doc.Users(UID) = New OSMUser(UID, GetAttr(x, "user", "unknown"))
             End If
         End If
         User = GetAttr(x, "user", "")
-        Version = CLng(GetAttr(x, "version", "0"))
-        Changeset = CLng(GetAttr(x, "changeset", "0"))
+        Version = Long.Parse(GetAttr(x, "version", "0"))
+        Changeset = ULong.Parse(GetAttr(x, "changeset", "0"))
         Try
             Timestamp = Date.Parse(GetAttr(x, "timestamp", "0"))
         Catch
@@ -274,6 +290,25 @@ Public MustInherit Class OSMObject
             Return sUrl
         End Get
     End Property
+    Public Shared ReadOnly Property BrowseUrl(Lat As Double, Lon As Double, Optional Zoom As Integer = 13) As String
+        Get
+            Dim sUrl As String
+            sUrl = Replace(BrowseLatLonBaseUrl, "{zoom}", Zoom.ToString())
+            sUrl = Replace(sUrl, "{lat}", Lat.ToString())
+            sUrl = Replace(sUrl, "{lon}", Lon.ToString())
+            Return sUrl
+        End Get
+    End Property
+    Public Shared ReadOnly Property EditUrl(Lat As Double, Lon As Double, Zoom As Integer) As String
+        Get
+            Dim sUrl As String
+            If Zoom < MinEditZoom Then Return ""
+            sUrl = Replace(EditLatLonBaseUrl, "{zoom}", Zoom.ToString())
+            sUrl = Replace(sUrl, "{lat}", Lat.ToString())
+            sUrl = Replace(sUrl, "{lon}", Lon.ToString())
+            Return sUrl
+        End Get
+    End Property
     ''' <summary>
     ''' Returns a string representing the object, contining the name (if present), the ID, and
     ''' a URL
@@ -322,7 +357,7 @@ Public MustInherit Class OSMObject
             Return xList
         End Get
     End Property
-    Public Sub Serialize(x As XmlTextWriter)
+    Public Sub Serialize(x As XmlWriter)
         Dim sType As String
         If TypeOf Me Is OSMNode Then
             sType = "node"
@@ -337,7 +372,7 @@ Public MustInherit Class OSMObject
         End If
         x.WriteStartElement(sType)
         x.WriteAttributeString("id", ID.ToString)
-        x.WriteAttributeString("visible", IIf(Visible, "true", "false"))
+        x.WriteAttributeString("visible", DirectCast(IIf(Visible, "true", "false"), String))
         x.WriteAttributeString("timestamp", Timestamp.ToUniversalTime.ToString("o"))
         x.WriteAttributeString("version", Version.ToString)
         x.WriteAttributeString("changeset", Changeset.ToString)
@@ -361,9 +396,9 @@ Public MustInherit Class OSMObject
         SerializeEnd(x)
         x.WriteEndElement()
     End Sub
-    Public Overridable Sub SerializeMe(x As XmlTextWriter)
+    Public Overridable Sub SerializeMe(x As XmlWriter)
     End Sub
-    Public Sub SerializeTags(x As XmlTextWriter)
+    Public Sub SerializeTags(x As XmlWriter)
         For Each k As String In Tags.Keys
             x.WriteStartElement("tag")
             x.WriteAttributeString("k", k)
@@ -371,9 +406,9 @@ Public MustInherit Class OSMObject
             x.WriteEndElement()
         Next
     End Sub
-    Public Overridable Sub SerializeEnd(x As XmlTextWriter)
+    Public Overridable Sub SerializeEnd(x As XmlWriter)
     End Sub
-    Public Overridable ReadOnly Property VersionByNumber(v As ULong) As OSMObject
+    Public Overridable ReadOnly Property VersionByNumber(v As Long) As OSMObject
         Get
             Dim vn As LinkedListNode(Of OSMObject)
             vn = Versions.First

@@ -520,7 +520,7 @@ Public Class BoundaryDB
             ' temp code
             If InStr(Name, "**delete**") > 0 Then
                 IsDeleted = True
-                Name = Replace(Name, " **delete**", "")
+                Name = Trim(Replace(Name, "**delete**", ""))
             End If
             Name2 = NodeText(xBnd.SelectSingleNode("name2"))
             ONSCode = NodeText(xBnd.SelectSingleNode("newcode"))
@@ -941,11 +941,11 @@ Public Class BoundaryDB
                             bchg = True
                         End If
                         pt = BoundaryItem.ParishType_FromString(xRel.Tag("parish_type"))
-                        If pt <> xMatch.ParishType Then
+                        If pt <> BoundaryItem.ParishTypes.PT_ParishCouncil AndAlso pt <> xMatch.ParishType Then
                             xMatch.ParishType = pt
                             bchg = True
                         End If
-                        If xMatch.CouncilName <> xRel.Tag("council_name") Then
+                        If xRel.Tag("council_name") <> "" AndAlso xMatch.CouncilName <> xRel.Tag("council_name") Then
                             xMatch.CouncilName = xRel.Tag("council_name")
                             bchg = True
                         End If

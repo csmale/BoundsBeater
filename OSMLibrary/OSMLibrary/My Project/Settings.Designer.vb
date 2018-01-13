@@ -15,7 +15,7 @@ Option Explicit On
 Namespace My
     
     <Global.System.Runtime.CompilerServices.CompilerGeneratedAttribute(),  _
-     Global.System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.3.0.0"),  _
+     Global.System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.5.0.0"),  _
      Global.System.ComponentModel.EditorBrowsableAttribute(Global.System.ComponentModel.EditorBrowsableState.Advanced)>  _
     Partial Public NotInheritable Class MySettings
         Inherits Global.System.Configuration.ApplicationSettingsBase
@@ -56,7 +56,7 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("http://api.openstreetmap.org/")>  _
+         Global.System.Configuration.DefaultSettingValueAttribute("http://api.openstreetmap.org/api/0.6/")>  _
         Public Property OSMBaseApiURL() As String
             Get
                 Return CType(Me("OSMBaseApiURL"),String)
@@ -145,6 +145,78 @@ Namespace My
             End Get
             Set
                 Me("APIPassword") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute(".\osmconvert\osmconvert64-0.8.8p.exe")>  _
+        Public Property OSMConvert() As String
+            Get
+                Return CType(Me("OSMConvert"),String)
+            End Get
+            Set
+                Me("OSMConvert") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("http://www.openstreetmap.org/#map={zoom}/{lat}/{lon}")>  _
+        Public Property OSMBrowseLatLon() As String
+            Get
+                Return CType(Me("OSMBrowseLatLon"),String)
+            End Get
+            Set
+                Me("OSMBrowseLatLon") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("13")>  _
+        Public Property OSMBrowseZoom() As Integer
+            Get
+                Return CType(Me("OSMBrowseZoom"),Integer)
+            End Get
+            Set
+                Me("OSMBrowseZoom") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("http://www.openstreetmap.org/edit#map={zoom}/{lat}/{lon}")>  _
+        Public Property OSMEditLatLon() As String
+            Get
+                Return CType(Me("OSMEditLatLon"),String)
+            End Get
+            Set
+                Me("OSMEditLatLon") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("13")>  _
+        Public Property MinEditZoom() As Integer
+            Get
+                Return CType(Me("MinEditZoom"),Integer)
+            End Get
+            Set
+                Me("MinEditZoom") = value
+            End Set
+        End Property
+        
+        <Global.System.Configuration.UserScopedSettingAttribute(),  _
+         Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.Configuration.DefaultSettingValueAttribute("C:\Temp\")>  _
+        Public Property LogDirectory() As String
+            Get
+                Return CType(Me("LogDirectory"),String)
+            End Get
+            Set
+                Me("LogDirectory") = value
             End Set
         End Property
     End Class

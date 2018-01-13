@@ -1,4 +1,6 @@
-﻿Imports System.Xml
+﻿Imports System.IO
+Imports System.Xml
+
 Public Class OSMDoc
     Dim xDoc As New XmlDocument
     Public Relations As New OSMCollection(Of OSMRelation)
@@ -9,7 +11,7 @@ Public Class OSMDoc
     Public Retriever As OSMRetriever
     Public Users As New Dictionary(Of ULong, OSMUser)
 
-    Public Event LoadProgress(nRels As ULong, nWays As ULong, nNodes As ULong)
+    Public Event LoadProgress(nRels As Integer, nWays As Integer, nNodes As Integer)
 
     Private Function LoadXMLDoc(xDoc As XmlDocument) As Boolean
         Dim xNodes As XmlNodeList
@@ -33,8 +35,9 @@ Public Class OSMDoc
             xOsmNode = Nodes(ID)
             xParentNode = Nothing
             If xOsmNode Is Nothing Then ' first time seeing this node id
-                xOsmNode = New OSMNode(xNode, Me)
-                xOsmNode.Doc = Me
+                xOsmNode = New OSMNode(xNode, Me) With {
+                    .Doc = Me
+                }
                 Nodes.Add(ID, xOsmNode)
                 xParentNode = Nodes(ID)
             Else    ' exists already! placeholder? update in place
@@ -44,8 +47,7 @@ Public Class OSMDoc
                 Else    ' different version? add version to collection
                     If xOsmNode.VersionByNumber(iVer) Is Nothing Then
                         xParentNode = xOsmNode
-                        xOsmNode = New OSMNode(xNode, Me)
-                        xOsmNode.Doc = Me
+                        xOsmNode = New OSMNode(xNode, Me) With {.Doc = Me}
                     End If
                 End If
             End If
@@ -61,8 +63,7 @@ Public Class OSMDoc
             xOsmWay = Ways(ID)
             xParentNode = Nothing
             If xOsmWay Is Nothing Then ' first time seeing this node id
-                xOsmWay = New OSMWay(xNode, Nodes, Me)
-                xOsmWay.Doc = Me
+                xOsmWay = New OSMWay(xNode, Nodes, Me) With {.Doc = Me}
                 Ways.Add(ID, xOsmWay)
                 xParentNode = Ways(ID)
             Else    ' exists already! placeholder? update in place
@@ -72,8 +73,7 @@ Public Class OSMDoc
                 Else    ' different version? add version to collection
                     If xOsmWay.VersionByNumber(iVer) Is Nothing Then
                         xParentNode = xOsmWay
-                        xOsmWay = New OSMWay(xNode, Nodes, Me)
-                        xOsmWay.Doc = Me
+                        xOsmWay = New OSMWay(xNode, Nodes, Me) With {.Doc = Me}
                     End If
                 End If
             End If
@@ -88,8 +88,7 @@ Public Class OSMDoc
             xOsmRel = Relations(ID)
             If xOsmRel Is Nothing Then
                 ' normal case, relation not seen before in this file
-                xOsmRel = New OSMRelation(xNode, Me)
-                xOsmRel.Doc = Me
+                xOsmRel = New OSMRelation(xNode, Me) With {.Doc = Me}
                 If Not Relations.Contains(xOsmRel.ID) Then ' first version - treat as base
                     Relations.Add(xOsmRel.ID, xOsmRel)
                 End If
@@ -98,7 +97,7 @@ Public Class OSMDoc
                     xParentNode.InsertVersion(xOsmRel)
                 End If
                 If xOsmRel.Version > xParentNode.Version Then
-                    Relations(ID) = xParentNode
+                    Relations(ID) = DirectCast(xParentNode, OSMRelation)
                 End If
             Else
                 ' must be a placeholder?
@@ -109,8 +108,9 @@ Public Class OSMDoc
                     ' duplicate relation in file!!!
                     If xOsmRel.VersionByNumber(iVer) Is Nothing Then
                         xParentNode = xOsmRel
-                        xOsmRel = New OSMRelation(xNode, Me)
-                        xOsmRel.Doc = Me
+                        xOsmRel = New OSMRelation(xNode, Me) With {
+                            .Doc = Me
+                        }
                         xParentNode.InsertVersion(xOsmRel)
                     End If
                 End If
@@ -170,7 +170,7 @@ Public Class OSMDoc
             xNode = xOther.Nodes(lRef)
             If Not Nodes.Contains(lRef) Then
                 Nodes.Add(lRef, xNode)
-            ElseIf Nodes(lRef).IsPlaceholder OrElse xNode.Version > Nodes(lref).Version Then
+            ElseIf Nodes(lRef).IsPlaceholder OrElse xNode.Version > Nodes(lRef).Version Then
                 Nodes(lRef) = xNode
             End If
             xNode.Doc = Me
@@ -179,7 +179,7 @@ Public Class OSMDoc
             xWay = xOther.Ways(lRef)
             If Not Ways.Contains(lRef) Then
                 Ways.Add(lRef, xWay)
-            ElseIf Ways(lRef).IsPlaceholder OrElse xWay.Version > Ways(lref).Version Then
+            ElseIf Ways(lRef).IsPlaceholder OrElse xWay.Version > Ways(lRef).Version Then
                 Ways(lRef) = xWay
             End If
             xWay.Doc = Me
@@ -188,47 +188,77 @@ Public Class OSMDoc
             xRel = xOther.Relations(lRef)
             If Not Relations.Contains(lRef) Then
                 Relations.Add(lRef, xRel)
-            ElseIf Relations(lRef).IsPlaceholder OrElse xRel.Version > Relations(lref).version Then
+            ElseIf Relations(lRef).IsPlaceholder OrElse xRel.Version > Relations(lRef).Version Then
                 Relations(lRef) = xRel
             End If
             xRel.Doc = Me
         Next
-        For Each UID As Long In xOther.Users.Keys
+        For Each UID As ULong In xOther.Users.Keys
             If Not Users.ContainsKey(UID) Then
                 Users.Add(UID, New OSMUser(UID, xOther.Users(UID).Name))
             End If
         Next
     End Sub
+    Public Function LoadPBF(sFile As String) As Boolean
+        ' run external osmconvert command on the given file which streams the xml output to stdout
+        Dim myPath As String = New System.Uri(System.Reflection.Assembly.GetExecutingAssembly().CodeBase).AbsolutePath
+        myPath = Uri.UnescapeDataString(myPath)
+        myPath = System.IO.Path.GetDirectoryName(myPath)
+        Dim oProcess As New Process()
+        Dim sProg As String = Path.Combine(myPath, My.Settings.OSMConvert)
+        Dim oStartInfo As New ProcessStartInfo(sProg, """" & sFile & """") With {
+            .UseShellExecute = False,
+            .RedirectStandardOutput = True,
+            .CreateNoWindow = True
+        }
+        oProcess.StartInfo = oStartInfo
+        oProcess.Start()
+
+        Dim oStreamReader As System.IO.StreamReader = oProcess.StandardOutput
+        Dim xRdr As New XmlTextReader(oStreamReader)
+        Dim bRet As Boolean = LoadXMLStream(xRdr)
+
+        If Not oProcess.HasExited Then
+            oProcess.Kill()
+        End If
+
+        If oProcess.ExitCode <> 0 Then bRet = False
+        Return bRet
+    End Function
     Public Function LoadBigXML(sFile As String) As Boolean
         Dim xRdr As XmlTextReader
+        Try
+            xRdr = New XmlTextReader(sFile)
+        Catch
+            Return False
+        End Try
+        Return LoadXMLStream(xRdr)
+    End Function
+    Public Function LoadXMLStream(xrdr As XmlTextReader) As Boolean
         Dim xDoc As XmlDocument
         Dim xEl As XmlElement
         Dim xNode As OSMNode
         Dim xWay As OSMWay
         Dim xRel As OSMRelation
         Dim ID As Long
-        Try
-            xRdr = New XmlTextReader(sFile)
-        Catch
-            Return False
-        End Try
-        xRdr.WhitespaceHandling = WhitespaceHandling.None
-        While Not xRdr.EOF
-            Select Case xRdr.NodeType
+
+        xrdr.WhitespaceHandling = WhitespaceHandling.None
+        While Not xrdr.EOF
+            Select Case xrdr.NodeType
                 Case XmlNodeType.Element
                     xDoc = New XmlDocument()
-                    Select Case xRdr.Name
+                    Select Case xrdr.Name
                         Case "node"
-                            xEl = xDoc.ReadNode(xRdr)
+                            xEl = DirectCast(xDoc.ReadNode(xrdr), XmlElement)
                             xNode = New OSMNode(xEl, Me)
-                            '                            xNode.Doc = Me
+                            ' xNode.Doc = Me
                             Nodes.Add(xNode.ID, xNode)
                         Case "way"
-                            xEl = xDoc.ReadNode(xRdr)
+                            xEl = DirectCast(xDoc.ReadNode(xrdr), XmlElement)
                             xWay = New OSMWay(xEl, Me)
                             Ways.Add(xWay.ID, xWay)
                         Case "relation"
-                            xEl = xDoc.ReadNode(xRdr)
+                            xEl = DirectCast(xDoc.ReadNode(xrdr), XmlElement)
                             ID = CLng(xEl.Attributes("id").InnerText)
                             xRel = Relations(ID)
                             If xRel Is Nothing Then
@@ -245,11 +275,11 @@ Public Class OSMDoc
                                 End If
                             End If
                         Case Else
-                            xRdr.Read()
+                            xrdr.Read()
                     End Select
                     RaiseEvent LoadProgress(Relations.Count, Ways.Count, Nodes.Count)
                 Case Else
-                    xRdr.Read()
+                    xrdr.Read()
             End Select
         End While
         Return True

@@ -19,8 +19,8 @@ End Enum
 Public Interface IOSMCacheProvider
     Function Open(ConnString As String, Optional Create As Boolean = False) As Boolean
     Sub Close()
-    Function GetByVersion() As OSMCacheRecord
-    Function GetByDate() As OSMCacheRecord
-    Function GetLatest(t As OSMObject.ObjectType, ID As ULong) As OSMCacheRecord
+    Function GetByVersion(t As OSMObject.ObjectType, ID As Long, Version As Long) As OSMCacheRecord
+    Function GetByDate(t As OSMObject.ObjectType, ID As Long, AsDate As Date) As OSMCacheRecord
+    Function GetLatest(t As OSMObject.ObjectType, ID As Long) As OSMCacheRecord
     Function Upsert(Data As OSMCacheRecord)
 End Interface

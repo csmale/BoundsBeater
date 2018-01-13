@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="OSMBaseApiURL" Type="System.String" Scope="User">
-      <Value Profile="(Default)">http://api.openstreetmap.org/</Value>
+      <Value Profile="(Default)">http://api.openstreetmap.org/api/0.6/</Value>
     </Setting>
     <Setting Name="OSMLibUserAgent" Type="System.String" Scope="User">
       <Value Profile="(Default)">OSMLibrary/1.0; colin.smale@xs4all.nl</Value>
@@ -30,6 +30,24 @@
     </Setting>
     <Setting Name="APIPassword" Type="System.String" Scope="User">
       <Value Profile="(Default)">myspeak1x</Value>
+    </Setting>
+    <Setting Name="OSMConvert" Type="System.String" Scope="User">
+      <Value Profile="(Default)">.\osmconvert\osmconvert64-0.8.8p.exe</Value>
+    </Setting>
+    <Setting Name="OSMBrowseLatLon" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://www.openstreetmap.org/#map={zoom}/{lat}/{lon}</Value>
+    </Setting>
+    <Setting Name="OSMBrowseZoom" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">13</Value>
+    </Setting>
+    <Setting Name="OSMEditLatLon" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://www.openstreetmap.org/edit#map={zoom}/{lat}/{lon}</Value>
+    </Setting>
+    <Setting Name="MinEditZoom" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">13</Value>
+    </Setting>
+    <Setting Name="LogDirectory" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Temp\</Value>
     </Setting>
   </Settings>
 </SettingsFile>

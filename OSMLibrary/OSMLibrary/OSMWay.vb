@@ -3,6 +3,9 @@ Imports System.Drawing
 Imports System.Text
 Imports OSMLibrary
 
+''' <summary>
+''' Represents an OSM Way
+''' </summary>
 Public Class OSMWay
     Inherits OSMObject
     Public Nodes As New LinkedList(Of OSMNode)
@@ -26,7 +29,7 @@ Public Class OSMWay
         End Get
     End Property
     Public Overrides Function Clone() As OSMObject
-        Dim xNew As OSMWay = MyBase.Clone()
+        Dim xNew As OSMWay = DirectCast(MyBase.Clone(), OSMWay)
 
         Return xNew
     End Function
@@ -104,34 +107,44 @@ Public Class OSMWay
     Public Sub New(xWay As XmlNode)
         LoadXML(xWay, Nothing)
     End Sub
+
+    ''' <summary>
+    ''' Default constructor
+    ''' </summary>
     Public Sub New()
         MyBase.New()
     End Sub
-    Public Sub New(x As Xml.XmlNode, xDoc As OSMDoc)
+
+    ''' <summary>
+    ''' Creates an OSMWay, consisting solely of the given node, within the given OSMDoc
+    ''' </summary>
+    ''' <param name="Node">The OSMNode to be inserted into the new way</param>
+    ''' <param name="xDoc">The OSMDoc containing bothe the given node and the new way</param>
+    Public Sub New(Node As Xml.XmlNode, xDoc As OSMDoc)
         MyBase.New(xDoc)
-        LoadXML(x, Doc.Nodes)
+        LoadXML(Node, Doc.Nodes)
     End Sub
     Public Sub New(x As Xml.XmlNode, xNodes As OSMCollection(Of OSMNode), xDoc As OSMDoc)
         MyBase.New(xDoc)
         LoadXML(x, xNodes)
     End Sub
 
-    Public Overrides ReadOnly Property Centroid As PointF
+    Public Overrides ReadOnly Property Centroid As DPoint
         Get
             Dim bb As BBox = Me.BBox
-            Return New PointF((bb.MinLon + bb.MaxLon) / 2.0, (bb.MinLat + bb.MaxLat) / 2.0)
+            Return New DPoint((bb.MinLon + bb.MaxLon) / 2.0, (bb.MinLat + bb.MaxLat) / 2.0)
         End Get
     End Property
-    Public Overrides Sub SerializeMe(x As XmlTextWriter)
+    Public Overrides Sub SerializeMe(x As XmlWriter)
         For Each n As OSMNode In Nodes
             x.WriteStartElement("nd")
             x.WriteAttributeString("ref", n.ID.ToString)
             x.WriteEndElement()
         Next
     End Sub
-    Public ReadOnly Property Length() As Single
+    Public ReadOnly Property Length() As Double
         Get
-            Dim l As Single
+            Dim l As Double
             Dim n1 As LinkedListNode(Of OSMNode), n2 As LinkedListNode(Of OSMNode)
             If Nodes.Count < 2 Then
                 Return 0.0

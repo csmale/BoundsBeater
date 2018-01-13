@@ -15,16 +15,7 @@ Public Class OSMRelationMember
     End Property
     Public ReadOnly Property TypeString As String
         Get
-            Select Case Member.Type
-                Case ObjectType.Node
-                    Return "node"
-                Case ObjectType.Way
-                    Return "way"
-                Case ObjectType.Relation
-                    Return "relation"
-                Case Else
-                    Return ""
-            End Select
+            Return OSMObject.ObjectTypeString(Member.Type)
         End Get
     End Property
     Public Overrides ReadOnly Property Bbox As BBox
@@ -58,12 +49,12 @@ Public Class OSMRelationMember
         Member = Obj
         Me.Role = Role
     End Sub
-    Public Overrides ReadOnly Property Centroid As PointF
+    Public Overrides ReadOnly Property Centroid As DPoint
         Get
             Return Member.Centroid
         End Get
     End Property
-    Public Overrides Sub SerializeMe(x As Xml.XmlTextWriter)
+    Public Overrides Sub SerializeMe(x As Xml.XmlWriter)
 
     End Sub
 End Class

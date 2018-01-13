@@ -96,7 +96,7 @@ Public Class OSMResolver
             End Get
         End Property
         Public Shared Function IsClockwise(n As LinkedList(Of OSMNode)) As Boolean
-            Dim a As Single = 0
+            Dim a As Double = 0
             Dim j As Integer
             For i = 0 To (n.Count) - 1
                 j = (i + 1) Mod n.Count
@@ -421,8 +421,8 @@ Public Class OSMResolver
                 Throw New Exception("Other Ring not closed")
                 Return Nothing
             End If
-            Dim out As New Ring()
-            out.Resolver = Me.Resolver
+
+            Dim out As New Ring With {.Resolver = Me.Resolver}
             Dim nIn As LinkedList(Of OSMNode) = Me.NodeListClockwise()
             Dim nOther As LinkedList(Of OSMNode) = Other.NodeListClockwise()
             Dim nOut As New LinkedList(Of OSMNode)
@@ -480,8 +480,9 @@ Public Class OSMResolver
             End If
 
             ' returned ring has a single way containing all the nodes - but nothing else
-            Dim w As New OSMWay
-            w.Nodes = nOut
+            Dim w As New OSMWay With {
+                .Nodes = nOut
+            }
             out.Ways.AddLast(w)
             out.Head = nOut.First.Value
             out.Tail = nOut.Last.Value
@@ -569,17 +570,19 @@ Public Class OSMResolver
             If m.Type <> OSMObject.ObjectType.Way Then
                 Continue For
             End If
-            If Ways.Contains(m.Member) Then
-                IgnoreWays.Add(m.Member)
+            Dim mw As OSMWay = DirectCast(m.Member, OSMWay)
+            If Ways.Contains(mw) Then
+                IgnoreWays.Add(mw)
             Else
-                Ways.Add(m.Member)
+                Ways.Add(mw)
             End If
         Next
 
         ' pass 2: process node members
         For Each m As OSMRelationMember In rel.Members
             If m.Type = OSMObject.ObjectType.Node Then
-                If Not Nodes.Contains(m.Member) Then Nodes.Add(m.Member)
+                Dim mn As OSMNode = DirectCast(m.Member, OSMNode)
+                If Not Nodes.Contains(mn) Then Nodes.Add(mn)
             End If
         Next
 
@@ -589,13 +592,14 @@ Public Class OSMResolver
             sTmp = ""
             If m.Type = OSMObject.ObjectType.Way Then
                 ' here be magic!
-                If IgnoreWays.Contains(m.Member) Then Continue For
+                Dim mw As OSMWay = DirectCast(m.Member, OSMWay)
+                If IgnoreWays.Contains(mw) Then Continue For
                 bLinked = False
                 For Each r In Rings
                     If r.isClosed() Then
                         Continue For
                     End If
-                    If r.Link(m.Member) Then
+                    If r.Link(mw) Then
                         bLinked = True
                         Debug.Print("Linked way " & m.Member.ID & " to ring #" & r.Index)
                         If m.Role <> r.Role Then
@@ -605,7 +609,7 @@ Public Class OSMResolver
                     End If
                 Next
                 If Not bLinked Then
-                    r = New Ring(Me, m.Member, m.Role)
+                    r = New Ring(Me, mw, m.Role)
                     Rings.AddLast(r)
                     r.Index = Rings.Count
                     Debug.Print("Way " & m.Member.ID & " starts new ring #" & r.Index)

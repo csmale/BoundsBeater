@@ -143,6 +143,14 @@ relOptions = {
           fillColor: 'Orange',
           fillOpacity: 0.3,
           pointToLayer: labelRelation
+      },
+      {
+          // level 12, used for placeholders where no OSM object exists
+          color: 'Gray',
+          weight: 2,
+          fillColor: 'Gray',
+          fillOpacity: 0.1,
+          pointToLayer: labelRelation
       }
   ];
 var townOptions = {
@@ -370,7 +378,16 @@ function drawJSON(j, id) {
 
     layers[id] = l;
     map.addLayer(l);
-    map.fitBounds(l.getBounds());
+    // map.fitBounds(l.getBounds());
+}
+
+function zoomToLayer(id) {
+    for (var x in layers) {
+        if (x === id) {
+            map.fitBounds(layers[x].getBounds());
+            break;
+        }
+    }
 }
 
 function getMapBounds() {
@@ -379,9 +396,14 @@ function getMapBounds() {
     return bb;
 }
 
-function clearLayers() {
-    for (x in map.getLayers()) {
+function getMapLoc() {
+    var b = map.getCenter();
+    var bb = { Lat: b.lat, Lon: b.lng, Zoom: map.getZoom() };
+    return bb;
+}
 
-        map.removeLayer(x);
+function clearLayers() {
+    for (var x in layers) {
+        map.removeLayer(layers[x]);
     }
 }

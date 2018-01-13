@@ -23,12 +23,10 @@ Partial Class frmAnalyze
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
-        Me.btnClose = New System.Windows.Forms.Button()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(frmAnalyze))
         Me.txtSingle = New System.Windows.Forms.TextBox()
         Me.btnSingle = New System.Windows.Forms.Button()
-        Me.cbLists = New System.Windows.Forms.ComboBox()
         Me.txtReport = New System.Windows.Forms.TextBox()
-        Me.btnGo = New System.Windows.Forms.Button()
         Me.tabDetail = New System.Windows.Forms.TabControl()
         Me.tbpChildren = New System.Windows.Forms.TabPage()
         Me.lvChildren = New System.Windows.Forms.ListView()
@@ -42,15 +40,29 @@ Partial Class frmAnalyze
         Me.colWebsite = CType(New System.Windows.Forms.ColumnHeader(), System.Windows.Forms.ColumnHeader)
         Me.tbpMap = New System.Windows.Forms.TabPage()
         Me.wbMap = New System.Windows.Forms.WebBrowser()
-        Me.btnUpdate = New System.Windows.Forms.Button()
-        Me.chkUpdateAll = New System.Windows.Forms.CheckBox()
         Me.ssStatus = New System.Windows.Forms.StatusStrip()
         Me.tsProgress = New System.Windows.Forms.ToolStripProgressBar()
         Me.tsStatus = New System.Windows.Forms.ToolStripStatusLabel()
-        Me.cmsNode = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.btnHist = New System.Windows.Forms.Button()
+        Me.cmsChild = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.tsmiChildEdit = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiChildReport = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiChildOpenWebsite = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiChildReview = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiChildShowInOsm = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiChildAnalyze = New System.Windows.Forms.ToolStripMenuItem()
+        Me.sfdReports = New System.Windows.Forms.SaveFileDialog()
+        Me.tvList = New System.Windows.Forms.TreeView()
+        Me.Panel1 = New System.Windows.Forms.Panel()
+        Me.scon1 = New System.Windows.Forms.SplitContainer()
+        Me.scon2 = New System.Windows.Forms.SplitContainer()
+        Me.ofdBoundaries = New System.Windows.Forms.OpenFileDialog()
+        Me.btnUpload = New System.Windows.Forms.Button()
+        Me.ofdUpload = New System.Windows.Forms.OpenFileDialog()
+        Me.chkShowDeleted = New System.Windows.Forms.CheckBox()
         Me.tsmiFlush = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiEdit = New System.Windows.Forms.ToolStripMenuItem()
-        Me.tsmiSearch = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiSearchNom = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiShowAll = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiJSON = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiReport = New System.Windows.Forms.ToolStripMenuItem()
@@ -61,32 +73,27 @@ Partial Class frmAnalyze
         Me.tsmiAddChild = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiReview = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiOpenWebsite = New System.Windows.Forms.ToolStripMenuItem()
-        Me.txtAdminLevel = New System.Windows.Forms.TextBox()
-        Me.btnHist = New System.Windows.Forms.Button()
-        Me.cmsChild = New System.Windows.Forms.ContextMenuStrip(Me.components)
-        Me.tsmiChildEdit = New System.Windows.Forms.ToolStripMenuItem()
-        Me.tsmiChildReport = New System.Windows.Forms.ToolStripMenuItem()
-        Me.tsmiChildOpenWebsite = New System.Windows.Forms.ToolStripMenuItem()
-        Me.tsmiChildReview = New System.Windows.Forms.ToolStripMenuItem()
-        Me.btnOSM = New System.Windows.Forms.Button()
-        Me.btnClear = New System.Windows.Forms.Button()
-        Me.sfdReports = New System.Windows.Forms.SaveFileDialog()
-        Me.tvList = New System.Windows.Forms.TreeView()
-        Me.Panel1 = New System.Windows.Forms.Panel()
-        Me.scon1 = New System.Windows.Forms.SplitContainer()
-        Me.scon2 = New System.Windows.Forms.SplitContainer()
-        Me.btnCentroids = New System.Windows.Forms.Button()
-        Me.ofdBoundaries = New System.Windows.Forms.OpenFileDialog()
-        Me.btnUpload = New System.Windows.Forms.Button()
-        Me.ofdUpload = New System.Windows.Forms.OpenFileDialog()
-        Me.chkShowDeleted = New System.Windows.Forms.CheckBox()
-        Me.tsmiChildShowInOsm = New System.Windows.Forms.ToolStripMenuItem()
-        Me.tsmiChildAnalyze = New System.Windows.Forms.ToolStripMenuItem()
+        Me.cmsNode = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.tsButtons = New System.Windows.Forms.ToolStrip()
+        Me.tsmiOpenDB = New System.Windows.Forms.ToolStripButton()
+        Me.tsImport = New System.Windows.Forms.ToolStripDropDownButton()
+        Me.tsmiImportCentroids = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiOsmBoundaries = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
+        Me.tsmiSearch = New System.Windows.Forms.ToolStripSplitButton()
+        Me.tsmiSearchNew = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiSearchAll = New System.Windows.Forms.ToolStripMenuItem()
+        Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
+        Me.tsmiBrowseMap = New System.Windows.Forms.ToolStripButton()
+        Me.tsmiEditMap = New System.Windows.Forms.ToolStripButton()
+        Me.ToolStripSeparator3 = New System.Windows.Forms.ToolStripSeparator()
+        Me.tsmiClearMap = New System.Windows.Forms.ToolStripButton()
+        Me.ToolStripSeparator4 = New System.Windows.Forms.ToolStripSeparator()
+        Me.tsmiClose = New System.Windows.Forms.ToolStripButton()
         Me.tabDetail.SuspendLayout()
         Me.tbpChildren.SuspendLayout()
         Me.tbpMap.SuspendLayout()
         Me.ssStatus.SuspendLayout()
-        Me.cmsNode.SuspendLayout()
         Me.cmsChild.SuspendLayout()
         Me.Panel1.SuspendLayout()
         CType(Me.scon1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -97,41 +104,25 @@ Partial Class frmAnalyze
         Me.scon2.Panel1.SuspendLayout()
         Me.scon2.Panel2.SuspendLayout()
         Me.scon2.SuspendLayout()
+        Me.cmsNode.SuspendLayout()
+        Me.tsButtons.SuspendLayout()
         Me.SuspendLayout()
-        '
-        'btnClose
-        '
-        Me.btnClose.Location = New System.Drawing.Point(835, 5)
-        Me.btnClose.Name = "btnClose"
-        Me.btnClose.Size = New System.Drawing.Size(54, 22)
-        Me.btnClose.TabIndex = 0
-        Me.btnClose.Text = "Close"
-        Me.btnClose.UseVisualStyleBackColor = True
         '
         'txtSingle
         '
-        Me.txtSingle.Location = New System.Drawing.Point(626, 7)
+        Me.txtSingle.Location = New System.Drawing.Point(54, 46)
         Me.txtSingle.Name = "txtSingle"
         Me.txtSingle.Size = New System.Drawing.Size(76, 20)
         Me.txtSingle.TabIndex = 2
         '
         'btnSingle
         '
-        Me.btnSingle.Location = New System.Drawing.Point(708, 8)
+        Me.btnSingle.Location = New System.Drawing.Point(136, 47)
         Me.btnSingle.Name = "btnSingle"
         Me.btnSingle.Size = New System.Drawing.Size(37, 19)
         Me.btnSingle.TabIndex = 3
         Me.btnSingle.Text = "Go"
         Me.btnSingle.UseVisualStyleBackColor = True
-        '
-        'cbLists
-        '
-        Me.cbLists.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.cbLists.FormattingEnabled = True
-        Me.cbLists.Location = New System.Drawing.Point(12, 11)
-        Me.cbLists.Name = "cbLists"
-        Me.cbLists.Size = New System.Drawing.Size(158, 21)
-        Me.cbLists.TabIndex = 4
         '
         'txtReport
         '
@@ -140,17 +131,8 @@ Partial Class frmAnalyze
         Me.txtReport.Multiline = True
         Me.txtReport.Name = "txtReport"
         Me.txtReport.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.txtReport.Size = New System.Drawing.Size(292, 370)
+        Me.txtReport.Size = New System.Drawing.Size(292, 260)
         Me.txtReport.TabIndex = 6
-        '
-        'btnGo
-        '
-        Me.btnGo.Location = New System.Drawing.Point(176, 9)
-        Me.btnGo.Name = "btnGo"
-        Me.btnGo.Size = New System.Drawing.Size(53, 23)
-        Me.btnGo.TabIndex = 8
-        Me.btnGo.Text = "Load"
-        Me.btnGo.UseVisualStyleBackColor = True
         '
         'tabDetail
         '
@@ -160,7 +142,7 @@ Partial Class frmAnalyze
         Me.tabDetail.Location = New System.Drawing.Point(0, 0)
         Me.tabDetail.Name = "tabDetail"
         Me.tabDetail.SelectedIndex = 0
-        Me.tabDetail.Size = New System.Drawing.Size(581, 603)
+        Me.tabDetail.Size = New System.Drawing.Size(581, 529)
         Me.tabDetail.TabIndex = 11
         '
         'tbpChildren
@@ -169,7 +151,7 @@ Partial Class frmAnalyze
         Me.tbpChildren.Location = New System.Drawing.Point(4, 22)
         Me.tbpChildren.Name = "tbpChildren"
         Me.tbpChildren.Padding = New System.Windows.Forms.Padding(3)
-        Me.tbpChildren.Size = New System.Drawing.Size(573, 577)
+        Me.tbpChildren.Size = New System.Drawing.Size(573, 503)
         Me.tbpChildren.TabIndex = 0
         Me.tbpChildren.Text = "Children"
         Me.tbpChildren.UseVisualStyleBackColor = True
@@ -183,7 +165,7 @@ Partial Class frmAnalyze
         Me.lvChildren.HideSelection = False
         Me.lvChildren.Location = New System.Drawing.Point(3, 3)
         Me.lvChildren.Name = "lvChildren"
-        Me.lvChildren.Size = New System.Drawing.Size(567, 571)
+        Me.lvChildren.Size = New System.Drawing.Size(567, 497)
         Me.lvChildren.TabIndex = 11
         Me.lvChildren.UseCompatibleStateImageBehavior = False
         Me.lvChildren.View = System.Windows.Forms.View.Details
@@ -232,7 +214,7 @@ Partial Class frmAnalyze
         Me.tbpMap.Controls.Add(Me.wbMap)
         Me.tbpMap.Location = New System.Drawing.Point(4, 22)
         Me.tbpMap.Name = "tbpMap"
-        Me.tbpMap.Size = New System.Drawing.Size(573, 577)
+        Me.tbpMap.Size = New System.Drawing.Size(573, 503)
         Me.tbpMap.TabIndex = 1
         Me.tbpMap.Text = "Map"
         Me.tbpMap.UseVisualStyleBackColor = True
@@ -246,27 +228,8 @@ Partial Class frmAnalyze
         Me.wbMap.MinimumSize = New System.Drawing.Size(20, 20)
         Me.wbMap.Name = "wbMap"
         Me.wbMap.ScrollBarsEnabled = False
-        Me.wbMap.Size = New System.Drawing.Size(573, 577)
+        Me.wbMap.Size = New System.Drawing.Size(573, 503)
         Me.wbMap.TabIndex = 0
-        '
-        'btnUpdate
-        '
-        Me.btnUpdate.Location = New System.Drawing.Point(316, 9)
-        Me.btnUpdate.Name = "btnUpdate"
-        Me.btnUpdate.Size = New System.Drawing.Size(53, 23)
-        Me.btnUpdate.TabIndex = 12
-        Me.btnUpdate.Text = "Update"
-        Me.btnUpdate.UseVisualStyleBackColor = True
-        '
-        'chkUpdateAll
-        '
-        Me.chkUpdateAll.AutoSize = True
-        Me.chkUpdateAll.Location = New System.Drawing.Point(381, 14)
-        Me.chkUpdateAll.Name = "chkUpdateAll"
-        Me.chkUpdateAll.Size = New System.Drawing.Size(110, 17)
-        Me.chkUpdateAll.TabIndex = 13
-        Me.chkUpdateAll.Text = "Update/review all"
-        Me.chkUpdateAll.UseVisualStyleBackColor = True
         '
         'ssStatus
         '
@@ -274,7 +237,7 @@ Partial Class frmAnalyze
         Me.ssStatus.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsProgress, Me.tsStatus})
         Me.ssStatus.Location = New System.Drawing.Point(0, 645)
         Me.ssStatus.Name = "ssStatus"
-        Me.ssStatus.Size = New System.Drawing.Size(1133, 25)
+        Me.ssStatus.Size = New System.Drawing.Size(1164, 25)
         Me.ssStatus.TabIndex = 14
         Me.ssStatus.Text = "StatusStrip1"
         '
@@ -291,12 +254,132 @@ Partial Class frmAnalyze
         Me.tsStatus.Size = New System.Drawing.Size(120, 20)
         Me.tsStatus.Text = "ToolStripStatusLabel1"
         '
-        'cmsNode
+        'btnHist
         '
-        Me.cmsNode.ImageScalingSize = New System.Drawing.Size(20, 20)
-        Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiSearch, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiShowInOsm, Me.tsmiAnalyze, Me.tsmiChildOverviewReport, Me.tsmiDeepChildReport, Me.tsmiAddChild, Me.tsmiReview, Me.tsmiOpenWebsite})
-        Me.cmsNode.Name = "ContextMenuStrip1"
-        Me.cmsNode.Size = New System.Drawing.Size(193, 290)
+        Me.btnHist.Location = New System.Drawing.Point(9, 46)
+        Me.btnHist.Name = "btnHist"
+        Me.btnHist.Size = New System.Drawing.Size(39, 23)
+        Me.btnHist.TabIndex = 16
+        Me.btnHist.Text = "Hist"
+        Me.btnHist.UseVisualStyleBackColor = True
+        '
+        'cmsChild
+        '
+        Me.cmsChild.ImageScalingSize = New System.Drawing.Size(20, 20)
+        Me.cmsChild.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiChildEdit, Me.tsmiChildReport, Me.tsmiChildOpenWebsite, Me.tsmiChildReview, Me.tsmiChildShowInOsm, Me.tsmiChildAnalyze})
+        Me.cmsChild.Name = "cmsChild"
+        Me.cmsChild.Size = New System.Drawing.Size(147, 136)
+        '
+        'tsmiChildEdit
+        '
+        Me.tsmiChildEdit.Name = "tsmiChildEdit"
+        Me.tsmiChildEdit.Size = New System.Drawing.Size(146, 22)
+        Me.tsmiChildEdit.Text = "Edit"
+        '
+        'tsmiChildReport
+        '
+        Me.tsmiChildReport.Name = "tsmiChildReport"
+        Me.tsmiChildReport.Size = New System.Drawing.Size(146, 22)
+        Me.tsmiChildReport.Text = "Report"
+        '
+        'tsmiChildOpenWebsite
+        '
+        Me.tsmiChildOpenWebsite.Name = "tsmiChildOpenWebsite"
+        Me.tsmiChildOpenWebsite.Size = New System.Drawing.Size(146, 22)
+        Me.tsmiChildOpenWebsite.Text = "Go to website"
+        '
+        'tsmiChildReview
+        '
+        Me.tsmiChildReview.Name = "tsmiChildReview"
+        Me.tsmiChildReview.Size = New System.Drawing.Size(146, 22)
+        Me.tsmiChildReview.Text = "OSM Review"
+        '
+        'tsmiChildShowInOsm
+        '
+        Me.tsmiChildShowInOsm.Name = "tsmiChildShowInOsm"
+        Me.tsmiChildShowInOsm.Size = New System.Drawing.Size(146, 22)
+        Me.tsmiChildShowInOsm.Text = "Show in OSM"
+        '
+        'tsmiChildAnalyze
+        '
+        Me.tsmiChildAnalyze.Name = "tsmiChildAnalyze"
+        Me.tsmiChildAnalyze.Size = New System.Drawing.Size(146, 22)
+        Me.tsmiChildAnalyze.Text = "Analyze"
+        '
+        'tvList
+        '
+        Me.tvList.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.tvList.HideSelection = False
+        Me.tvList.Location = New System.Drawing.Point(0, 0)
+        Me.tvList.Name = "tvList"
+        Me.tvList.Size = New System.Drawing.Size(292, 265)
+        Me.tvList.TabIndex = 9
+        '
+        'Panel1
+        '
+        Me.Panel1.Controls.Add(Me.scon1)
+        Me.Panel1.Location = New System.Drawing.Point(11, 79)
+        Me.Panel1.Name = "Panel1"
+        Me.Panel1.Size = New System.Drawing.Size(877, 529)
+        Me.Panel1.TabIndex = 19
+        '
+        'scon1
+        '
+        Me.scon1.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.scon1.Location = New System.Drawing.Point(0, 0)
+        Me.scon1.Name = "scon1"
+        '
+        'scon1.Panel1
+        '
+        Me.scon1.Panel1.Controls.Add(Me.scon2)
+        '
+        'scon1.Panel2
+        '
+        Me.scon1.Panel2.Controls.Add(Me.tabDetail)
+        Me.scon1.Size = New System.Drawing.Size(877, 529)
+        Me.scon1.SplitterDistance = 292
+        Me.scon1.TabIndex = 0
+        '
+        'scon2
+        '
+        Me.scon2.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.scon2.Location = New System.Drawing.Point(0, 0)
+        Me.scon2.Name = "scon2"
+        Me.scon2.Orientation = System.Windows.Forms.Orientation.Horizontal
+        '
+        'scon2.Panel1
+        '
+        Me.scon2.Panel1.Controls.Add(Me.tvList)
+        '
+        'scon2.Panel2
+        '
+        Me.scon2.Panel2.Controls.Add(Me.txtReport)
+        Me.scon2.Size = New System.Drawing.Size(292, 529)
+        Me.scon2.SplitterDistance = 265
+        Me.scon2.TabIndex = 10
+        '
+        'ofdBoundaries
+        '
+        Me.ofdBoundaries.Filter = "CSV Files|*.csv|All Files|*.*"
+        '
+        'btnUpload
+        '
+        Me.btnUpload.Location = New System.Drawing.Point(223, 44)
+        Me.btnUpload.Name = "btnUpload"
+        Me.btnUpload.Size = New System.Drawing.Size(34, 23)
+        Me.btnUpload.TabIndex = 21
+        Me.btnUpload.Text = "Up"
+        Me.btnUpload.UseVisualStyleBackColor = True
+        '
+        'chkShowDeleted
+        '
+        Me.chkShowDeleted.AutoSize = True
+        Me.chkShowDeleted.Location = New System.Drawing.Point(324, 46)
+        Me.chkShowDeleted.Name = "chkShowDeleted"
+        Me.chkShowDeleted.Size = New System.Drawing.Size(121, 17)
+        Me.chkShowDeleted.TabIndex = 22
+        Me.chkShowDeleted.Text = "Show Deleted Items"
+        Me.chkShowDeleted.UseVisualStyleBackColor = True
         '
         'tsmiFlush
         '
@@ -310,11 +393,11 @@ Partial Class frmAnalyze
         Me.tsmiEdit.Size = New System.Drawing.Size(192, 22)
         Me.tsmiEdit.Text = "Edit"
         '
-        'tsmiSearch
+        'tsmiSearchNom
         '
-        Me.tsmiSearch.Name = "tsmiSearch"
-        Me.tsmiSearch.Size = New System.Drawing.Size(192, 22)
-        Me.tsmiSearch.Text = "Search"
+        Me.tsmiSearchNom.Name = "tsmiSearchNom"
+        Me.tsmiSearchNom.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiSearchNom.Text = "Search"
         '
         'tsmiShowAll
         '
@@ -376,188 +459,145 @@ Partial Class frmAnalyze
         Me.tsmiOpenWebsite.Size = New System.Drawing.Size(192, 22)
         Me.tsmiOpenWebsite.Text = "Go to website"
         '
-        'txtAdminLevel
+        'cmsNode
         '
-        Me.txtAdminLevel.Location = New System.Drawing.Point(530, 15)
-        Me.txtAdminLevel.Name = "txtAdminLevel"
-        Me.txtAdminLevel.Size = New System.Drawing.Size(43, 20)
-        Me.txtAdminLevel.TabIndex = 15
+        Me.cmsNode.ImageScalingSize = New System.Drawing.Size(20, 20)
+        Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiSearchNom, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiShowInOsm, Me.tsmiAnalyze, Me.tsmiChildOverviewReport, Me.tsmiDeepChildReport, Me.tsmiAddChild, Me.tsmiReview, Me.tsmiOpenWebsite})
+        Me.cmsNode.Name = "ContextMenuStrip1"
+        Me.cmsNode.Size = New System.Drawing.Size(193, 290)
         '
-        'btnHist
+        'tsButtons
         '
-        Me.btnHist.Location = New System.Drawing.Point(581, 7)
-        Me.btnHist.Name = "btnHist"
-        Me.btnHist.Size = New System.Drawing.Size(39, 23)
-        Me.btnHist.TabIndex = 16
-        Me.btnHist.Text = "Hist"
-        Me.btnHist.UseVisualStyleBackColor = True
+        Me.tsButtons.ImageScalingSize = New System.Drawing.Size(32, 32)
+        Me.tsButtons.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiOpenDB, Me.tsImport, Me.ToolStripSeparator1, Me.tsmiSearch, Me.ToolStripSeparator2, Me.tsmiBrowseMap, Me.tsmiEditMap, Me.ToolStripSeparator3, Me.tsmiClearMap, Me.ToolStripSeparator4, Me.tsmiClose})
+        Me.tsButtons.Location = New System.Drawing.Point(0, 0)
+        Me.tsButtons.Name = "tsButtons"
+        Me.tsButtons.Size = New System.Drawing.Size(1164, 39)
+        Me.tsButtons.TabIndex = 25
+        Me.tsButtons.Text = "ToolStrip1"
         '
-        'cmsChild
+        'tsmiOpenDB
         '
-        Me.cmsChild.ImageScalingSize = New System.Drawing.Size(20, 20)
-        Me.cmsChild.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiChildEdit, Me.tsmiChildReport, Me.tsmiChildOpenWebsite, Me.tsmiChildReview, Me.tsmiChildShowInOsm, Me.tsmiChildAnalyze})
-        Me.cmsChild.Name = "cmsChild"
-        Me.cmsChild.Size = New System.Drawing.Size(147, 136)
+        Me.tsmiOpenDB.Image = CType(resources.GetObject("tsmiOpenDB.Image"), System.Drawing.Image)
+        Me.tsmiOpenDB.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.tsmiOpenDB.Name = "tsmiOpenDB"
+        Me.tsmiOpenDB.Size = New System.Drawing.Size(69, 36)
+        Me.tsmiOpenDB.Text = "Load"
+        Me.tsmiOpenDB.ToolTipText = "Load Boundary DB"
         '
-        'tsmiChildEdit
+        'tsImport
         '
-        Me.tsmiChildEdit.Name = "tsmiChildEdit"
-        Me.tsmiChildEdit.Size = New System.Drawing.Size(146, 22)
-        Me.tsmiChildEdit.Text = "Edit"
+        Me.tsImport.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiImportCentroids, Me.tsmiOsmBoundaries})
+        Me.tsImport.Image = CType(resources.GetObject("tsImport.Image"), System.Drawing.Image)
+        Me.tsImport.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.tsImport.Name = "tsImport"
+        Me.tsImport.Size = New System.Drawing.Size(88, 36)
+        Me.tsImport.Text = "Import"
+        Me.tsImport.ToolTipText = "Import Stuff"
         '
-        'tsmiChildReport
+        'tsmiImportCentroids
         '
-        Me.tsmiChildReport.Name = "tsmiChildReport"
-        Me.tsmiChildReport.Size = New System.Drawing.Size(146, 22)
-        Me.tsmiChildReport.Text = "Report"
+        Me.tsmiImportCentroids.Name = "tsmiImportCentroids"
+        Me.tsmiImportCentroids.Size = New System.Drawing.Size(210, 22)
+        Me.tsmiImportCentroids.Text = "Centroids"
         '
-        'tsmiChildOpenWebsite
+        'tsmiOsmBoundaries
         '
-        Me.tsmiChildOpenWebsite.Name = "tsmiChildOpenWebsite"
-        Me.tsmiChildOpenWebsite.Size = New System.Drawing.Size(146, 22)
-        Me.tsmiChildOpenWebsite.Text = "Go to website"
+        Me.tsmiOsmBoundaries.Name = "tsmiOsmBoundaries"
+        Me.tsmiOsmBoundaries.Size = New System.Drawing.Size(210, 22)
+        Me.tsmiOsmBoundaries.Text = "Boundaries from OSM file"
+        Me.tsmiOsmBoundaries.ToolTipText = "Merge boundary data from an OSM file"
         '
-        'tsmiChildReview
+        'ToolStripSeparator1
         '
-        Me.tsmiChildReview.Name = "tsmiChildReview"
-        Me.tsmiChildReview.Size = New System.Drawing.Size(146, 22)
-        Me.tsmiChildReview.Text = "OSM Review"
+        Me.ToolStripSeparator1.Name = "ToolStripSeparator1"
+        Me.ToolStripSeparator1.Size = New System.Drawing.Size(6, 39)
         '
-        'btnOSM
+        'tsmiSearch
         '
-        Me.btnOSM.Location = New System.Drawing.Point(491, 13)
-        Me.btnOSM.Name = "btnOSM"
-        Me.btnOSM.Size = New System.Drawing.Size(34, 23)
-        Me.btnOSM.TabIndex = 12
-        Me.btnOSM.Text = "osm"
-        Me.btnOSM.UseVisualStyleBackColor = True
+        Me.tsmiSearch.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiSearchNew, Me.tsmiSearchAll})
+        Me.tsmiSearch.Image = CType(resources.GetObject("tsmiSearch.Image"), System.Drawing.Image)
+        Me.tsmiSearch.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.tsmiSearch.Name = "tsmiSearch"
+        Me.tsmiSearch.Size = New System.Drawing.Size(90, 36)
+        Me.tsmiSearch.Text = "Search"
         '
-        'btnClear
+        'tsmiSearchNew
         '
-        Me.btnClear.Location = New System.Drawing.Point(751, 7)
-        Me.btnClear.Name = "btnClear"
-        Me.btnClear.Size = New System.Drawing.Size(49, 19)
-        Me.btnClear.TabIndex = 17
-        Me.btnClear.Text = "Clear"
-        Me.btnClear.UseVisualStyleBackColor = True
+        Me.tsmiSearchNew.Name = "tsmiSearchNew"
+        Me.tsmiSearchNew.Size = New System.Drawing.Size(136, 22)
+        Me.tsmiSearchNew.Text = "Search New"
+        Me.tsmiSearchNew.ToolTipText = "Search New"
         '
-        'tvList
+        'tsmiSearchAll
         '
-        Me.tvList.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.tvList.HideSelection = False
-        Me.tvList.Location = New System.Drawing.Point(0, 0)
-        Me.tvList.Name = "tvList"
-        Me.tvList.Size = New System.Drawing.Size(292, 229)
-        Me.tvList.TabIndex = 9
+        Me.tsmiSearchAll.Name = "tsmiSearchAll"
+        Me.tsmiSearchAll.Size = New System.Drawing.Size(136, 22)
+        Me.tsmiSearchAll.Text = "Search All"
+        Me.tsmiSearchAll.ToolTipText = "Search All"
         '
-        'Panel1
+        'ToolStripSeparator2
         '
-        Me.Panel1.Controls.Add(Me.scon1)
-        Me.Panel1.Location = New System.Drawing.Point(12, 42)
-        Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(877, 603)
-        Me.Panel1.TabIndex = 19
+        Me.ToolStripSeparator2.Name = "ToolStripSeparator2"
+        Me.ToolStripSeparator2.Size = New System.Drawing.Size(6, 39)
         '
-        'scon1
+        'tsmiBrowseMap
         '
-        Me.scon1.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.scon1.Location = New System.Drawing.Point(0, 0)
-        Me.scon1.Name = "scon1"
+        Me.tsmiBrowseMap.Image = CType(resources.GetObject("tsmiBrowseMap.Image"), System.Drawing.Image)
+        Me.tsmiBrowseMap.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.tsmiBrowseMap.Name = "tsmiBrowseMap"
+        Me.tsmiBrowseMap.Size = New System.Drawing.Size(99, 36)
+        Me.tsmiBrowseMap.Text = "Open map"
         '
-        'scon1.Panel1
+        'tsmiEditMap
         '
-        Me.scon1.Panel1.Controls.Add(Me.scon2)
+        Me.tsmiEditMap.Image = CType(resources.GetObject("tsmiEditMap.Image"), System.Drawing.Image)
+        Me.tsmiEditMap.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.tsmiEditMap.Name = "tsmiEditMap"
+        Me.tsmiEditMap.Size = New System.Drawing.Size(90, 36)
+        Me.tsmiEditMap.Text = "Edit map"
+        Me.tsmiEditMap.ToolTipText = "Edit map in browser"
         '
-        'scon1.Panel2
+        'ToolStripSeparator3
         '
-        Me.scon1.Panel2.Controls.Add(Me.tabDetail)
-        Me.scon1.Size = New System.Drawing.Size(877, 603)
-        Me.scon1.SplitterDistance = 292
-        Me.scon1.TabIndex = 0
+        Me.ToolStripSeparator3.Name = "ToolStripSeparator3"
+        Me.ToolStripSeparator3.Size = New System.Drawing.Size(6, 39)
         '
-        'scon2
+        'tsmiClearMap
         '
-        Me.scon2.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.scon2.Location = New System.Drawing.Point(0, 0)
-        Me.scon2.Name = "scon2"
-        Me.scon2.Orientation = System.Windows.Forms.Orientation.Horizontal
+        Me.tsmiClearMap.Image = CType(resources.GetObject("tsmiClearMap.Image"), System.Drawing.Image)
+        Me.tsmiClearMap.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.tsmiClearMap.Name = "tsmiClearMap"
+        Me.tsmiClearMap.Size = New System.Drawing.Size(70, 36)
+        Me.tsmiClearMap.Text = "Clear"
+        Me.tsmiClearMap.ToolTipText = "Clear map layers"
         '
-        'scon2.Panel1
+        'ToolStripSeparator4
         '
-        Me.scon2.Panel1.Controls.Add(Me.tvList)
+        Me.ToolStripSeparator4.Name = "ToolStripSeparator4"
+        Me.ToolStripSeparator4.Size = New System.Drawing.Size(6, 39)
         '
-        'scon2.Panel2
+        'tsmiClose
         '
-        Me.scon2.Panel2.Controls.Add(Me.txtReport)
-        Me.scon2.Size = New System.Drawing.Size(292, 603)
-        Me.scon2.SplitterDistance = 229
-        Me.scon2.TabIndex = 10
-        '
-        'btnCentroids
-        '
-        Me.btnCentroids.Location = New System.Drawing.Point(236, 9)
-        Me.btnCentroids.Name = "btnCentroids"
-        Me.btnCentroids.Size = New System.Drawing.Size(73, 23)
-        Me.btnCentroids.TabIndex = 20
-        Me.btnCentroids.Text = "Centroids"
-        Me.btnCentroids.UseVisualStyleBackColor = True
-        '
-        'ofdBoundaries
-        '
-        Me.ofdBoundaries.Filter = "CSV Files|*.csv|All Files|*.*"
-        '
-        'btnUpload
-        '
-        Me.btnUpload.Location = New System.Drawing.Point(795, 5)
-        Me.btnUpload.Name = "btnUpload"
-        Me.btnUpload.Size = New System.Drawing.Size(34, 23)
-        Me.btnUpload.TabIndex = 21
-        Me.btnUpload.Text = "Up"
-        Me.btnUpload.UseVisualStyleBackColor = True
-        '
-        'chkShowDeleted
-        '
-        Me.chkShowDeleted.AutoSize = True
-        Me.chkShowDeleted.Location = New System.Drawing.Point(896, 7)
-        Me.chkShowDeleted.Name = "chkShowDeleted"
-        Me.chkShowDeleted.Size = New System.Drawing.Size(121, 17)
-        Me.chkShowDeleted.TabIndex = 22
-        Me.chkShowDeleted.Text = "Show Deleted Items"
-        Me.chkShowDeleted.UseVisualStyleBackColor = True
-        '
-        'tsmiChildShowInOsm
-        '
-        Me.tsmiChildShowInOsm.Name = "tsmiChildShowInOsm"
-        Me.tsmiChildShowInOsm.Size = New System.Drawing.Size(146, 22)
-        Me.tsmiChildShowInOsm.Text = "Show in OSM"
-        '
-        'tsmiChildAnalyze
-        '
-        Me.tsmiChildAnalyze.Name = "tsmiChildAnalyze"
-        Me.tsmiChildAnalyze.Size = New System.Drawing.Size(146, 22)
-        Me.tsmiChildAnalyze.Text = "Analyze"
+        Me.tsmiClose.Image = CType(resources.GetObject("tsmiClose.Image"), System.Drawing.Image)
+        Me.tsmiClose.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.tsmiClose.Name = "tsmiClose"
+        Me.tsmiClose.Size = New System.Drawing.Size(72, 36)
+        Me.tsmiClose.Text = "Close"
         '
         'frmAnalyze
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1133, 670)
+        Me.ClientSize = New System.Drawing.Size(1164, 670)
+        Me.Controls.Add(Me.tsButtons)
         Me.Controls.Add(Me.chkShowDeleted)
         Me.Controls.Add(Me.btnUpload)
-        Me.Controls.Add(Me.btnCentroids)
         Me.Controls.Add(Me.Panel1)
-        Me.Controls.Add(Me.btnClear)
-        Me.Controls.Add(Me.btnOSM)
         Me.Controls.Add(Me.btnHist)
-        Me.Controls.Add(Me.txtAdminLevel)
         Me.Controls.Add(Me.ssStatus)
-        Me.Controls.Add(Me.chkUpdateAll)
-        Me.Controls.Add(Me.btnUpdate)
-        Me.Controls.Add(Me.btnGo)
-        Me.Controls.Add(Me.cbLists)
         Me.Controls.Add(Me.btnSingle)
         Me.Controls.Add(Me.txtSingle)
-        Me.Controls.Add(Me.btnClose)
         Me.Name = "frmAnalyze"
         Me.Text = "Boundary Analyzer"
         Me.tabDetail.ResumeLayout(False)
@@ -565,7 +605,6 @@ Partial Class frmAnalyze
         Me.tbpMap.ResumeLayout(False)
         Me.ssStatus.ResumeLayout(False)
         Me.ssStatus.PerformLayout()
-        Me.cmsNode.ResumeLayout(False)
         Me.cmsChild.ResumeLayout(False)
         Me.Panel1.ResumeLayout(False)
         Me.scon1.Panel1.ResumeLayout(False)
@@ -577,67 +616,77 @@ Partial Class frmAnalyze
         Me.scon2.Panel2.PerformLayout()
         CType(Me.scon2, System.ComponentModel.ISupportInitialize).EndInit()
         Me.scon2.ResumeLayout(False)
+        Me.cmsNode.ResumeLayout(False)
+        Me.tsButtons.ResumeLayout(False)
+        Me.tsButtons.PerformLayout()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
-    Friend WithEvents btnClose As System.Windows.Forms.Button
     Friend WithEvents txtSingle As System.Windows.Forms.TextBox
     Friend WithEvents btnSingle As System.Windows.Forms.Button
-    Friend WithEvents cbLists As System.Windows.Forms.ComboBox
     Friend WithEvents txtReport As System.Windows.Forms.TextBox
-    Friend WithEvents btnGo As System.Windows.Forms.Button
     Friend WithEvents tabDetail As System.Windows.Forms.TabControl
     Friend WithEvents tbpChildren As System.Windows.Forms.TabPage
     Friend WithEvents lvChildren As System.Windows.Forms.ListView
     Friend WithEvents tbpMap As System.Windows.Forms.TabPage
     Friend WithEvents wbMap As System.Windows.Forms.WebBrowser
-    Friend WithEvents btnUpdate As System.Windows.Forms.Button
-    Friend WithEvents chkUpdateAll As System.Windows.Forms.CheckBox
     Friend WithEvents ssStatus As System.Windows.Forms.StatusStrip
     Friend WithEvents tsProgress As System.Windows.Forms.ToolStripProgressBar
     Friend WithEvents tsStatus As System.Windows.Forms.ToolStripStatusLabel
-    Friend WithEvents cmsNode As System.Windows.Forms.ContextMenuStrip
-    Friend WithEvents txtAdminLevel As System.Windows.Forms.TextBox
     Friend WithEvents colName As System.Windows.Forms.ColumnHeader
     Friend WithEvents colOSMID As System.Windows.Forms.ColumnHeader
     Friend WithEvents colType As System.Windows.Forms.ColumnHeader
     Friend WithEvents colGSS As System.Windows.Forms.ColumnHeader
     Friend WithEvents colCouncilStyle As System.Windows.Forms.ColumnHeader
-    Friend WithEvents tsmiFlush As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents tsmiEdit As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents tsmiShowAll As System.Windows.Forms.ToolStripMenuItem
-    Friend WithEvents tsmiJSON As System.Windows.Forms.ToolStripMenuItem
     Friend WithEvents btnHist As System.Windows.Forms.Button
     Friend WithEvents colCouncilName As ColumnHeader
     Friend WithEvents cmsChild As ContextMenuStrip
     Friend WithEvents tsmiChildEdit As ToolStripMenuItem
     Friend WithEvents colParishType As ColumnHeader
-    Friend WithEvents btnOSM As Button
-    Friend WithEvents btnClear As Button
-    Friend WithEvents tsmiReport As ToolStripMenuItem
     Friend WithEvents tsmiChildReport As ToolStripMenuItem
-    Friend WithEvents tsmiAddChild As ToolStripMenuItem
-    Friend WithEvents tsmiReview As ToolStripMenuItem
-    Friend WithEvents tsmiChildOverviewReport As ToolStripMenuItem
-    Friend WithEvents tsmiDeepChildReport As ToolStripMenuItem
     Friend WithEvents sfdReports As SaveFileDialog
-    Friend WithEvents tsmiSearch As ToolStripMenuItem
     Friend WithEvents tvList As TreeView
     Friend WithEvents scon1 As SplitContainer
     Friend WithEvents scon2 As SplitContainer
     Friend WithEvents Panel1 As Panel
-    Friend WithEvents btnCentroids As Button
     Friend WithEvents ofdBoundaries As OpenFileDialog
-    Friend WithEvents tsmiOpenWebsite As ToolStripMenuItem
     Friend WithEvents tsmiChildOpenWebsite As ToolStripMenuItem
     Friend WithEvents colWebsite As ColumnHeader
     Friend WithEvents tsmiChildReview As ToolStripMenuItem
     Friend WithEvents btnUpload As Button
     Friend WithEvents ofdUpload As OpenFileDialog
     Friend WithEvents chkShowDeleted As CheckBox
-    Friend WithEvents tsmiShowInOsm As ToolStripMenuItem
-    Friend WithEvents tsmiAnalyze As ToolStripMenuItem
     Friend WithEvents tsmiChildShowInOsm As ToolStripMenuItem
     Friend WithEvents tsmiChildAnalyze As ToolStripMenuItem
+    Friend WithEvents tsmiFlush As ToolStripMenuItem
+    Friend WithEvents tsmiEdit As ToolStripMenuItem
+    Friend WithEvents tsmiSearchNom As ToolStripMenuItem
+    Friend WithEvents tsmiShowAll As ToolStripMenuItem
+    Friend WithEvents tsmiJSON As ToolStripMenuItem
+    Friend WithEvents tsmiReport As ToolStripMenuItem
+    Friend WithEvents tsmiShowInOsm As ToolStripMenuItem
+    Friend WithEvents tsmiAnalyze As ToolStripMenuItem
+    Friend WithEvents tsmiChildOverviewReport As ToolStripMenuItem
+    Friend WithEvents tsmiDeepChildReport As ToolStripMenuItem
+    Friend WithEvents tsmiAddChild As ToolStripMenuItem
+    Friend WithEvents tsmiReview As ToolStripMenuItem
+    Friend WithEvents tsmiOpenWebsite As ToolStripMenuItem
+    Friend WithEvents cmsNode As ContextMenuStrip
+    Friend WithEvents tsButtons As ToolStrip
+    Friend WithEvents tsmiOpenDB As ToolStripButton
+    Friend WithEvents tsImport As ToolStripDropDownButton
+    Friend WithEvents tsmiImportCentroids As ToolStripMenuItem
+    Friend WithEvents ToolStripSeparator1 As ToolStripSeparator
+    Friend WithEvents tsmiOsmBoundaries As ToolStripMenuItem
+    Friend WithEvents ToolStripSeparator2 As ToolStripSeparator
+    Friend WithEvents tsmiBrowseMap As ToolStripButton
+    Friend WithEvents tsmiEditMap As ToolStripButton
+    Friend WithEvents ToolStripSeparator3 As ToolStripSeparator
+    Friend WithEvents tsmiClearMap As ToolStripButton
+    Friend WithEvents tsmiSearch As ToolStripSplitButton
+    Friend WithEvents tsmiSearchNew As ToolStripMenuItem
+    Friend WithEvents ToolStripSeparator4 As ToolStripSeparator
+    Friend WithEvents tsmiClose As ToolStripButton
+    Friend WithEvents tsmiSearchAll As ToolStripMenuItem
 End Class

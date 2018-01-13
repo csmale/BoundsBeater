@@ -359,7 +359,7 @@ Public Class frmEdit
         If IsNothing(x) Then Exit Sub
         Dim councilStyle As BoundaryItem.CouncilStyles = CType(x, GenericListItem(Of BoundaryItem.CouncilStyles)).Value
         Dim parishType As BoundaryItem.ParishTypes
-        If boundaryType = BoundaryItem.BoundaryTypes.BT_CivilParish Then
+        If boundaryType = BoundaryItem.BoundaryTypes.BT_CivilParish Or boundaryType = BoundaryItem.BoundaryTypes.BT_ParishGroup Then
             x = cbParishType.SelectedItem
             If IsNothing(x) Then Exit Sub
             parishType = CType(x, GenericListItem(Of BoundaryItem.ParishTypes)).Value

@@ -2,8 +2,8 @@
 Imports System.IO
 Imports System.Security
 
-Public Class OSMRetriever 
-    Public MaxAge As Long = 24 * 60 * 60   ' in seconds, default is one day
+Public Class OSMRetriever
+    Public MaxAge As Integer = 24 * 60 * 60   ' in seconds, default is one day
     Public API As OSMApi
     Public LastError As String
 
@@ -116,11 +116,11 @@ Public Class OSMRetriever
                 For Each xMbr In xRel2.Members
                     If xMbr.Type = OSMObject.ObjectType.Way Then
                         If Not listWays.Contains(xMbr.Member.ID) Then
-                            listWays.Add(xMbr.Member.ID, xMbr.Member)
+                            listWays.Add(xMbr.Member.ID, DirectCast(xMbr.Member, OSMWay))
                         End If
                     ElseIf xMbr.Type = OSMObject.ObjectType.Node Then
                         If Not listNodes.Contains(xMbr.Member.ID) Then
-                            listNodes.Add(xMbr.Member.ID, xMbr.Member)
+                            listNodes.Add(xMbr.Member.ID, DirectCast(xMbr.Member, OSMNode))
                         End If
                     End If
                 Next
@@ -207,7 +207,7 @@ Public Class OSMRetriever
                         tmpDoc = API.GetOSMDoc(xType, lRef, True)
                         xDoc.Merge(tmpDoc)
                     Catch e As OSMWebException
-                        MsgBox(String.Format("Error retrieving way {0}: {1}", lRef, e.Message))
+                        MsgBox($"Error retrieving way {lRef}: {e.Message}")
                     End Try
                 Else
                     xWay = xDoc.Ways(lRef)
@@ -219,7 +219,7 @@ Public Class OSMRetriever
                                 xWay = xDoc.Ways(lRef)
                             End If
                         Catch e As OSMWebException
-                            MsgBox(String.Format("Error retrieving way {0}: {1}", lRef, e.Message))
+                            MsgBox($"Error retrieving way {lRef}: {e.Message}")
                         End Try
                     End If
                 End If

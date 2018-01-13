@@ -2,15 +2,17 @@
 Imports System.Environment
 Imports System.Runtime.InteropServices.ComTypes
 Imports Microsoft.VisualBasic.FileIO
-Imports ProtoBuf.Meta
+' Imports ProtoBuf.Meta
 Imports System.ComponentModel
 Imports System.Text
+Imports System.Threading.Tasks
 
 Public Class frmAnalyze
     Private m_SortingColumn As ColumnHeader
 
     Dim loading As Boolean = True
-    Dim tmpDoc As New OSMDoc
+    Dim WithEvents tmpDoc As New OSMDoc
+    Dim bLargeCache As Boolean = True
     Dim xRetriever As New OSMRetriever
     Dim bMapInitDone As Boolean = False
     Dim sDBPath As String
@@ -22,6 +24,7 @@ Public Class frmAnalyze
     Const DUMMY_MARKER As String = "dummy"
     Dim bAllowExpandCollapse As Boolean = False
     Dim bExpanding As Boolean = False
+    Dim biListViewParent As BoundaryDB.BoundaryItem
     ' Dim x As New System.Data.SQLite.SQLiteConnection()
 
     Private Sub testpbf()
@@ -29,18 +32,6 @@ Public Class frmAnalyze
         ' Dim sc As New ProtoBuf.SerializationContext
         'Dim tm As New TypeModel()
         'Dim z As New ProtoBuf.ProtoReader(IStream, t, sc)
-    End Sub
-
-    ''' <summary>
-    ''' Handles Click event on Close button
-    ''' </summary>
-    ''' <param name="sender"></param>
-    ''' <param name="e"></param>
-    Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
-        If Len(sCache) > 0 Then
-            tmpDoc.SaveXML(sCache)
-        End If
-        Me.Close()
     End Sub
 
     ''' <summary>
@@ -73,7 +64,7 @@ Public Class frmAnalyze
     ''' Shows a boundary on the map, with some information in a text box
     ''' </summary>
     ''' <param name="iRel">The OSM ID of the selecte relation</param>
-    Private Sub ShowRelation(iRel As Long)
+    Private Function ShowRelation(iRel As Long) As OSMRelation
         Dim xRel As OSMRelation
         Dim xRes As OSMResolver
         Dim sLine As String
@@ -85,7 +76,7 @@ Public Class frmAnalyze
         If IsNothing(xRel) Then
             xRel = Nothing
             txtReport.Text = "Unable to retrieve relation #" & iRel
-            Exit Sub
+            Return Nothing
         End If
         sTmp = "Loaded " & xRel.Name() & ", OSM Relation " & iRel.ToString & ", version " & xRel.Version.ToString() & " of " & xRel.Timestamp.ToString() & " by " & xRel.User
         tsStatus.Text = sTmp
@@ -101,7 +92,7 @@ Public Class frmAnalyze
             sLine = "Relation has no ways"
             sTmp = sTmp & vbCrLf & sLine
             txtReport.Text = txtReport.Text & sTmp
-            Return
+            Return xRel
         End If
 
         ShowOnMap(xRel)
@@ -150,7 +141,8 @@ Public Class frmAnalyze
         txtReport.Text = txtReport.Text & vbCrLf & sTmp
         sTmp = My.Settings.xapiAPI & $"?relation[type=boundary][bbox={b.MinLon},{b.MinLat},{b.MaxLon},{b.MaxLat}][@meta]"
         txtReport.Text = txtReport.Text & vbCrLf & sTmp
-    End Sub
+        Return xRel
+    End Function
 
 #If False Then
     Private Sub LoadTreeView(tv As TreeView, xParentNode As TreeNode, xDB As BoundaryDB, xItem As BoundaryDB.BoundaryItem, ByRef iTotal As Integer, ByRef iCount As Integer)
@@ -269,6 +261,21 @@ Public Class frmAnalyze
         iCount += iThisCount
     End Sub
 #End If
+
+    Sub ShowLoadProgress(r As Long, w As Long, n As Long) Handles tmpDoc.LoadProgress
+        Static lastupdate As Date
+        Dim rightnow As Date = Now()
+        If Math.Abs(DateDiff(DateInterval.Second, rightnow, lastupdate)) < 1 Then Return
+        tsStatus.Text = $"Loaded {r} relations, {w} ways, {n} nodes"
+        Application.DoEvents()
+        lastupdate = rightnow
+    End Sub
+
+    ''' <summary>
+    ''' Creates a string for display of a BoundaryItem
+    ''' </summary>
+    ''' <param name="xItem">The BoundaryItem</param>
+    ''' <returns>The generated display string</returns>
     Private Function DisplayString(xItem As BoundaryDB.BoundaryItem) As String
         Dim sName As String
         sName = xItem.TypeCode & " " & xItem.Name
@@ -307,7 +314,7 @@ Public Class frmAnalyze
     ''' </summary>
     ''' <param name="sender"></param>
     ''' <param name="e"></param>
-    Private Sub btnGo_Click(sender As Object, e As EventArgs) Handles btnGo.Click
+    Private Async Sub btnGo_Click(sender As Object, e As EventArgs)
         Dim sDB As String
 
         sDB = FindBoundaryDB()
@@ -320,14 +327,17 @@ Public Class frmAnalyze
         sCache = System.Environment.ExpandEnvironmentVariables(My.Settings.OSMCache)
         If Len(sCache) > 0 Then
             If System.IO.File.Exists(sCache) Then
-                tmpDoc = New OSMDoc(sCache)
+                tmpDoc = New OSMDoc()
+                If bLargeCache Then
+                    tmpDoc.LoadBigXML(sCache)
+                Else
+                    tmpDoc.Load(sCache)
+                End If
             End If
         End If
 
-        tsStatus.Text = "Loading " & sDB & "..."
-        Application.DoEvents()
-        Dim x As New BoundaryDB(sDB)
-        tsStatus.Text = "Loaded " & sDB
+        Dim x As New BoundaryDB
+        Dim s As String = Await loadxml(sDB, x)
 
         If IsNothing(fntBold) Then
             fntNormal = tvList.Font
@@ -340,6 +350,20 @@ Public Class frmAnalyze
         sDBPath = sDB
     End Sub
 
+    Delegate Sub doit(s As String)
+
+    Public Async Function loadxml(sdb As String, x As BoundaryDB) As Task(Of String)
+        tsStatus.Text = "Loading " & sdb & "..."
+        Application.DoEvents()
+        Await LoadXDocumentAsync(x, sdb)
+        tsStatus.Text = "Loaded " & sdb
+        Return "hhh"
+    End Function
+    Public Async Function LoadXDocumentAsync(x As BoundaryDB, uri As String) As Task(Of Boolean)
+        Dim t As New Task(Of Boolean)(Function() x.LoadFromFile(uri))
+        t.Start()
+        Return Await t
+    End Function
     ''' <summary>
     ''' Clears and reloads the main TreeView
     ''' </summary>
@@ -386,6 +410,7 @@ Public Class frmAnalyze
     ''' <param name="n"></param>
     Private Sub ShowChildren(n As TreeNode)
         Dim p As BoundaryDB.BoundaryItem
+        biListViewParent = DirectCast(n.Tag, BoundaryDB.BoundaryItem)
         lvChildren.Items.Clear()
         For Each x As TreeNode In n.Nodes
             p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
@@ -397,6 +422,7 @@ Public Class frmAnalyze
                 lvi.Tag = x
             End If
         Next
+        lvChildren.Sort()
     End Sub
 
     ''' <summary>
@@ -422,13 +448,23 @@ Public Class frmAnalyze
             .SubItems(colWebsite.Index).Text = p.Website
         End With
     End Sub
+    Private Function RelationLabel(xRel As OSMRelation) As String
+        Dim sLabel As String = xRel.Tag("ref:gss")
+        If sLabel = "" Then sLabel = "r" & xRel.ID.ToString
+        Return sLabel
+    End Function
     Private Sub ShowOnMap(xRel As OSMRelation)
         Dim sJSON As String
         If Not bMapInitDone Then Exit Sub
         Dim res As New OSMResolver(xRel)
         'sJSON = xRel.GeoJSON
         sJSON = res.GeoJSON()
-        ShowJSON(sJSON, "r" & xRel.ID.ToString)
+        ShowJSON(sJSON, RelationLabel(xRel))
+    End Sub
+    Private Sub ZoomToLayer(uid As String)
+        Dim xArgs(1) As Object
+        xArgs(0) = uid
+        wbMap.Document.InvokeScript("zoomToLayer", xArgs)
     End Sub
     Private Sub ShowJSON(sJSON As String, uid As String)
         Dim xArgs(2) As Object
@@ -470,6 +506,8 @@ Public Class frmAnalyze
         Dim frameWidth As Integer = (Me.Width - Me.ClientSize.Width) \ 2
         Me.Panel1.Width = Me.ClientSize.Width - 2 * Me.Panel1.Left
         Me.Panel1.Height = Me.ClientSize.Height - Me.Panel1.Top - Me.ssStatus.Height - frameWidth
+        My.Settings.frmAnalyze_MinMax = Me.WindowState
+        My.Settings.Save()
     End Sub
     Private Sub CollectExpanded(tvn As TreeNode, l As List(Of BoundaryDB.BoundaryItem))
         If tvn.IsExpanded Then l.Add(DirectCast(tvn.Tag, BoundaryDB.BoundaryItem))
@@ -483,102 +521,12 @@ Public Class frmAnalyze
             RestoreExpanded(xnode, l)
         Next
     End Sub
-    Private Sub btnUpdate_Click(sender As Object, e As EventArgs) Handles btnUpdate.Click
-        Dim oDoc As OSMDoc
-        Dim bBox As New BBox
-        Dim iRel As Long
-        Dim x As BoundaryDB.BoundaryItem
-        Dim xNode As TreeNode
-        Dim sURL As String
-        Dim bUpdateAll As Boolean = chkUpdateAll.Checked
-        Dim sAdminLevel As String = txtAdminLevel.Text
-
-        If Not GetMapBBox(bBox) Then
-            xNode = tvList.SelectedNode
-            If IsNothing(xNode) Then
-                Exit Sub
-            End If
-            x = DirectCast(xNode.Tag, BoundaryDB.BoundaryItem)
-            If IsNothing(x) Then
-                Exit Sub
-            End If
-            iRel = x.OSMRelation
-            If iRel <= 0 Then
-                Exit Sub
-            End If
-            bBox = tmpDoc.Relations(iRel).BBox
-        End If
-
-        If Len(sAdminLevel) = 0 Then
-            sURL = My.Settings.xapiAPI & $"?relation[type=boundary][bbox={bBox.MinLon},{bBox.MinLat},{bBox.MaxLon},{bBox.MaxLat}][@meta]"
-        Else
-            sURL = My.Settings.xapiAPI & $"?relation[type=boundary][admin_level={sAdminLevel}][bbox={bBox.MinLon},{bBox.MinLat},{bBox.MaxLon},{bBox.MaxLat}][@meta]"
-        End If
-
-        Try
-            tsStatus.Text = "Retrieving " & sURL
-            Application.DoEvents()
-            oDoc = xRetriever.API.GetOSM(sURL)
-            If IsNothing(oDoc) Then
-                tsStatus.Text = "Query failed or returned no data: " & xRetriever.API.LastError
-                Exit Sub
-            End If
-        Catch ex As Exception
-            MsgBox($"Unable to retrieve {sURL} : {ex.Message}")
-            Exit Sub
-        End Try
-
-        tsStatus.Text = "Merging new data with library..."
-        Application.DoEvents()
-        xDB.MergeOSM(oDoc, bUpdateAll)
-        If xDB.ChangedItems.Count > 0 Then
-
-            Dim xExpanded As New List(Of BoundaryDB.BoundaryItem)
-            Dim xSelected As BoundaryDB.BoundaryItem = TryCast(tvList.SelectedNode?.Tag, BoundaryDB.BoundaryItem)
-            Dim selectedNodes(10) As String
-            Dim xTmp As BoundaryDB.BoundaryItem = xSelected
-            Dim i As Integer = 0
-            Do
-                If xTmp Is Nothing Then Exit Do
-                selectedNodes(i) = xTmp.ONSCode
-                xTmp = xTmp.Parent
-                i = i + 1
-            Loop
-
-            ' For Each xNode In tvList.Nodes
-            ' CollectExpanded(xNode, xExpanded)
-            ' Next
-
-            tsStatus.Text = "Updating tree..."
-            Application.DoEvents()
-            ReloadTV(xDB) ' only reloads top level initially!
-
-            Dim j As Integer = i - 2
-            If j > 0 Then
-                i = tvList.Nodes.IndexOfKey(selectedNodes(j))
-                xNode = tvList.Nodes(i)
-                Do
-                    bAllowExpandCollapse = True ' otherwise the expand gets cancelled
-                    xNode.Expand()
-                    If j <= 0 Then Exit Do
-                    j = j - 1
-                    If xNode.Nodes.IndexOfKey(selectedNodes(j)) >= 0 Then
-                        xNode = xNode.Nodes(xNode.Nodes.IndexOfKey(selectedNodes(j)))
-                    End If
-                Loop
-            End If
-
-
-
-            ' For Each xNode In tvList.Nodes
-            ' RestoreExpanded(xNode, xExpanded)
-            ' Next
-        End If
-        tsStatus.Text = "Update complete."
-        MsgBox("Update complete.", MsgBoxStyle.OkOnly Or MsgBoxStyle.Information)
-    End Sub
 
     Private Sub lvChildren_ColumnClick(sender As Object, e As ColumnClickEventArgs) Handles lvChildren.ColumnClick
+        Const SortUpPrefix As String = "> "
+        Const SortDownPrefix As String = "< "
+        Const SortPrefixLen As Integer = 2
+
         ' Get the new sorting column.
         Dim lv As ListView = DirectCast(sender, ListView)
         Dim new_sorting_column As ColumnHeader =
@@ -593,7 +541,7 @@ Public Class frmAnalyze
             ' See if this is the same column.
             If new_sorting_column.Equals(m_SortingColumn) Then
                 ' Same column. Switch the sort order.
-                If m_SortingColumn.Text.StartsWith("> ") Then
+                If m_SortingColumn.Text.StartsWith(SortUpPrefix) Then
                     sort_order = SortOrder.Descending
                 Else
                     sort_order = SortOrder.Ascending
@@ -604,16 +552,18 @@ Public Class frmAnalyze
             End If
 
             ' Remove the old sort indicator.
-            m_SortingColumn.Text =
-                m_SortingColumn.Text.Substring(2)
+            If Strings.Left(m_SortingColumn.Text, SortPrefixLen) = SortUpPrefix _
+                OrElse Strings.Left(m_SortingColumn.Text, SortPrefixLen) = SortDownPrefix Then
+                m_SortingColumn.Text = m_SortingColumn.Text.Substring(SortPrefixLen)
+            End If
         End If
 
         ' Display the new sort order.
         m_SortingColumn = new_sorting_column
         If sort_order = SortOrder.Ascending Then
-            m_SortingColumn.Text = "> " & m_SortingColumn.Text
+            m_SortingColumn.Text = SortUpPrefix & m_SortingColumn.Text
         Else
-            m_SortingColumn.Text = "< " & m_SortingColumn.Text
+            m_SortingColumn.Text = SortDownPrefix & m_SortingColumn.Text
         End If
 
         ' Create a comparer.
@@ -649,14 +599,14 @@ Public Class frmAnalyze
             End If
             ' reload current lv item
             If Not (x Is Nothing) Then
-                    Dim xNode As TreeNode = x
-                    Do Until xNode Is Nothing
-                        LoadTreeNodeText(xNode)
-                        xNode = xNode.Parent
-                    Loop
-                    '                tvList.Sort()
-                End If
+                Dim xNode As TreeNode = x
+                Do Until xNode Is Nothing
+                    LoadTreeNodeText(xNode)
+                    xNode = xNode.Parent
+                Loop
+                '                tvList.Sort()
             End If
+        End If
     End Sub
 
     Private Sub tsmiEdit_Click(sender As Object, e As EventArgs) Handles tsmiEdit.Click
@@ -684,9 +634,6 @@ Public Class frmAnalyze
         Dim p As BoundaryDB.BoundaryItem
         p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
         Dim iPar As Long = p.OSMRelation
-        If iPar > 0 Then
-            ShowRelation(iPar)
-        End If
         Dim iChild As Long
         For Each xChild As TreeNode In x.Nodes
             If xChild.Tag Is Nothing Then Continue For
@@ -698,10 +645,31 @@ Public Class frmAnalyze
                 Application.DoEvents()
             ElseIf p.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_ParishGroup Then
                 ShowParishGroup(p)
+            ElseIf p.ONSCode <> "" AndAlso p.Lat <> 0.0 AndAlso p.Lon <> 0.0 Then
+                ShowPlaceHolder(p)
             End If
         Next
+        If iPar > 0 Then
+            ShowRelation(iPar)
+        End If
     End Sub
 
+
+    Private Sub ShowPlaceHolder(p As BoundaryDB.BoundaryItem)
+        Dim sJSON As String
+        Dim xNode As New OSMNode
+        Dim xName As New OSMTag("name", p.Name)
+        xNode.Tags.Add(xName.Key, xName)
+        Dim xLevel As New OSMTag("admin_level", "12")
+        xNode.Tags.Add(xLevel.Key, xLevel)
+        Dim xLabel As New OSMTag("_bblabel", p.Name)
+        xNode.Tags.Add(xLabel.Key, xLabel)
+        xNode.Lat = p.Lat
+        xNode.Lon = p.Lon
+        xNode.IsPlaceholder = False
+        sJSON = xNode.GeoJSON()
+        ShowJSON(sJSON, p.ONSCode)
+    End Sub
     Private Sub tsmiJSON_Click(sender As Object, e As EventArgs) Handles tsmiJSON.Click
         Dim x As TreeNode = tvList.SelectedNode
         Dim p As BoundaryDB.BoundaryItem
@@ -741,6 +709,24 @@ Public Class frmAnalyze
         Return True
     End Function
 
+    Function GetMapLoc(ByRef Zoom As Integer, ByRef Centre As DPoint) As Boolean
+        If Not bMapInitDone Then Return False
+        Dim xbb As Object
+        Static bFlags As System.Reflection.BindingFlags = Reflection.BindingFlags.DeclaredOnly Or
+            System.Reflection.BindingFlags.Public Or
+            System.Reflection.BindingFlags.NonPublic Or
+            System.Reflection.BindingFlags.Instance Or
+            System.Reflection.BindingFlags.GetProperty Or
+            System.Reflection.BindingFlags.GetField
+
+        xbb = wbMap.Document.InvokeScript("getMapLoc")
+        Dim type As System.Type = xbb.GetType()
+        Zoom = CInt(DirectCast(type.InvokeMember("Zoom", bFlags, Nothing, xbb, Nothing), Double))
+        Centre.X = DirectCast(type.InvokeMember("Lon", bFlags, Nothing, xbb, Nothing), Double)
+        Centre.Y = DirectCast(type.InvokeMember("Lat", bFlags, Nothing, xbb, Nothing), Double)
+        Return True
+    End Function
+
     Private Sub btnHist_Click(sender As Object, e As EventArgs) Handles btnHist.Click
         Dim iRel As Long
         Dim sTmp As String = Me.txtSingle.Text
@@ -758,17 +744,6 @@ Public Class frmAnalyze
         End If
     End Sub
 
-    Private Sub btnOSM_Click(sender As Object, e As EventArgs) Handles btnOSM.Click
-        If IsNothing(xDB) Then Exit Sub
-        If System.IO.File.Exists("C:\VMShare\mkgmap\work\uk\gbb.osm") Then
-            xDB.UpdateFromOSMFile("C:\VMShare\mkgmap\work\uk\gbb.osm")
-        ElseIf System.IO.File.Exists("L:\VMShare\mkgmap\work\uk\gbb.osm") Then
-            xDB.UpdateFromOSMFile("L:\VMShare\mkgmap\work\uk\gbb.osm")
-        Else
-            MsgBox("gbb.osm not found")
-        End If
-    End Sub
-
     Private Sub tvList_NodeMouseClick(sender As Object, e As TreeNodeMouseClickEventArgs) Handles tvList.NodeMouseClick
         If e.Button = MouseButtons.Right Then
             bInRightClick = True
@@ -777,9 +752,8 @@ Public Class frmAnalyze
         End If
     End Sub
 
-    Private Sub btnClear_Click(sender As Object, e As EventArgs) Handles btnClear.Click
-        If Not bMapInitDone Then Return
-        wbMap.Document.InvokeScript("clearLayers")
+    Private Sub btnClear_Click(sender As Object, e As EventArgs)
+
     End Sub
 
     Private Sub tsmiChildReport_Click(sender As Object, e As EventArgs) Handles tsmiChildReport.Click
@@ -880,7 +854,7 @@ Public Class frmAnalyze
         If x.Tag Is Nothing Then Return
         Dim p As BoundaryDB.BoundaryItem
         p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
-        Dim f As New frmReview(p)
+        Dim f As New frmReview(p, "")
         f.ShowDialog(Me)
     End Sub
 
@@ -1078,42 +1052,45 @@ Public Class frmAnalyze
             Else
                 iRel = xItem.OSMRelation
                 If iRel > 0 Then
-                    ShowRelation(iRel)
+                    Dim xRel As OSMRelation = ShowRelation(iRel)
+                    If xRel IsNot Nothing Then ZoomToLayer(RelationLabel(xRel))
                 Else
                     If xItem.Lat * xItem.Lon <> 0.0 Then
+                        ShowPlaceHolder(xItem)
                         GotoPanZoom(xItem.Lat, xItem.Lon, 13)
                     End If
                 End If
             End If
         End If
     End Sub
-    Private Sub ShowParishGroup(xItem As BoundaryDB.BoundaryItem)
+    Private Function ShowParishGroup(xItem As BoundaryDB.BoundaryItem) As OSMRelation
         Dim rTemp As OSMRelation = Nothing
         Dim xRel As OSMRelation
         Dim xResolver As OSMResolver = Nothing
         Dim parts As List(Of BoundaryDB.BoundaryItem)
 
         parts = xDB.GetGroupedParishes(xItem)
-        If parts Is Nothing Then Exit Sub
+        If parts Is Nothing Then Return Nothing
 
         For Each d In parts
+            If d.OSMRelation = 0 Then Continue For
             xRel = DirectCast(xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, d.OSMRelation), OSMRelation)
             If xRel Is Nothing Then
                 MsgBox($"Unable to retrieve relation #{d.OSMRelation} ({d.Name})")
             End If
             If rTemp Is Nothing Then
-                rTemp = xRel
+                rTemp = DirectCast(xRel.Clone(), OSMRelation)
             Else
                 rTemp = rTemp.Combine(xRel)
             End If
         Next
 
-        If rTemp Is Nothing Then Exit Sub
+        If rTemp Is Nothing Then Return Nothing
         Try
-            rTemp.Tags.Add("admin_level", New OSMTag("admin_level", "10"))
-            rTemp.Tags.Add("parish_type", New OSMTag("parish_type", "parish_group")) ' special value to trigger javascript
-            rTemp.Tags.Add("ref:gss", New OSMTag("ref:gss", xItem.ONSCode))
-            rTemp.Tags.Add("name", New OSMTag("name", xItem.Name))
+            rTemp.Tags("admin_level") = New OSMTag("admin_level", "10")
+            rTemp.Tags("parish_type") = New OSMTag("parish_type", "parish_group") ' special value to trigger javascript
+            rTemp.Tags("ref:gss") = New OSMTag("ref:gss", xItem.ONSCode)
+            rTemp.Tags("name") = New OSMTag("name", xItem.Name)
         Catch
         End Try
 
@@ -1125,7 +1102,8 @@ Public Class frmAnalyze
             sJson = xResolver.GeoJSON
             ShowJSON(sJson, xItem.ONSCode)
         End If
-    End Sub
+        Return rTemp
+    End Function
     Private Sub frmAnalyze_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
         Dim sbTmp As New StringBuilder
         ' column widths
@@ -1201,6 +1179,7 @@ Public Class frmAnalyze
         End If
         scon1.SplitterDistance = My.Settings.frmAnalyze_Splitter1
         scon2.SplitterDistance = My.Settings.frmAnalyze_Splitter2
+        Me.WindowState = DirectCast(My.Settings.frmAnalyze_MinMax, FormWindowState)
         loading = False
     End Sub
 
@@ -1228,7 +1207,7 @@ Public Class frmAnalyze
     ''' </summary>
     ''' <param name="sender"></param>
     ''' <param name="e"></param>
-    Private Sub tsmiSearch_Click(sender As Object, e As EventArgs) Handles tsmiSearch.Click
+    Private Sub tsmiSearchNom_Click(sender As Object, e As EventArgs) Handles tsmiSearchNom.Click
         If Not bMapInitDone Then Exit Sub
         Dim x As TreeNode = tvList.SelectedNode
         If x Is Nothing Then Exit Sub
@@ -1310,42 +1289,6 @@ Public Class frmAnalyze
         End If
     End Sub
 
-    Private Sub btnCentroids_Click(sender As Object, e As EventArgs) Handles btnCentroids.Click
-        Dim sLatLong As String
-        Dim fi As System.IO.FileInfo
-
-        If xDB Is Nothing Then
-            MsgBox("Must load boundary database before importing centroids")
-            Exit Sub
-        End If
-        sLatLong = My.Settings.LatLongFile
-        With ofdBoundaries
-            .Title = "Import Lat/Lon from GSS CSV File"
-            If Len(sLatLong) > 0 Then
-                fi = New System.IO.FileInfo(sLatLong)
-                .FileName = fi.Name
-                .InitialDirectory = fi.DirectoryName
-            Else
-                .FileName = ""
-                .InitialDirectory = GetFolderPath(SpecialFolder.MyDocuments)
-            End If
-            If .ShowDialog <> DialogResult.OK Then
-                Exit Sub
-            End If
-            sLatLong = .FileName
-        End With
-        If Len(sLatLong) > 0 AndAlso System.IO.File.Exists(sLatLong) Then
-            tsStatus.Text = "Importing centroids from " & sLatLong
-            If xDB.ImportLatLong(sLatLong) Then
-                tsStatus.Text = "Centroids imported from " & sLatLong
-                My.Settings.LatLongFile = sLatLong
-            Else
-                tsStatus.Text = "Error importing centroids from " & sLatLong
-            End If
-        End If
-
-    End Sub
-
     Private Sub tsmiOpenWebsite_Click(sender As Object, e As EventArgs) Handles tsmiOpenWebsite.Click
         Dim x As TreeNode = tvList.SelectedNode
         If x Is Nothing Then Exit Sub
@@ -1371,7 +1314,9 @@ Public Class frmAnalyze
         Dim items As New List(Of BoundaryDB.BoundaryItem)
         Dim x As TreeNode
         Dim bi As BoundaryDB.BoundaryItem
+        Dim sTitle As String
 
+        sTitle = " in " & biListViewParent.Name
         For Each lvi As ListViewItem In lvChildren.SelectedItems
             x = DirectCast(lvi.Tag, TreeNode)
             If x IsNot Nothing Then
@@ -1384,7 +1329,7 @@ Public Class frmAnalyze
                 End If
             End If
         Next
-        Dim f As New frmReview(items)
+        Dim f As New frmReview(items, sTitle)
         f.ShowDialog()
     End Sub
 
@@ -1408,13 +1353,13 @@ Public Class frmAnalyze
         tsmiShowInOsm.Enabled = (tvList.SelectedNode IsNot Nothing)
         tsmiReport.Enabled = (tvList.SelectedNode IsNot Nothing)
         tsmiReview.Enabled = (tvList.SelectedNode IsNot Nothing)
-        tsmiSearch.Enabled = (tvList.SelectedNode IsNot Nothing)
+        tsmiSearchNom.Enabled = (tvList.SelectedNode IsNot Nothing)
         tsmiShowAll.Enabled = (tvList.SelectedNode IsNot Nothing)
     End Sub
 
     Private Sub lvChildren_KeyDown(sender As Object, e As KeyEventArgs) Handles lvChildren.KeyDown
         If e.KeyData = (Keys.A Or Keys.Control) Then
-            For Each item In lvChildren.Items
+            For Each item As ListViewItem In lvChildren.Items
                 item.Selected = True
             Next
         End If
@@ -1443,8 +1388,12 @@ Public Class frmAnalyze
         If x Is Nothing Then Return
         Dim p As BoundaryDB.BoundaryItem = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
         If p Is Nothing Then Return
-        If p.OSMRelation = 0 Then Return
-        Dim sUrl As String = OSMObject.BrowseURL(OSMObject.ObjectType.Relation, p.OSMRelation)
+        Dim sUrl As String = ""
+        If p.OSMRelation > 0 Then
+            sUrl = OSMObject.BrowseURL(OSMObject.ObjectType.Relation, p.OSMRelation)
+        ElseIf p.Lat * p.lon <> 0.0 Then
+            sUrl = OSMObject.BrowseUrl(p.Lat, p.Lon, My.Settings.BrowseZoom)
+        End If
         If Len(sUrl) > 0 Then OpenBrowserAt(sUrl)
     End Sub
 
@@ -1487,11 +1436,248 @@ Public Class frmAnalyze
         Dim bi As BoundaryDB.BoundaryItem
         bi = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
         If bi Is Nothing Then Exit Sub
-        If bi.OSMRelation = 0 Then Return
-        Dim sUrl As String = OSMObject.BrowseURL(OSMObject.ObjectType.Relation, bi.OSMRelation)
+        Dim sUrl As String
+        If bi.OSMRelation > 0 Then
+            sUrl = OSMObject.BrowseURL(OSMObject.ObjectType.Relation, bi.OSMRelation)
+        ElseIf bi.Lat * bi.Lon <> 0.0 Then
+            sUrl = OSMObject.BrowseUrl(bi.Lat, bi.Lon, My.Settings.BrowseZoom)
+        End If
         If Len(sUrl) > 0 Then OpenBrowserAt(sUrl)
     End Sub
+
+    Private Async Sub tsmiOpenDB_Click(sender As Object, e As EventArgs) Handles tsmiOpenDB.Click
+        Dim sDB As String
+
+        sDB = FindBoundaryDB()
+
+        If Len(sDB) = 0 Then
+            MsgBox("No Boundary XML file defined")
+            Exit Sub
+        End If
+
+        sCache = System.Environment.ExpandEnvironmentVariables(My.Settings.OSMCache)
+        If Len(sCache) > 0 Then
+            If System.IO.File.Exists(sCache) Then
+                tmpDoc = New OSMDoc()
+                If bLargeCache Then
+                    tmpDoc.LoadBigXML(sCache)
+                Else
+                    tmpDoc.Load(sCache)
+                End If
+            End If
+        End If
+
+        Dim x As New BoundaryDB
+        Dim s As String = Await loadxml(sDB, x)
+
+        If IsNothing(fntBold) Then
+            fntNormal = tvList.Font
+            fntBold = New Font(tvList.Font, FontStyle.Bold)
+        End If
+
+        ReloadTV(x)
+
+        xDB = x
+        sDBPath = sDB
+    End Sub
+
+    Private Sub tsmiImportCentroids_Click(sender As Object, e As EventArgs) Handles tsmiImportCentroids.Click
+        Dim sLatLong As String
+        Dim fi As System.IO.FileInfo
+
+        If xDB Is Nothing Then
+            MsgBox("Must load boundary database before importing centroids")
+            Exit Sub
+        End If
+        sLatLong = My.Settings.LatLongFile
+        With ofdBoundaries
+            .Title = "Import Lat/Lon from GSS CSV File"
+            If Len(sLatLong) > 0 Then
+                fi = New System.IO.FileInfo(sLatLong)
+                .FileName = fi.Name
+                .InitialDirectory = fi.DirectoryName
+            Else
+                .FileName = ""
+                .InitialDirectory = GetFolderPath(SpecialFolder.MyDocuments)
+            End If
+            If .ShowDialog <> DialogResult.OK Then
+                Exit Sub
+            End If
+            sLatLong = .FileName
+        End With
+        If Len(sLatLong) > 0 AndAlso System.IO.File.Exists(sLatLong) Then
+            tsStatus.Text = "Importing centroids from " & sLatLong
+            If xDB.ImportLatLong(sLatLong) Then
+                tsStatus.Text = "Centroids imported from " & sLatLong
+                My.Settings.LatLongFile = sLatLong
+            Else
+                tsStatus.Text = "Error importing centroids from " & sLatLong
+            End If
+        End If
+    End Sub
+
+    Private Sub DoSearch(bUpdateAll As Boolean)
+        Dim oDoc As OSMDoc
+        Dim bBox As New BBox
+        Dim iRel As Long
+        Dim x As BoundaryDB.BoundaryItem
+        Dim xNode As TreeNode
+        Dim sURL As String
+        Dim sAdminLevel As String = ""
+
+        If Not GetMapBBox(bBox) Then
+            xNode = tvList.SelectedNode
+            If IsNothing(xNode) Then
+                Exit Sub
+            End If
+            x = DirectCast(xNode.Tag, BoundaryDB.BoundaryItem)
+            If IsNothing(x) Then
+                Exit Sub
+            End If
+            iRel = x.OSMRelation
+            If iRel <= 0 Then
+                Exit Sub
+            End If
+            bBox = tmpDoc.Relations(iRel).BBox
+        End If
+
+        tsmiSearchAll.Enabled = False
+        tsmiSearchNew.Enabled = False
+
+        If Len(sAdminLevel) = 0 Then
+            sURL = My.Settings.xapiAPI & $"?relation[type=boundary][bbox={bBox.MinLon},{bBox.MinLat},{bBox.MaxLon},{bBox.MaxLat}][@meta]"
+        Else
+            sURL = My.Settings.xapiAPI & $"?relation[type=boundary][admin_level={sAdminLevel}][bbox={bBox.MinLon},{bBox.MinLat},{bBox.MaxLon},{bBox.MaxLat}][@meta]"
+        End If
+
+        Try
+            tsStatus.Text = "Retrieving " & sURL
+            Application.DoEvents()
+            oDoc = xRetriever.API.GetOSM(sURL)
+            If IsNothing(oDoc) Then
+                tsStatus.Text = "Query failed or returned no data: " & xRetriever.API.LastError
+                tsmiSearchAll.Enabled = True
+                tsmiSearchNew.Enabled = True
+                Exit Sub
+            End If
+        Catch ex As Exception
+            MsgBox($"Unable to retrieve {sURL} : {ex.Message}")
+            tsmiSearchAll.Enabled = True
+            tsmiSearchNew.Enabled = True
+            Exit Sub
+        End Try
+
+        tsStatus.Text = "Merging new data with library..."
+        Application.DoEvents()
+        xDB.MergeOSM(oDoc, bUpdateAll)
+        If xDB.ChangedItems.Count > 0 Then
+
+            Dim xExpanded As New List(Of BoundaryDB.BoundaryItem)
+            Dim xSelected As BoundaryDB.BoundaryItem = TryCast(tvList.SelectedNode?.Tag, BoundaryDB.BoundaryItem)
+            Dim selectedNodes(10) As String
+            Dim xTmp As BoundaryDB.BoundaryItem = xSelected
+            Dim i As Integer = 0
+            Do
+                If xTmp Is Nothing Then Exit Do
+                selectedNodes(i) = xTmp.ONSCode
+                xTmp = xTmp.Parent
+                i = i + 1
+            Loop
+
+            ' For Each xNode In tvList.Nodes
+            ' CollectExpanded(xNode, xExpanded)
+            ' Next
+
+            tsStatus.Text = "Updating tree..."
+            Application.DoEvents()
+            ReloadTV(xDB) ' only reloads top level initially!
+
+            Dim j As Integer = i - 2
+            If j > 0 Then
+                i = tvList.Nodes.IndexOfKey(selectedNodes(j))
+                xNode = tvList.Nodes(i)
+                Do
+                    bAllowExpandCollapse = True ' otherwise the expand gets cancelled
+                    xNode.Expand()
+                    If j <= 0 Then Exit Do
+                    j = j - 1
+                    If xNode.Nodes.IndexOfKey(selectedNodes(j)) >= 0 Then
+                        xNode = xNode.Nodes(xNode.Nodes.IndexOfKey(selectedNodes(j)))
+                    End If
+                Loop
+            End If
+
+            ' For Each xNode In tvList.Nodes
+            ' RestoreExpanded(xNode, xExpanded)
+            ' Next
+        End If
+        tsStatus.Text = "Update complete."
+        MsgBox("Update complete.", MsgBoxStyle.OkOnly Or MsgBoxStyle.Information)
+        tsmiSearchNew.Enabled = True
+        tsmiSearchAll.Enabled = True
+    End Sub
+    Private Sub tsmiSearchNew_Click(sender As Object, e As EventArgs) Handles tsmiSearchNew.Click
+        DoSearch(False)
+    End Sub
+
+    Private Sub tsmiSearchAll_Click(sender As Object, e As EventArgs) Handles tsmiSearchAll.Click
+        DoSearch(True)
+    End Sub
+
+    Private Sub tsmiOsmBoundaries_DragEnter(sender As Object, e As DragEventArgs) Handles tsmiOsmBoundaries.DragEnter
+        If IsNothing(xDB) Then Exit Sub
+        If System.IO.File.Exists("C:\VMShare\mkgmap\work\uk\gbb.osm") Then
+            xDB.UpdateFromOSMFile("C:\VMShare\mkgmap\work\uk\gbb.osm")
+        ElseIf System.IO.File.Exists("L:\VMShare\mkgmap\work\uk\gbb.osm") Then
+            xDB.UpdateFromOSMFile("L:\VMShare\mkgmap\work\uk\gbb.osm")
+        Else
+            MsgBox("gbb.osm not found")
+        End If
+    End Sub
+
+    Private Sub tsmiEditMap_Click(sender As Object, e As EventArgs) Handles tsmiEditMap.Click
+        Dim ctr As New DPoint(0, 0)
+        Dim zoom As Integer
+        If Not GetMapLoc(zoom, ctr) Then Return
+        If zoom < OSMObject.MinEditZoom Then
+            MsgBox($"Zoom in further to edit map")
+            Return
+        End If
+        Dim sUrl As String = OSMObject.EditUrl(ctr.Y, ctr.X, zoom)
+        If Len(sUrl) > 0 Then OpenBrowserAt(sUrl)
+    End Sub
+
+    Private Sub tsmiBrowseMap_Click(sender As Object, e As EventArgs) Handles tsmiBrowseMap.Click
+        Dim ctr As New DPoint(0, 0)
+        Dim zoom As Integer
+        If Not GetMapLoc(zoom, ctr) Then Return
+        Dim sUrl As String = OSMObject.BrowseUrl(ctr.Y, ctr.X, zoom)
+        If Len(sUrl) > 0 Then OpenBrowserAt(sUrl)
+    End Sub
+
+    Private Sub tsmiClearMap_Click(sender As Object, e As EventArgs) Handles tsmiClearMap.Click
+        If Not bMapInitDone Then Return
+        wbMap.Document.InvokeScript("clearLayers")
+    End Sub
+
+    ''' <summary>
+    ''' Handles Click event on Close button
+    ''' </summary>
+    ''' <param name="sender"></param>
+    ''' <param name="e"></param>
+    Private Sub tsmiClose_Click(sender As Object, e As EventArgs) Handles tsmiClose.Click
+        If Len(sCache) > 0 Then
+            tmpDoc.SaveXML(sCache)
+        End If
+        Me.Close()
+    End Sub
+
+    Private Sub tsmiSearch_ButtonClick(sender As Object, e As EventArgs) Handles tsmiSearch.ButtonClick
+        DoSearch(False)
+    End Sub
 End Class
+
+
 Public Class ListViewComparer
     Implements IComparer
 

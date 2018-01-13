@@ -184,7 +184,7 @@ Public Class RelationReport
             Case "waterway"
                 xResolver.Mode = OSMResolver.ResolverMode.Linear
             Case Else
-                myLog.Write(xRel, Nothing, "not boundary or multipolygon!")
+                myLog.Write(xRel, Nothing, "not boundary, multipolygon or waterway!")
                 Exit Sub
         End Select
         bCheckLevels = False

@@ -14,11 +14,11 @@ Public Class OSMHistoryCache
     Dim sqlConn As SQLiteConnection
     Public Class OSMHistoryObject
         Public Type As OSMObject.ObjectType
-        Public ID As ULong
-        Public Version As Integer
+        Public ID As Long
+        Public Version As Long
         Public LastChecked As Date
         Friend _XML As String
-        Public ReadOnly Property XML
+        Public ReadOnly Property XML As String
             Get
                 Return _XML
             End Get
@@ -29,7 +29,7 @@ Public Class OSMHistoryCache
     Private Oldest As Date = Now
     Private Cache As New Dictionary(Of String, OSMHistoryObject)
     Private api As New OSMApi
-    Private Function MakeKey(Type As OSMObject.ObjectType, ID As ULong) As String
+    Private Function MakeKey(Type As OSMObject.ObjectType, ID As Long) As String
         Dim s As String
         If Type = OSMObject.ObjectType.Node Then
             s = "n"
@@ -44,12 +44,10 @@ Public Class OSMHistoryCache
         sqlConn = New SQLiteConnection("Data Source='T:\BoundsBeater\hcache.sqlite'")
         sqlConn.Open()
     End Sub
-    Public Function OSMObjectHistory(Type As OSMObject.ObjectType, ID As ULong, Optional ForceFetch As Boolean = False) As OSMObject
+    Public Function OSMObjectHistory(Type As OSMObject.ObjectType, ID As Long, Optional ForceFetch As Boolean = False) As OSMObject
         Dim xDoc As OSMDoc
-        Dim xCurrent As OSMObject
         Dim xObj As OSMObject
         Dim hObj As OSMHistoryObject
-        Dim sql As IDbCommand
         Dim sKey As String = MakeKey(Type, ID)
         If Cache.ContainsKey(sKey) Then
             hObj = Cache(sKey)
@@ -68,13 +66,17 @@ Public Class OSMHistoryCache
                     xObj = xDoc.Ways(ID)
                 Case OSMObject.ObjectType.Relation
                     xObj = xDoc.Relations(ID)
+                Case Else
+                    Debug.Assert(False, $"GetOSMObjectHistory as returned a {TypeName(xDoc)}")
+                    Return Nothing
             End Select
             ' insert new cache entry
-            hObj = New OSMHistoryObject
-            hObj.Type = Type
-            hObj.ID = ID
-            hObj.LastChecked = Now
-            hObj.Version = xObj.Version
+            hObj = New OSMHistoryObject With {
+                .Type = xObj.Type,
+                .ID = xObj.ID,
+                .LastChecked = Now,
+                .Version = xObj.Version
+            }
             Dim sw As New MemoryStream
             Dim xtw As New XmlTextWriter(sw, Encoding.UTF8)
             xObj.Serialize(xtw)
@@ -112,7 +114,7 @@ xml:        history.xml()
     End Function
 
     Public Function OSMNodeHistory(ID As Long, Optional ForceFetch As Boolean = False) As OSMNode
-        Return OSMObjectHistory(OSMObject.ObjectType.Node, ID, ForceFetch)
+        Return DirectCast(OSMObjectHistory(OSMObject.ObjectType.Node, ID, ForceFetch), OSMNode)
     End Function
     Public Function OSMWayHistory(ID As Long, Optional ForceFetch As Boolean = False) As OSMWay
 

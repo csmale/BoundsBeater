@@ -22,7 +22,7 @@ Public Class FileLogger
             Try
                 Dim fs As FileStream = New FileStream(fileName, FileMode.Append, FileAccess.Write)
                 Dim sw As StreamWriter = New StreamWriter(fs)
-                sw.WriteLine(vbCrLf & "--- " + vbCrLf + DateTime.Now + " " + info.ToString)
+                sw.WriteLine(vbCrLf & "--- " + vbCrLf + DateTime.Now.ToString + " " + info.ToString)
                 sw.Close()
                 fs.Close()
             Catch dirEx As DirectoryNotFoundException
@@ -37,7 +37,7 @@ Public Class FileLogger
             Try
                 Dim fileStream As FileStream = File.Create(fileName)
                 Dim sw As StreamWriter = New StreamWriter(fileStream)
-                sw.WriteLine(vbCrLf & "--- " + vbCrLf + DateTime.Now + info.ToString)
+                sw.WriteLine(vbCrLf & "--- " + vbCrLf + DateTime.Now.ToString + info.ToString)
                 sw.Close()
                 fileStream.Close()
             Catch fileEx As FileNotFoundException

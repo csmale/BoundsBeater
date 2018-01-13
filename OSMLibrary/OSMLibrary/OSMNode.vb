@@ -2,6 +2,9 @@
 Imports System.Drawing
 Imports OSMLibrary
 
+''' <summary>
+''' Represents an OSM Node
+''' </summary>
 Public Class OSMNode
     Inherits OSMObject
     Public Lat As Double
@@ -26,7 +29,7 @@ Public Class OSMNode
         End Get
     End Property
     Public Overrides Function Clone() As OSMObject
-        Dim xNew As OSMNode = MyBase.Clone()
+        Dim xNew As OSMNode = DirectCast(MyBase.Clone(), OSMNode)
         xNew.UsedByWays.AddRange(UsedByWays)
         xNew.UsedByRelations.AddRange(UsedByRelations)
         Return xNew
@@ -52,7 +55,7 @@ Public Class OSMNode
             Return "[" & CStr(Lon) & "," & CStr(Lat) & "]"
         End Get
     End Property
-    Public Sub LoadXML(x As Xml.XmlNode)
+    Public Async Sub LoadXML(x As Xml.XmlNode)
         MyBase.LoadGenericXML(x)
         Try
             Lat = CDbl(x.Attributes("lat").InnerText)
@@ -91,19 +94,19 @@ Public Class OSMNode
         End Get
     End Property
     Public Function MakeBBox(r As Double) As BBox
-        Dim bb As New BBox
-        bb.MinLon = Lon - r
-        bb.MinLat = Lat - r
-        bb.MaxLon = Lon + r
-        bb.MaxLat = Lat + r
-        Return bb
+        Return New BBox With {
+            .MinLon = Lon - r,
+            .MinLat = Lat - r,
+            .MaxLon = Lon + r,
+            .MaxLat = Lat + r
+        }
     End Function
-    Public Overrides ReadOnly Property Centroid As PointF
+    Public Overrides ReadOnly Property Centroid As DPoint
         Get
-            Return New PointF(Lon, Lat)
+            Return New DPoint(Lon, Lat)
         End Get
     End Property
-    Public Overrides Sub SerializeMe(x As XmlTextWriter)
+    Public Overrides Sub SerializeMe(x As XmlWriter)
     End Sub
 
     ''' <summary>
