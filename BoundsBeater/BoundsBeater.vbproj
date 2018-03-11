@@ -71,11 +71,10 @@
     <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>B3BBAF3DF02A0F98AE08A2F6088A1EFB3E2202F0</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>E544CC41188F55A6C33C6A9B1F031B3DA0157F20</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>
-    </ManifestKeyFile>
+    <ManifestKeyFile>BoundsBeater_5_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -272,6 +271,7 @@
     <None Include="BoundsBeater_2_TemporaryKey.pfx" />
     <None Include="BoundsBeater_3_TemporaryKey.pfx" />
     <None Include="BoundsBeater_4_TemporaryKey.pfx" />
+    <None Include="BoundsBeater_5_TemporaryKey.pfx" />
     <None Include="BoundsBeater_TemporaryKey.pfx" />
     <None Include="My Project\app.manifest" />
     <None Include="My Project\Application.myapp">

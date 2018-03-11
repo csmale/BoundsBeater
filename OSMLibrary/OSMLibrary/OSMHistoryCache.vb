@@ -2,6 +2,7 @@
 Imports System.IO
 Imports System.Text
 Imports System.Xml
+
 ' caches individual objects, possibly as full history
 ' uses two tables in SQLite
 ' (type,ID,headversion,fullhistory,lastcheck)
@@ -11,81 +12,81 @@ Imports System.Xml
 ' 2) persistent storage - SQLite connection
 
 Public Class OSMHistoryCache
-    Dim sqlConn As SQLiteConnection
-    Public Class OSMHistoryObject
-        Public Type As OSMObject.ObjectType
-        Public ID As Long
-        Public Version As Long
-        Public LastChecked As Date
-        Friend _XML As String
-        Public ReadOnly Property XML As String
-            Get
-                Return _XML
-            End Get
-        End Property
+        Dim sqlConn As SQLiteConnection
+        Public Class OSMHistoryObject
+            Public Type As OSMObject.ObjectType
+            Public ID As Long
+            Public Version As Long
+            Public LastChecked As Date
+            Friend _XML As String
+            Public ReadOnly Property XML As String
+                Get
+                    Return _XML
+                End Get
+            End Property
 
-    End Class
+        End Class
 
-    Private Oldest As Date = Now
-    Private Cache As New Dictionary(Of String, OSMHistoryObject)
-    Private api As New OSMApi
-    Private Function MakeKey(Type As OSMObject.ObjectType, ID As Long) As String
-        Dim s As String
-        If Type = OSMObject.ObjectType.Node Then
-            s = "n"
-        ElseIf Type = OSMObject.ObjectType.Way Then
-            s = "w"
-        Else
-            s = "r"
-        End If
-        Return s & ID.ToString
-    End Function
-    Sub New()
-        sqlConn = New SQLiteConnection("Data Source='T:\BoundsBeater\hcache.sqlite'")
-        sqlConn.Open()
-    End Sub
-    Public Function OSMObjectHistory(Type As OSMObject.ObjectType, ID As Long, Optional ForceFetch As Boolean = False) As OSMObject
-        Dim xDoc As OSMDoc
-        Dim xObj As OSMObject
-        Dim hObj As OSMHistoryObject
-        Dim sKey As String = MakeKey(Type, ID)
-        If Cache.ContainsKey(sKey) Then
-            hObj = Cache(sKey)
-            If ForceFetch OrElse hObj.LastChecked < Oldest Then
-                ' get current version
-                xDoc = api.GetOSMDoc(Type, ID, False)
-                ' get full history
+        Private Oldest As Date = Now
+        Private Cache As New Dictionary(Of String, OSMHistoryObject)
+        Private api As New OSMApi
+        Private Function MakeKey(Type As OSMObject.ObjectType, ID As Long) As String
+            Dim s As String
+            If Type = OSMObject.ObjectType.Node Then
+                s = "n"
+            ElseIf Type = OSMObject.ObjectType.Way Then
+                s = "w"
+            Else
+                s = "r"
             End If
-        Else
-            ' get full history
-            xDoc = api.GetOSMObjectHistory(Type, ID)
-            Select Case Type
-                Case OSMObject.ObjectType.Node
-                    xObj = xDoc.Nodes(ID)
-                Case OSMObject.ObjectType.Way
-                    xObj = xDoc.Ways(ID)
-                Case OSMObject.ObjectType.Relation
-                    xObj = xDoc.Relations(ID)
-                Case Else
-                    Debug.Assert(False, $"GetOSMObjectHistory as returned a {TypeName(xDoc)}")
-                    Return Nothing
-            End Select
-            ' insert new cache entry
-            hObj = New OSMHistoryObject With {
-                .Type = xObj.Type,
-                .ID = xObj.ID,
-                .LastChecked = Now,
-                .Version = xObj.Version
-            }
-            Dim sw As New MemoryStream
-            Dim xtw As New XmlTextWriter(sw, Encoding.UTF8)
-            xObj.Serialize(xtw)
-            xtw.Flush()
-            Dim sr As New StreamReader(sw, Encoding.UTF8)
-            sw.Seek(0, SeekOrigin.Begin)
-            hObj._XML = sr.ReadToEnd
-            Insert(hObj)
-        End If
+            Return s & ID.ToString
+        End Function
+        Sub New()
+            sqlConn = New SQLiteConnection("Data Source='T:\BoundsBeater\hcache.sqlite'")
+            sqlConn.Open()
+        End Sub
+        Public Function OSMObjectHistory(Type As OSMObject.ObjectType, ID As Long, Optional ForceFetch As Boolean = False) As OSMObject
+            Dim xDoc As OSMDoc
+            Dim xObj As OSMObject
+            Dim hObj As OSMHistoryObject
+            Dim sKey As String = MakeKey(Type, ID)
+            If Cache.ContainsKey(sKey) Then
+                hObj = Cache(sKey)
+                If ForceFetch OrElse hObj.LastChecked < Oldest Then
+                    ' get current version
+                    xDoc = api.GetOSMDoc(Type, ID, False)
+                    ' get full history
+                End If
+            Else
+                ' get full history
+                xDoc = api.GetOSMObjectHistory(Type, ID)
+                Select Case Type
+                    Case OSMObject.ObjectType.Node
+                        xObj = xDoc.Nodes(ID)
+                    Case OSMObject.ObjectType.Way
+                        xObj = xDoc.Ways(ID)
+                    Case OSMObject.ObjectType.Relation
+                        xObj = xDoc.Relations(ID)
+                    Case Else
+                        Debug.Assert(False, $"GetOSMObjectHistory as returned a {TypeName(xDoc)}")
+                        Return Nothing
+                End Select
+                ' insert new cache entry
+                hObj = New OSMHistoryObject With {
+                    .Type = xObj.Type,
+                    .ID = xObj.ID,
+                    .LastChecked = Now,
+                    .Version = xObj.Version
+                }
+                Dim sw As New MemoryStream
+                Dim xtw As New XmlTextWriter(sw, Encoding.UTF8)
+                xObj.Serialize(xtw)
+                xtw.Flush()
+                Dim sr As New StreamReader(sw, Encoding.UTF8)
+                sw.Seek(0, SeekOrigin.Begin)
+                hObj._XML = sr.ReadToEnd
+                Insert(hObj)
+            End If
 
 #If False Then
         If found Then
@@ -111,18 +112,18 @@ xml:        history.xml()
         End If
 #End If
 
-    End Function
+        End Function
 
-    Public Function OSMNodeHistory(ID As Long, Optional ForceFetch As Boolean = False) As OSMNode
-        Return DirectCast(OSMObjectHistory(OSMObject.ObjectType.Node, ID, ForceFetch), OSMNode)
-    End Function
-    Public Function OSMWayHistory(ID As Long, Optional ForceFetch As Boolean = False) As OSMWay
+        Public Function OSMNodeHistory(ID As Long, Optional ForceFetch As Boolean = False) As OSMNode
+            Return DirectCast(OSMObjectHistory(OSMObject.ObjectType.Node, ID, ForceFetch), OSMNode)
+        End Function
+        Public Function OSMWayHistory(ID As Long, Optional ForceFetch As Boolean = False) As OSMWay
 
-    End Function
+        End Function
 
-    Public Function OSMRelationHistory(ID As Long, Optional ForceFetch As Boolean = False) As OSMRelation
+        Public Function OSMRelationHistory(ID As Long, Optional ForceFetch As Boolean = False) As OSMRelation
 
-    End Function
+        End Function
 #If False Then
 osmobj
     type (n,w,r)
@@ -193,18 +194,18 @@ to get the deep history of a relation:
     next
 #End If
 
-    Private Sub Insert(c As OSMHistoryObject)
-        Dim cmd As New SQLiteCommand("INSERT INTO Cache (Key, LastChecked, HeadVersion, XML) VALUES(:Key, :Time, :Ver, :Data)", sqlConn)
-        cmd.Parameters.Add("Key", DbType.String).Value = MakeKey(c.Type, c.ID)
-        cmd.Parameters.Add("Time", DbType.String).Value = c.LastChecked.ToString("o")
-        cmd.Parameters.Add("Ver", DbType.Int32).Value = c.Version
-        cmd.Parameters.Add("Data", DbType.Xml).Value = c.XML
-        Try
-            cmd.ExecuteNonQuery()
-        Catch
+        Private Sub Insert(c As OSMHistoryObject)
+            Dim cmd As New SQLiteCommand("INSERT INTO Cache (Key, LastChecked, HeadVersion, XML) VALUES(:Key, :Time, :Ver, :Data)", sqlConn)
+            cmd.Parameters.Add("Key", DbType.String).Value = MakeKey(c.Type, c.ID)
+            cmd.Parameters.Add("Time", DbType.String).Value = c.LastChecked.ToString("o")
+            cmd.Parameters.Add("Ver", DbType.Int32).Value = c.Version
+            cmd.Parameters.Add("Data", DbType.Xml).Value = c.XML
+            Try
+                cmd.ExecuteNonQuery()
+            Catch
 
-        End Try
-    End Sub
-    Public Function OSMObjectX() As OSMObject
-    End Function
-End Class
+            End Try
+        End Sub
+        Public Function OSMObjectX() As OSMObject
+        End Function
+    End Class

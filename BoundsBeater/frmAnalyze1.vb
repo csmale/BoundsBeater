@@ -984,7 +984,22 @@ Public Class frmAnalyze
         If xItem.OSMRelation > 0 Then
             tvn.NodeFont = fntBold
         Else
-            tvn.NodeFont = fntNormal
+            If xItem.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_ParishGroup Then
+                Dim parts = xDB.GetGroupedParishes(xItem)
+                If parts Is Nothing Then
+                    tvn.NodeFont = fntNormal
+                Else
+                    tvn.NodeFont = fntBold
+                    For Each d In parts
+                        If d.OSMRelation = 0 Then
+                            tvn.NodeFont = fntNormal
+                            Exit For
+                        End If
+                    Next
+                End If
+            Else
+                tvn.NodeFont = fntNormal
+            End If
         End If
         If tvn.ForeColor <> colRequired Then
             tvn.ForeColor = colRequired

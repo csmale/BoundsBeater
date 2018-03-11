@@ -1,6 +1,7 @@
 ﻿Imports System.Net
 Imports System.IO
 Imports System.Security
+Imports OSMLibrary
 
 Public Class OSMRetriever 
     Public MaxAge As Long = 24 * 60 * 60   ' in seconds, default is one day

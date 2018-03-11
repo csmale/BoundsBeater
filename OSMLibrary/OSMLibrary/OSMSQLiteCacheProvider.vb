@@ -4,46 +4,46 @@ Imports System.Text
 Imports System.Xml
 
 Public Class OSMSQLiteCacheProvider
-    Implements IOSMCacheProvider
+        Implements IOSMCacheProvider
 
-    Public Sub Close() Implements IOSMCacheProvider.Close
-        Throw New NotImplementedException()
-    End Sub
+        Public Sub Close() Implements IOSMCacheProvider.Close
+            Throw New NotImplementedException()
+        End Sub
 
-    Public Function GetByDate(t As OSMObject.ObjectType, ID As Long, AsOf As Date) As OSMCacheRecord Implements IOSMCacheProvider.GetByDate
-        Throw New NotImplementedException()
-        Dim sSql As String
-        sSql = <![CDATA[
+        Public Function GetByDate(t As OSMObject.ObjectType, ID As Long, AsOf As Date) As OSMCacheRecord Implements IOSMCacheProvider.GetByDate
+            Throw New NotImplementedException()
+            Dim sSql As String
+            sSql = <![CDATA[
             SELECT v.value from osmobjver v
             WHERE v.Type=@type AND v.ID=@ID
             AND v.Version = (SELECT MAX(o.Version) from OSMObjectVer o where o.type+id=type+id and o.date<date)
          ]]>.Value
-    End Function
+        End Function
 
-    Public Function GetByVersion(t As OSMObject.ObjectType, ID As Long, Version As Long) As OSMCacheRecord Implements IOSMCacheProvider.GetByVersion
-        Throw New NotImplementedException()
-        Dim sSql As String
-        sSql = <![CDATA[
+        Public Function GetByVersion(t As OSMObject.ObjectType, ID As Long, Version As Long) As OSMCacheRecord Implements IOSMCacheProvider.GetByVersion
+            Throw New NotImplementedException()
+            Dim sSql As String
+            sSql = <![CDATA[
             SELECT v.value from osmobjver v
             WHERE v.Type=@type AND v.ID=@ID AND v.Version = @ID
          ]]>.Value
-    End Function
+        End Function
 
-    Public Function GetLatest(t As OSMObject.ObjectType, ID As Long) As OSMCacheRecord Implements IOSMCacheProvider.GetLatest
-        Throw New NotImplementedException()
-        Dim sSql As String
-        sSql = <![CDATA[
+        Public Function GetLatest(t As OSMObject.ObjectType, ID As Long) As OSMCacheRecord Implements IOSMCacheProvider.GetLatest
+            Throw New NotImplementedException()
+            Dim sSql As String
+            sSql = <![CDATA[
             SELECT o.value from osmobj o
             WHERE o.Type=@type AND o.ID=@ID AND o.Version = 
                 (SELECT Version FROM osmobjver v
                 WHERE o.Type=v.Type AND o.ID=v.ID)
          ]]>.Value
 
-    End Function
+        End Function
 
-    Public Function Upsert(Data As OSMCacheRecord) As Object Implements IOSMCacheProvider.Upsert
-        Throw New NotImplementedException()
-    End Function
+        Public Function Upsert(Data As OSMCacheRecord) As Object Implements IOSMCacheProvider.Upsert
+            Throw New NotImplementedException()
+        End Function
 
 #If False Then
 Schema:
@@ -64,42 +64,42 @@ table OSMOBJ
     primary key(type,ID)
 
 #End If
-    Dim sqlConn As SQLiteConnection
-    Dim myCompressionLevel As System.IO.Compression.CompressionLevel = Compression.CompressionLevel.Optimal
+        Dim sqlConn As SQLiteConnection
+        Dim myCompressionLevel As System.IO.Compression.CompressionLevel = Compression.CompressionLevel.Optimal
 
-    Public Sub New(CacheFile As String, Optional Create As Boolean = False)
-        Open(CacheFile, Create)
-    End Sub
-    Public Function Open(CacheFile As String, Optional Create As Boolean = False) As Boolean Implements IOSMCacheProvider.Open
-        Dim xcs As New SQLiteConnectionStringBuilder
-        If Not System.IO.File.Exists(CacheFile) Then
-            If Create Then
-                SQLiteConnection.CreateFile(CacheFile)
-            Else
-                Return False
+        Public Sub New(CacheFile As String, Optional Create As Boolean = False)
+            Open(CacheFile, Create)
+        End Sub
+        Public Function Open(CacheFile As String, Optional Create As Boolean = False) As Boolean Implements IOSMCacheProvider.Open
+            Dim xcs As New SQLiteConnectionStringBuilder
+            If Not System.IO.File.Exists(CacheFile) Then
+                If Create Then
+                    SQLiteConnection.CreateFile(CacheFile)
+                Else
+                    Return False
+                End If
             End If
-        End If
-        ' we now know the file exists, lets open it
-        xcs.Add("Data Source", CacheFile)
-        Dim newconn As SQLiteConnection
-        Try
-            newconn = New SQLiteConnection(xcs.ConnectionString)
-            newconn.Open()
-        Catch ex As Exception
+            ' we now know the file exists, lets open it
+            xcs.Add("Data Source", CacheFile)
+            Dim newconn As SQLiteConnection
+            Try
+                newconn = New SQLiteConnection(xcs.ConnectionString)
+                newconn.Open()
+            Catch ex As Exception
+                Return False
+            End Try
+            ' now we are connected to a database. can we use it?
+            If isValidDB(newconn) Then
+                sqlConn = newconn
+                Return True
+            End If
+            If CreateSchema(newconn) Then
+                sqlConn = newconn
+                Return True
+            End If
             Return False
-        End Try
-        ' now we are connected to a database. can we use it?
-        If isValidDB(newconn) Then
-            sqlConn = newconn
-            Return True
-        End If
-        If CreateSchema(newconn) Then
-            sqlConn = newconn
-            Return True
-        End If
-        Return False
-    End Function
-    Public Function isValidDB(Conn As SQLiteConnection) As Boolean
+        End Function
+        Public Function isValidDB(Conn As SQLiteConnection) As Boolean
             ' check the tables exist
             If IsNothing(Conn) Then Return False
             ' If Conn.State <> ConnectionState.Open Then Return False
@@ -169,18 +169,18 @@ table OSMOBJ
                 sqlCmd.Parameters.AddWithValue("@lastcheck", Now())
                 iRows = sqlCmd.ExecuteNonQuery()
                 If iRows = 1 Then
-                sqlCmd.CommandText = <![CDATA[
+                    sqlCmd.CommandText = <![CDATA[
                         UPDATE osmobj
                         SET Version = @version, LastCheck=@lastcheck
                         WHERE Type=@type AND ID=@id AND Version<@version
                 ]]>.Value()
-                iRows = sqlCmd.ExecuteNonQuery()
-                If iRows = 0 Then
-                    sqlCmd.CommandText = <![CDATA[
+                    iRows = sqlCmd.ExecuteNonQuery()
+                    If iRows = 0 Then
+                        sqlCmd.CommandText = <![CDATA[
                         INSERT INTO osmobj (Type, ID, Version, Lastcheck)
                         VALUES (@type,@id,@version,@lastcheck)
                     ]]>.Value()
-                    iRows = sqlCmd.ExecuteNonQuery()
+                        iRows = sqlCmd.ExecuteNonQuery()
                     End If
                 End If
                 sqlTxn.Commit()
@@ -191,29 +191,29 @@ table OSMOBJ
             Return True
         End Function
 
-    Public Function GetObject(Type As OSMObject.ObjectType, ID As Long, Optional Version As Integer = 0) As Object
-        Dim oTmp As Object
-        Dim sqlCmd As SQLiteCommand = sqlConn.CreateCommand
-        sqlCmd.Parameters.AddWithValue("@id", ID)
-        sqlCmd.Parameters.AddWithValue("@type", OSMObject.ObjectTypeChar(Type))
-        sqlCmd.Parameters.AddWithValue("@version", Version)
-        If Version = 0 Then ' latest version
-            sqlCmd.CommandText = <![CDATA[
+        Public Function GetObject(Type As OSMObject.ObjectType, ID As Long, Optional Version As Integer = 0) As Object
+            Dim oTmp As Object
+            Dim sqlCmd As SQLiteCommand = sqlConn.CreateCommand
+            sqlCmd.Parameters.AddWithValue("@id", ID)
+            sqlCmd.Parameters.AddWithValue("@type", OSMObject.ObjectTypeChar(Type))
+            sqlCmd.Parameters.AddWithValue("@version", Version)
+            If Version = 0 Then ' latest version
+                sqlCmd.CommandText = <![CDATA[
                 SELECT V.Value FROM osmobjver V, osmobj O
                 WHERE v.Type=o.Type AND v.ID=o.ID AND v.Version = o.Version"
                 And o.Type=@type AND o.ID=@id
                 ]]>.Value()
-        Else ' specific version
-            sqlCmd.CommandText = <![CDATA[
+            Else ' specific version
+                sqlCmd.CommandText = <![CDATA[
                 SELECT V.Value FROM osmobjver V
                 WHERE v.Type=@type AND v.ID=@id AND v.Version = @version
                 ]]>.Value()
-        End If
-        oTmp = sqlCmd.ExecuteScalar()
-        Return oTmp
-    End Function
+            End If
+            oTmp = sqlCmd.ExecuteScalar()
+            Return oTmp
+        End Function
 
-    Public Function xxxgetObjectVersion(type, ID, version) As String
+        Public Function xxxgetObjectVersion(type, ID, version) As String
             ' Select status, userID, username, timestamp, xml from objver v  where v.type And v.ID = ID And v.version = version
         End Function
 

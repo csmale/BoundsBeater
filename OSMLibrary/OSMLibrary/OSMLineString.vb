@@ -1,4 +1,5 @@
-﻿Public Class OSMLineString
+﻿
+Public Class OSMLineString
     Public Nodes As New LinkedList(Of OSMNode)
     Public ReadOnly Property BBox As BBox
         Get
