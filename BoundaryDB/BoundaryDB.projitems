@@ -16,6 +16,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)BoundaryDB.vb" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)Normalise.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="$(MSBuildThisFileDirectory)UKBoundaries.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -15,7 +15,7 @@ Option Explicit On
 Namespace My
     
     <Global.System.Runtime.CompilerServices.CompilerGeneratedAttribute(),  _
-     Global.System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.5.0.0"),  _
+     Global.System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.7.0.0"),  _
      Global.System.ComponentModel.EditorBrowsableAttribute(Global.System.ComponentModel.EditorBrowsableState.Advanced)>  _
     Partial Public NotInheritable Class MySettings
         Inherits Global.System.Configuration.ApplicationSettingsBase
@@ -56,7 +56,7 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("http://api.openstreetmap.org/api/0.6/")>  _
+         Global.System.Configuration.DefaultSettingValueAttribute("https://api.openstreetmap.org/api/0.6/")>  _
         Public Property OSMBaseApiURL() As String
             Get
                 Return CType(Me("OSMBaseApiURL"),String)
@@ -114,7 +114,7 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("http://www.openstreetmap.org/{type}/{id}")>  _
+         Global.System.Configuration.DefaultSettingValueAttribute("https://www.openstreetmap.org/{type}/{id}")>  _
         Public Property OSMBrowseBaseURL() As String
             Get
                 Return CType(Me("OSMBrowseBaseURL"),String)
@@ -162,7 +162,7 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("http://www.openstreetmap.org/#map={zoom}/{lat}/{lon}")>  _
+         Global.System.Configuration.DefaultSettingValueAttribute("https://www.openstreetmap.org/#map={zoom}/{lat}/{lon}")>  _
         Public Property OSMBrowseLatLon() As String
             Get
                 Return CType(Me("OSMBrowseLatLon"),String)
@@ -186,7 +186,7 @@ Namespace My
         
         <Global.System.Configuration.UserScopedSettingAttribute(),  _
          Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.Configuration.DefaultSettingValueAttribute("http://www.openstreetmap.org/edit#map={zoom}/{lat}/{lon}")>  _
+         Global.System.Configuration.DefaultSettingValueAttribute("https://www.openstreetmap.org/edit#map={zoom}/{lat}/{lon}")>  _
         Public Property OSMEditLatLon() As String
             Get
                 Return CType(Me("OSMEditLatLon"),String)

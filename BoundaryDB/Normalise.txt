@@ -1,0 +1,35 @@
+﻿# regex replacements to normalise boundary names
+# NB: the input has already been lower-cased, so all strings in this file should be in LC
+# lines are of the form:
+#  <regex>|<replacement>
+# to use a pipe character in either string, use a backslash to escape it, i.e. \|
+# lines are applied in order!
+# spaces (including leading and trailing) are significant in this file!
+# the final result has multiple spaces replaced with single spaces, and leading and trailing spaces removed.
+# blank lines, and lines starting with #, are ignored
+
+london borough of |
+royal borough of |
+city of |
+ cp|
+ civil parish|
+district of |
+borough of |
+parish of |
+ county council|
+ district council|
+ borough council|
+ city council|
+ district|
+ borough|
+ parish|
+ community|
+ tc|
+\.|
+'|
+,|
+\(.*|
+-| 
+hertfordshire|herts
+saint |st 
+&| and 

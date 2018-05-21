@@ -78,15 +78,20 @@ Public Class OSMRetriever
             End Select
         End Function
         Public Function GetOSMObjectHistory(xType As OSMObject.ObjectType, lRef As Long, Optional bFull As Boolean = False) As OSMObject
-            Dim xObj As OSMObject
-            Dim xWay As OSMWay
-            Dim xNode As OSMNode
-            Dim xDoc As OSMDoc
-            Dim xDoc2 As OSMDoc
-            ' this just gets the history of the object itself, not the referenced ways and nodes
-            xDoc = API.GetOSMObjectHistory(xType, lRef)
-
-            Return xObj
+        Dim xObj As OSMObject = Nothing
+        Dim xDoc As OSMDoc
+        ' this just gets the history of the object itself, not the referenced ways and nodes
+        xDoc = API.GetOSMObjectHistory(xType, lRef)
+        If xDoc Is Nothing Then Return Nothing
+        Select Case xType
+            Case OSMObject.ObjectType.Relation
+                xObj = xDoc.Relations(lRef)
+            Case OSMObject.ObjectType.Way
+                xObj = xDoc.Ways(lRef)
+            Case OSMObject.ObjectType.Node
+                xObj = xDoc.Nodes(lRef)
+        End Select
+        Return xObj
         End Function
         Public Function GetOSMObjectHistoryFull(xType As OSMObject.ObjectType, lRef As Long) As OSMDoc
             Dim xWay As OSMWay

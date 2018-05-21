@@ -358,11 +358,11 @@ function drawJSON(j, id) {
         if (adminLevel == 10) {
             if (arg.properties.council_style == "town") {
                 opts = townOptions;
-            } else if (arg.properties.council_style == "city" || arg.properties.council_style == "city_and_county" || arg.properties.council_style == "city_and_district") {
+            } else if (arg.properties.council_style === "city" || arg.properties.council_style === "city_and_county" || arg.properties.council_style === "city_and_district") {
                 opts = cityOptions;
-            } else if (arg.properties.parish_type == "parish_meeting") {
+            } else if (arg.properties.parish_type === "parish_meeting" || arg.properties.parish_type === "joint_parish_meeting") {
                 opts = pmeetingOptions;
-            } else if (arg.properties.parish_type == "parish_group") { // magic value
+            } else if (arg.properties.parish_type === "parish_group") { // magic value
                 opts = groupOptions;
                 isParishGroup = true;
             }

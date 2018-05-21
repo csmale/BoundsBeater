@@ -283,6 +283,10 @@ Public Class frmAnalyze
             sName = $"{sName} ({xItem.Name2})"
             ' sName = sName & " (" & xItem.Name2 & ")"
         End If
+        If xItem.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish Then
+            If xItem.LandsCommon.Count > 0 Then sName &= "*"
+            If xItem.DetachedAreas.Count > 0 Then sName &= "+"
+        End If
         Return sName
     End Function
 #If False Then
@@ -324,18 +328,6 @@ Public Class frmAnalyze
             Exit Sub
         End If
 
-        sCache = System.Environment.ExpandEnvironmentVariables(My.Settings.OSMCache)
-        If Len(sCache) > 0 Then
-            If System.IO.File.Exists(sCache) Then
-                tmpDoc = New OSMDoc()
-                If bLargeCache Then
-                    tmpDoc.LoadBigXML(sCache)
-                Else
-                    tmpDoc.Load(sCache)
-                End If
-            End If
-        End If
-
         Dim x As New BoundaryDB
         Dim s As String = Await loadxml(sDB, x)
 
@@ -348,6 +340,20 @@ Public Class frmAnalyze
 
         xDB = x
         sDBPath = sDB
+        Application.DoEvents()
+
+        sCache = System.Environment.ExpandEnvironmentVariables(My.Settings.OSMCache)
+        If Len(sCache) > 0 Then
+            If System.IO.File.Exists(sCache) Then
+                tmpDoc = New OSMDoc()
+                If bLargeCache Then
+                    tmpDoc.LoadBigXML(sCache)
+                Else
+                    tmpDoc.Load(sCache)
+                End If
+            End If
+        End If
+
     End Sub
 
     Delegate Sub doit(s As String)
@@ -462,11 +468,13 @@ Public Class frmAnalyze
         ShowJSON(sJSON, RelationLabel(xRel))
     End Sub
     Private Sub ZoomToLayer(uid As String)
+        If Not bMapInitDone Then Exit Sub
         Dim xArgs(1) As Object
         xArgs(0) = uid
         wbMap.Document.InvokeScript("zoomToLayer", xArgs)
     End Sub
     Private Sub ShowJSON(sJSON As String, uid As String)
+        If Not bMapInitDone Then Exit Sub
         Dim xArgs(2) As Object
         If Len(sJSON) > 0 Then
             xArgs(0) = sJSON
@@ -475,17 +483,20 @@ Public Class frmAnalyze
         End If
     End Sub
     Private Sub GotoLatLong(Lat As Double, Lon As Double)
+        If Not bMapInitDone Then Exit Sub
         Dim xArgs(2) As Object
         xArgs(0) = Lat
         xArgs(1) = Lon
         wbMap.Document.InvokeScript("gotoLatLon", xArgs)
     End Sub
     Private Sub GotoZoom(Zoom As Integer)
+        If Not bMapInitDone Then Exit Sub
         Dim xArgs(1) As Object
         xArgs(0) = Zoom
         wbMap.Document.InvokeScript("gotoZoom", xArgs)
     End Sub
     Private Sub GotoPanZoom(Lat As Double, Lon As Double, Zoom As Integer)
+        If Not bMapInitDone Then Exit Sub
         Dim xArgs(3) As Object
         xArgs(0) = Lat
         xArgs(1) = Lon
@@ -639,6 +650,9 @@ Public Class frmAnalyze
             If xChild.Tag Is Nothing Then Continue For
             p = DirectCast(xChild.Tag, BoundaryDB.BoundaryItem)
             If p.IsDeleted Then Continue For
+            If p.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish _
+                AndAlso (p.ParishType = BoundaryDB.BoundaryItem.ParishTypes.PT_DetachedArea _
+                OrElse p.ParishType = BoundaryDB.BoundaryItem.ParishTypes.PT_LandsCommon) Then Continue For
             iChild = p.OSMRelation
             If iChild > 0 Then
                 ShowRelation(iChild)
@@ -750,10 +764,6 @@ Public Class frmAnalyze
             tvList.SelectedNode = e.Node
             bInRightClick = False
         End If
-    End Sub
-
-    Private Sub btnClear_Click(sender As Object, e As EventArgs)
-
     End Sub
 
     Private Sub tsmiChildReport_Click(sender As Object, e As EventArgs) Handles tsmiChildReport.Click
@@ -956,13 +966,17 @@ Public Class frmAnalyze
             Return
         End If
         Dim n As TreeNode = e.Node
+        ExpandNode(n)
+    End Sub
+
+    Private Sub ExpandNode(n As TreeNode)
         Dim xItem As BoundaryDB.BoundaryItem = DirectCast(n.Tag, BoundaryDB.BoundaryItem)
         If n.Nodes.Count <> 1 Then Return
         If n.Nodes(0).Text <> DUMMY_MARKER Then Return
         n.Nodes(0).Remove()
         LoadTreeNode(tvList, n, xItem)
-        ' tvList.Sort()
     End Sub
+
     Private Sub LoadTreeNodeText(tvn As TreeNode)
         Dim iCount As Integer, iCountOSM As Integer
         Dim sName As String
@@ -985,7 +999,7 @@ Public Class frmAnalyze
             tvn.NodeFont = fntBold
         Else
             If xItem.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_ParishGroup Then
-                Dim parts = xDB.GetGroupedParishes(xItem)
+                Dim parts = xItem.GroupMembers
                 If parts Is Nothing Then
                     tvn.NodeFont = fntNormal
                 Else
@@ -1084,7 +1098,7 @@ Public Class frmAnalyze
         Dim xResolver As OSMResolver = Nothing
         Dim parts As List(Of BoundaryDB.BoundaryItem)
 
-        parts = xDB.GetGroupedParishes(xItem)
+        parts = xItem.GroupMembers
         If parts Is Nothing Then Return Nothing
 
         For Each d In parts
@@ -1152,6 +1166,7 @@ Public Class frmAnalyze
         Dim iWidth As Integer
         Dim sTmp As String
         Dim aTmp() As String
+        lvSearchResults.Visible = False
         ' column width
         sTmp = My.Settings.ListColumnWidth
         aTmp = Split(sTmp, ",")
@@ -1689,6 +1704,110 @@ Public Class frmAnalyze
 
     Private Sub tsmiSearch_ButtonClick(sender As Object, e As EventArgs) Handles tsmiSearch.ButtonClick
         DoSearch(False)
+    End Sub
+
+    Private Sub btnParent_Click(sender As Object, e As EventArgs) Handles btnParent.Click
+        Dim i As TreeNode = tvList.SelectedNode
+        If i Is Nothing Then Return
+        Dim p As TreeNode = i.Parent
+        If p Is Nothing Then Return
+        Dim bnd As BoundaryDB.BoundaryItem = DirectCast(p.Tag, BoundaryDB.BoundaryItem)
+        If bnd Is Nothing Then Return
+        tvList.SelectedNode = p
+    End Sub
+    Private Sub tsmiSearchText_GotFocus(sender As Object, e As EventArgs) Handles tsmiSearchText.GotFocus
+        lvSearchResults.SelectedItems.Clear()
+        lvSearchResults.Visible = True
+    End Sub
+    Private Sub tsmiSearchText_LostFocus(sender As Object, e As EventArgs) Handles tsmiSearchText.LostFocus
+        ' lvSearchResults.Visible = False
+    End Sub
+    Private Sub InstantSearch(s As String)
+        Dim maxHits As Integer = My.Settings.InstantSearchCount
+        If maxHits < 1 Or maxHits > 1000 Then maxHits = 10
+        Dim re As New RegularExpressions.Regex(s, RegularExpressions.RegexOptions.IgnoreCase)
+        lvSearchResults.Items.Clear()
+        For Each b In xDB.Items.Values
+            If re.IsMatch(b.Name) Then
+                Dim p As BoundaryDB.BoundaryItem = b.Parent
+                With lvSearchResults.Items.Add(b.TypeCode)
+                    .SubItems.Add(b.Name)
+                    .SubItems.Add(p.Name)
+                    .Tag = b
+                End With
+                If lvSearchResults.Items.Count >= maxHits Then Exit Sub
+            End If
+        Next
+    End Sub
+
+    Private Sub tsmiSearchText_TextChanged(sender As Object, e As EventArgs) Handles tsmiSearchText.TextChanged
+        If xDB Is Nothing Then Exit Sub
+        InstantSearch(tsmiSearchText.Text)
+    End Sub
+
+    Private Sub tsmiSearchText_KeyUp(sender As Object, e As KeyEventArgs) Handles tsmiSearchText.KeyUp
+        If e.KeyCode = Keys.Escape Then lvSearchResults.Visible = False
+    End Sub
+
+    Private Sub frmAnalyze_KeyDown(sender As Object, e As KeyEventArgs) Handles Me.KeyDown
+        If e.KeyCode = Keys.Escape Then lvSearchResults.Visible = False
+    End Sub
+
+    Private Sub lvSearchResults_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lvSearchResults.SelectedIndexChanged
+        If lvSearchResults.SelectedItems.Count = 1 Then
+            Dim b As BoundaryDB.BoundaryItem = DirectCast(lvSearchResults.SelectedItems(0).Tag, BoundaryDB.BoundaryItem)
+            Dim s As String = b.Name
+            lvSearchResults.Visible = False
+            ' MsgBox($"Selected {s}")
+            ShowBoundaryItem(b)
+        End If
+    End Sub
+    Private Sub ShowBoundaryItem(bi As BoundaryDB.BoundaryItem)
+        Dim lvls As New List(Of BoundaryDB.BoundaryItem)
+        Dim b As BoundaryDB.BoundaryItem = bi
+        Do
+            If b.BoundaryType <> BoundaryDB.BoundaryItem.BoundaryTypes.BT_Country Then
+                lvls.Add(b)
+            End If
+            b = b.Parent
+        Loop Until b Is Nothing
+        lvls.Reverse()
+        ' first in list is top level
+        Dim tn As TreeNode = tvList.Nodes.Item(0)
+        While tn.Parent IsNot Nothing
+            tn = tn.Parent
+        End While
+        ' select nation node
+        Dim tbi As BoundaryDB.BoundaryItem
+        For Each n As TreeNode In tvList.Nodes
+            If n.Level = 0 Then
+                tbi = DirectCast(n.Tag, BoundaryDB.BoundaryItem)
+                If tbi Is lvls(0) Then
+                    tn = n
+                    lvls.Remove(lvls(0))
+                End If
+            End If
+        Next
+        ' unless we were looking for the nation node, drill down
+        If DirectCast(tn.Tag, BoundaryDB.BoundaryItem) IsNot bi Then
+            For Each b In lvls
+                ExpandNode(tn)
+                For Each t As TreeNode In tn.Nodes
+                    tbi = DirectCast(t.Tag, BoundaryDB.BoundaryItem)
+                    If tbi Is Nothing Then Continue For
+                    If tbi Is b Then
+                        bAllowExpandCollapse = True
+                        tn.Expand()
+                        tn = t
+                        Exit For
+                    End If
+                Next
+            Next
+        End If
+        If tn IsNot Nothing Then
+            tn.EnsureVisible()
+            tvList.SelectedNode = tn
+        End If
     End Sub
 End Class
 

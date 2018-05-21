@@ -236,11 +236,12 @@ Public Class OSMApi
 
                 If resp.StatusCode = HttpStatusCode.Moved Or resp.StatusCode = HttpStatusCode.MovedPermanently Then
                     nRedirect = nRedirect + 1
-                    If nRedirect >= MaxRedirect Then
-                        _LastError = "Too many redirects"
-                        Throw New WebException("Too many redirects")
-                    End If
-                    req = DirectCast(GetNewRequest(resp.GetResponseHeader("Location")), HttpWebRequest)
+                If nRedirect >= MaxRedirect Then
+                    _LastError = "Too many redirects"
+                    Throw New WebException("Too many redirects")
+                End If
+                Debug.Print($"Redirecting to {resp.GetResponseHeader("Location")}")
+                req = DirectCast(GetNewRequest(resp.GetResponseHeader("Location")), HttpWebRequest)
                     AuthUri = New Uri(resp.GetResponseHeader("Location"))
                     If Credentials IsNot Nothing Then
                         If CredentialCache.GetCredential(AuthUri, "Basic") Is Nothing Then

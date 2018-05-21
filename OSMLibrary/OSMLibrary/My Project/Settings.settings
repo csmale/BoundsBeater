@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="OSMBaseApiURL" Type="System.String" Scope="User">
-      <Value Profile="(Default)">http://api.openstreetmap.org/api/0.6/</Value>
+      <Value Profile="(Default)">https://api.openstreetmap.org/api/0.6/</Value>
     </Setting>
     <Setting Name="OSMLibUserAgent" Type="System.String" Scope="User">
       <Value Profile="(Default)">OSMLibrary/1.0; colin.smale@xs4all.nl</Value>
@@ -23,7 +23,7 @@
       <Value Profile="(Default)">30000</Value>
     </Setting>
     <Setting Name="OSMBrowseBaseURL" Type="System.String" Scope="User">
-      <Value Profile="(Default)">http://www.openstreetmap.org/{type}/{id}</Value>
+      <Value Profile="(Default)">https://www.openstreetmap.org/{type}/{id}</Value>
     </Setting>
     <Setting Name="APIUser" Type="System.String" Scope="User">
       <Value Profile="(Default)">colin.smale@xs4all.nl</Value>
@@ -35,13 +35,13 @@
       <Value Profile="(Default)">.\osmconvert\osmconvert64-0.8.8p.exe</Value>
     </Setting>
     <Setting Name="OSMBrowseLatLon" Type="System.String" Scope="User">
-      <Value Profile="(Default)">http://www.openstreetmap.org/#map={zoom}/{lat}/{lon}</Value>
+      <Value Profile="(Default)">https://www.openstreetmap.org/#map={zoom}/{lat}/{lon}</Value>
     </Setting>
     <Setting Name="OSMBrowseZoom" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">13</Value>
     </Setting>
     <Setting Name="OSMEditLatLon" Type="System.String" Scope="User">
-      <Value Profile="(Default)">http://www.openstreetmap.org/edit#map={zoom}/{lat}/{lon}</Value>
+      <Value Profile="(Default)">https://www.openstreetmap.org/edit#map={zoom}/{lat}/{lon}</Value>
     </Setting>
     <Setting Name="MinEditZoom" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">13</Value>

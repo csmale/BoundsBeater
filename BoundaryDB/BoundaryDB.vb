@@ -1,4 +1,5 @@
 ﻿Imports System.Configuration
+Imports System.Text.RegularExpressions
 Imports System.Xml
 Imports System.Xml.XPath
 Imports OSMLibrary
@@ -13,6 +14,12 @@ Public Class BoundaryDB
     Private _root As BoundaryItem
     Private _ChangedItems As List(Of BoundaryItem)
     Private Const DeletedAttribute As String = "deleted"
+    Private Shared NormaliseRegexps As New ArrayList
+    Private Structure NormStuff
+        Public re As Regex
+        Public repl As String
+    End Structure
+    Private Const NormaliseFile As String = "Normalise.txt"
 
     Public ReadOnly Property ChangedItems As List(Of BoundaryItem)
         Get
@@ -22,10 +29,12 @@ Public Class BoundaryDB
     Public Sub New()
         _root = New BoundaryItem(Me)
         _root.Parent = Nothing
+        GetNormaliseData
     End Sub
     Public Sub New(sFile As String)
         _root = New BoundaryItem(Me)
         _root.Parent = Nothing
+        GetNormaliseData()
         LoadFromFile(sFile)
     End Sub
     Public ReadOnly Property Root As BoundaryItem
@@ -33,6 +42,58 @@ Public Class BoundaryDB
             Return _root
         End Get
     End Property
+    Private Sub GetNormaliseData()
+        Dim sLine As String
+        Dim sDir As String
+        Dim iHash As Integer
+        Dim sPattern As String
+        Dim sReplacement As String
+        Const DummyChar As Char = ChrW(1)
+        Dim re As Regex
+        Dim ns As NormStuff
+        sDir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)
+
+        Dim f As System.IO.StreamReader
+        Try
+            f = My.Computer.FileSystem.OpenTextFileReader(System.IO.Path.Combine(sDir, NormaliseFile))
+        Catch e As Exception
+            MsgBox($"Error opening normalisation rules file: {e.Message}")
+            Return
+        End Try
+
+        Dim iLineNum As Integer = 0
+        Try
+            While Not f.EndOfStream
+                iLineNum += 1
+                sLine = f.ReadLine
+                iHash = InStr(sLine, "#")
+                If iHash > 0 Then sLine = Left(sLine, iHash - 1)
+                If Len(Trim(sLine)) = 0 Then Continue While
+                sLine = Replace(sLine, "\|", DummyChar)
+                Dim a = Split(sLine, "|")
+                sPattern = a(0)
+                If a.Length > 1 Then
+                    sReplacement = a(1)
+                    If sReplacement Is Nothing Then sReplacement = ""
+                Else
+                    sReplacement = ""
+                End If
+                sPattern = Replace(sPattern, DummyChar, "|")
+                sReplacement = Replace(sReplacement, DummyChar, "|")
+                If sReplacement Is Nothing Then sReplacement = ""
+                re = New Regex(sPattern)
+                ns = New NormStuff With {
+                    .re = re,
+                    .repl = sReplacement
+                }
+                NormaliseRegexps.Add(ns)
+            End While
+        Catch e As Exception
+            MsgBox($"Error at line {iLineNum} of normalisation rules: {e.Message}")
+        Finally
+            f.Close()
+        End Try
+    End Sub
     Public Function LoadFromFile(sFile As String) As Boolean
         xDoc = New XmlDocument
         ' xDoc.PreserveWhitespace = True
@@ -118,18 +179,6 @@ Public Class BoundaryDB
             sTmp = Left(sTmp, 1) & Mid(sTmp, 6)
         End If
         Return Left(sTmp, 5)
-    End Function
-    Public Function GetGroupedParishes(bi As BoundaryItem) As List(Of BoundaryItem)
-        If bi Is Nothing Then Return Nothing
-        If bi.BoundaryType <> BoundaryItem.BoundaryTypes.BT_ParishGroup Then Return Nothing
-
-        Dim a As New List(Of BoundaryItem)
-        For Each x As BoundaryItem In Items.Values
-            If x.BoundaryType <> BoundaryItem.BoundaryTypes.BT_CivilParish Then Continue For
-            If x.ParishType <> BoundaryItem.ParishTypes.PT_JointParishCouncil AndAlso x.ParishType <> BoundaryItem.ParishTypes.PT_JointParishMeeting Then Continue For
-            If x.CouncilName = bi.CouncilName Then a.Add(x)
-        Next
-        Return a
     End Function
     Public Function UpdateFromOSMFile(sFile As String) As Boolean
         Dim xRdr As XmlTextReader
@@ -274,7 +323,13 @@ Public Class BoundaryDB
         Public Property Name As String
         Public Property Name2 As String
         Public Enum BoundaryTypes
+            ''' <summary>
+            ''' Unknown Boundary Type
+            ''' </summary>
             BT_Unknown
+            ''' <summary>
+            ''' Country - probably Great Britain or United Kingdom
+            ''' </summary>
             BT_Country
             BT_Nation
             BT_Region
@@ -317,6 +372,7 @@ Public Class BoundaryDB
             PT_JointParishMeeting
             PT_LandsCommon
             PT_CommunityCouncil
+            PT_DetachedArea
             PT_NA
         End Enum
         Public Enum LeadershipTypes
@@ -336,6 +392,22 @@ Public Class BoundaryDB
         Public Property Website As String
         Public Property Prefix As String
         Public Property IsDeleted As Boolean
+        ' election cycles
+        ''' <summary>
+        ''' Number of years in an electoral cycle
+        ''' </summary>
+        ''' <returns>Usually 4</returns>
+        Public Property ElectionCycle As Integer
+        ''' <summary>
+        ''' Fraction of the council which is elected at each election
+        ''' </summary>
+        ''' <returns>1 (whole council),2 (by halves),3 (by thirds)</returns>
+        Public Property ElectionFraction As Integer
+        ''' <summary>
+        ''' Value of (year MOD ElectionCycle) when (first) election is held
+        ''' </summary>
+        ''' <returns>0..(ElectionCycle -1)</returns>
+        Public Property ElectionCycleStartMod As Integer
         Private _BoundaryType As BoundaryTypes
         Private Shared _mapBTString As Dictionary(Of BoundaryTypes, String)
         Private Shared _mapStringBT As Dictionary(Of String, BoundaryTypes)
@@ -437,6 +509,82 @@ Public Class BoundaryDB
                 Return GSSPrefixForBoundaryType(_BoundaryType)
             End Get
         End Property
+        Private _LandsCommonIDs As New List(Of String)
+        ''' <summary>
+        ''' For a civil parish, returns the LCP items if any which are part of this parish
+        ''' </summary>
+        ''' <returns>List(Of BoundaryItem)</returns>
+        Public ReadOnly Property LandsCommon As List(Of BoundaryItem)
+            Get
+                Dim a As New List(Of BoundaryItem)
+                For Each s In _LandsCommonIDs
+                    If _bdb.Items.ContainsKey(s) Then
+                        Dim i = _bdb.Items(s)
+                        If i.BoundaryType = BoundaryTypes.BT_CivilParish _
+                            AndAlso i.ParishType = ParishTypes.PT_LandsCommon Then
+                            a.Add(i)
+                        End If
+                    End If
+                Next
+                Return a
+            End Get
+        End Property
+        Public Sub AddLandsCommon(LCP As BoundaryItem)
+            If Not _LandsCommonIDs.Contains(LCP.ONSCode) Then _LandsCommonIDs.Add(LCP.ONSCode)
+        End Sub
+        Public Sub RemoveLandsCommon(LCP As BoundaryItem)
+            If _LandsCommonIDs.Contains(LCP.ONSCode) Then _LandsCommonIDs.Remove(LCP.ONSCode)
+        End Sub
+        Public Sub SetLandsCommon(LCPs As List(Of String))
+            _LandsCommonIDs.Clear()
+            For Each s In LCPs
+                _LandsCommonIDs.Add(s)
+            Next
+        End Sub
+        Public Sub SetLandsCommon(LCPs As List(Of BoundaryItem))
+            _LandsCommonIDs.Clear()
+            For Each i In LCPs
+                _LandsCommonIDs.Add(i.ONSCode)
+            Next
+        End Sub
+        Private _DetachedAreaIDs As New List(Of String)
+        ''' <summary>
+        ''' For a civil parish, returns the DET items if any which are part of this parish
+        ''' </summary>
+        ''' <returns>List(Of BoundaryItem)</returns>
+        Public ReadOnly Property DetachedAreas As List(Of BoundaryItem)
+            Get
+                Dim a As New List(Of BoundaryItem)
+                For Each s In _DetachedAreaIDs
+                    If _bdb.Items.ContainsKey(s) Then
+                        Dim i = _bdb.Items(s)
+                        If i.BoundaryType = BoundaryTypes.BT_CivilParish _
+                            AndAlso i.ParishType = ParishTypes.PT_DetachedArea Then
+                            a.Add(i)
+                        End If
+                    End If
+                Next
+                Return a
+            End Get
+        End Property
+        Public Sub AddDetachedArea(Det As BoundaryItem)
+            If Not _DetachedAreaIDs.Contains(Det.ONSCode) Then _DetachedAreaIDs.Add(Det.ONSCode)
+        End Sub
+        Public Sub RemoveDetachedArea(Det As BoundaryItem)
+            If _DetachedAreaIDs.Contains(Det.ONSCode) Then _DetachedAreaIDs.Remove(Det.ONSCode)
+        End Sub
+        Public Sub SetDetachedAreas(Dets As List(Of String))
+            _DetachedAreaIDs.Clear()
+            For Each s In Dets
+                _DetachedAreaIDs.Add(s)
+            Next
+        End Sub
+        Public Sub SetDetachedAreas(Dets As List(Of BoundaryItem))
+            _DetachedAreaIDs.Clear()
+            For Each i In Dets
+                _DetachedAreaIDs.Add(i.ONSCode)
+            Next
+        End Sub
         Public ParentCode As String
         Public OSMRelation As Long
         Public AdminLevel As Integer
@@ -508,6 +656,72 @@ Public Class BoundaryDB
                 Return count
             End Get
         End Property
+        Public ReadOnly Property HasElections As Boolean
+            Get
+                Select Case BoundaryType
+                    Case BoundaryTypes.BT_CivilParish,
+                         BoundaryTypes.BT_Community,
+                         BoundaryTypes.BT_LondonBorough,
+                         BoundaryTypes.BT_MetroDistrict,
+                         BoundaryTypes.BT_NIreDistrict,
+                         BoundaryTypes.BT_NonMetroCounty,
+                         BoundaryTypes.BT_NonMetroDistrict,
+                         BoundaryTypes.BT_ParishGroup,
+                         BoundaryTypes.BT_PrincipalArea,
+                         BoundaryTypes.BT_ScotCouncil,
+                         BoundaryTypes.BT_SuiGeneris
+                    Case Else
+                        Return False
+                End Select
+                If BoundaryType = BoundaryTypes.BT_CivilParish OrElse BoundaryType = BoundaryTypes.BT_ParishGroup Then
+                    If ParishType = ParishTypes.PT_ParishCouncil Then
+                        Return True
+                    End If
+                    Return False
+                End If
+                Return True
+            End Get
+        End Property
+        Public ReadOnly Property NextElection As Date
+            Get
+                ' start of current cycle
+                Dim iYear As Integer = NextElectionCycleYear - ElectionCycle
+                Return FirstThursdayInMay(Now().Year)
+            End Get
+        End Property
+        Public Shared ReadOnly Property FirstThursdayInMay(iYear As Integer) As Date
+            Get
+                Dim iDate As Date = New Date(iYear, 5, 1) ' 1st of may
+                Select Case iDate.DayOfWeek
+                    Case DayOfWeek.Friday
+                        iDate = iDate.AddDays(6)
+                    Case DayOfWeek.Saturday
+                        iDate = iDate.AddDays(5)
+                    Case DayOfWeek.Sunday
+                        iDate = iDate.AddDays(4)
+                    Case DayOfWeek.Monday
+                        iDate = iDate.AddDays(3)
+                    Case DayOfWeek.Tuesday
+                        iDate = iDate.AddDays(2)
+                    Case DayOfWeek.Wednesday
+                        iDate = iDate.AddDays(1)
+                End Select
+                Return iDate
+            End Get
+        End Property
+        Public ReadOnly Property NextElectionCycleYear As Integer
+            Get
+                If ElectionCycle = 0 Then Return 0
+                Dim iDate As Date = Now()
+                Dim iYear As Integer = iDate.Year
+                ' if we are past e-day, add a year
+                If iDate > FirstThursdayInMay(iYear) Then iYear += 1
+                ' roll forward to next cycle year
+                Dim iCycleYear As Integer = (iYear Mod ElectionCycle) + ElectionCycle
+
+                Return iYear + ElectionCycle - iCycleYear + ElectionCycleStartMod
+            End Get
+        End Property
         Public ReadOnly Property TypeCode As String
             Get
                 Return _btcode
@@ -548,7 +762,7 @@ Public Class BoundaryDB
                     BoundaryType = BoundaryTypes.BT_Community
                 End If
             End If
-                CouncilStyle = CouncilStyle_FromString(NodeText(xBnd.SelectSingleNode("council_style")))
+            CouncilStyle = CouncilStyle_FromString(NodeText(xBnd.SelectSingleNode("council_style")))
             sTmp = NodeText(xBnd.SelectSingleNode("osmid"))
             If Left(sTmp, 1) = "r" Then
                 OSMRelation = CLng(Mid(sTmp, 2))
@@ -590,6 +804,40 @@ Public Class BoundaryDB
             Double.TryParse(NodeText(xBnd.SelectSingleNode("lat")), Lat)
             Double.TryParse(NodeText(xBnd.SelectSingleNode("lon")), Lon)
             Website = NodeText(xBnd.SelectSingleNode("website"))
+            ' Electoral cycle
+            sTmp = NodeText(xBnd.SelectSingleNode("election_cycle"))
+            If Integer.TryParse(sTmp, ElectionCycle) Then
+                If ElectionCycle < 0 Or ElectionCycle > 4 Then ElectionCycle = 4
+            Else
+                ElectionCycle = 4
+            End If
+            sTmp = NodeText(xBnd.SelectSingleNode("election_fraction"))
+            If Integer.TryParse(sTmp, ElectionFraction) Then
+                If ElectionFraction < 1 Or ElectionFraction > 3 Then ElectionFraction = 1
+            Else
+                ElectionFraction = 1
+            End If
+            sTmp = NodeText(xBnd.SelectSingleNode("election_mod"))
+            If Integer.TryParse(sTmp, ElectionCycleStartMod) Then
+                If ElectionCycleStartMod < 0 Or ElectionCycleStartMod > (ElectionCycle - 1) Then ElectionCycleStartMod = 0
+            Else
+                ElectionCycleStartMod = 0
+            End If
+
+            If BoundaryType = BoundaryTypes.BT_CivilParish Then
+                For Each x In xBnd.SelectNodes("lands_common")
+                    sTmp = DirectCast(x, XmlElement).GetAttribute("gss")
+                    If Len(sTmp) > 0 Then
+                        _LandsCommonIDs.Add(sTmp)
+                    End If
+                Next
+                For Each x In xBnd.SelectNodes("detached_area")
+                    sTmp = DirectCast(x, XmlElement).GetAttribute("gss")
+                    If Len(sTmp) > 0 Then
+                        _DetachedAreaIDs.Add(sTmp)
+                    End If
+                Next
+            End If
             _xNode = xBnd
             Return True
         End Function
@@ -746,6 +994,7 @@ Public Class BoundaryDB
                 Case ParishTypes.PT_JointParishMeeting : sTmp = "joint_parish_meeting"
                 Case ParishTypes.PT_LandsCommon : sTmp = "lands_common"
                 Case ParishTypes.PT_CommunityCouncil : sTmp = "community_council"
+                Case ParishTypes.PT_DetachedArea : sTmp = "detached_area"
                 Case ParishTypes.PT_NA : sTmp = ""
                 Case Else
                     sTmp = ""
@@ -767,6 +1016,8 @@ Public Class BoundaryDB
                     xRet = ParishTypes.PT_LandsCommon
                 Case "community_council"
                     xRet = ParishTypes.PT_CommunityCouncil
+                Case "detached_area"
+                    xRet = ParishTypes.PT_DetachedArea
                 Case ""
                     xRet = ParishTypes.PT_ParishCouncil
                 Case Else
@@ -824,7 +1075,66 @@ Public Class BoundaryDB
             SetValue(_xNode, "lat", Lat.ToString)
             SetValue(_xNode, "lon", Lon.ToString)
             SetValue(_xNode, "website", Website)
+            SetValue(_xNode, "election_cycle", ElectionCycle.ToString)
+            SetValue(_xNode, "election_fraction", ElectionFraction.ToString)
+            SetValue(_xNode, "election_mod", ElectionCycleStartMod.ToString)
             SetValue(_xNode, "notes", Notes)
+            UpdateLCPs(_xNode)
+            UpdateDetachedAreas(_xNode)
+        End Sub
+        Private Sub UpdateLCPs(_xNode As XmlElement)
+            ' if list of lcps has changed
+            ' get list of what is in the xml
+            Dim xList As New List(Of String)
+            For Each x In _xNode.SelectNodes("lands_common")
+                xList.Add(DirectCast(x, XmlElement).GetAttribute("gss"))
+            Next
+            ' remove items in our list
+            For Each s In _LandsCommonIDs
+                If xList.Contains(s) Then
+                    xList.Remove(s)
+                Else
+                    Dim xChild = _xNode.OwnerDocument.CreateElement("lands_common")
+                    DirectCast(xChild, XmlElement).SetAttribute("gss", s)
+                    _xNode.AppendChild(xChild)
+                    _bdb.bChanges = True
+                End If
+            Next
+            ' if there are any left in the list from the xml, they need removing from the xml
+            For Each s In xList
+                Dim xChild = _xNode.SelectSingleNode($"lands_common[@gss='{s}']")
+                If xChild IsNot Nothing Then
+                    _xNode.RemoveChild(xChild)
+                    _bdb.bChanges = True
+                End If
+            Next
+        End Sub
+        Private Sub UpdateDetachedAreas(_xNode As XmlElement)
+            ' if list of lcps has changed
+            ' get list of what is in the xml
+            Dim xList As New List(Of String)
+            For Each x In _xNode.SelectNodes("detached_area")
+                xList.Add(DirectCast(x, XmlElement).GetAttribute("gss"))
+            Next
+            ' remove items in our list
+            For Each s In _DetachedAreaIDs
+                If xList.Contains(s) Then
+                    xList.Remove(s)
+                Else
+                    Dim xChild = _xNode.OwnerDocument.CreateElement("detached_area")
+                    DirectCast(xChild, XmlElement).SetAttribute("gss", s)
+                    _xNode.AppendChild(xChild)
+                    _bdb.bChanges = True
+                End If
+            Next
+            ' if there are any left in the list from the xml, they need removing from the xml
+            For Each s In xList
+                Dim xChild = _xNode.SelectSingleNode($"detached_area[@gss='{s}']")
+                If xChild IsNot Nothing Then
+                    _xNode.RemoveChild(xChild)
+                    _bdb.bChanges = True
+                End If
+            Next
         End Sub
         Private Sub SetValue(xNode As XmlElement, sKey As String, sValue As String)
             Dim xChild As XmlElement = DirectCast(xNode.SelectSingleNode(sKey), XmlElement)
@@ -845,8 +1155,19 @@ Public Class BoundaryDB
                 _bdb.bChanges = True
             End If
         End Sub
+        Public ReadOnly Property GroupMembers() As List(Of BoundaryItem)
+            Get
+                If Me.BoundaryType <> BoundaryItem.BoundaryTypes.BT_ParishGroup Then Return Nothing
+                Dim a As New List(Of BoundaryItem)
+                For Each x As BoundaryItem In _bdb.Items.Values
+                    If x.BoundaryType <> BoundaryItem.BoundaryTypes.BT_CivilParish Then Continue For
+                    If x.ParishType <> BoundaryItem.ParishTypes.PT_JointParishCouncil AndAlso x.ParishType <> BoundaryItem.ParishTypes.PT_JointParishMeeting Then Continue For
+                    If x.CouncilName = CouncilName Then a.Add(x)
+                Next
+                Return a
+            End Get
+        End Property
     End Class
-
 
     Private Shared Function NodeText(xNode As XmlNode) As String
         If IsNothing(xNode) Then
@@ -954,7 +1275,7 @@ Public Class BoundaryDB
                             bChanges = True
                         End If
                     End If
-                    End If
+                End If
                 If bAbort Then Exit For
             End If
         Next
@@ -967,54 +1288,15 @@ Public Class BoundaryDB
         Return True
     End Function
     Private Shared Function Normalise(sName As String) As String
-        Static ss() As String = {
-            "london borough of ",
-            "royal borough of ",
-            "city of ",
-            " cp",
-            " civil parish",
-            "district of ",
-            "borough of ",
-            "parish of ",
-            " county council",
-            " district council",
-            " borough council",
-            " city council",
-            " district",
-            " borough",
-            " parish",
-            " community",
-            " tc",
-            ".",
-            "'",
-            ","
-        }
-        Dim sTmp As String
-        Dim iParen As Integer
         If sName = "RESET" Then
             Return "OK"
         End If
-        sTmp = sName
-        iParen = InStr(sTmp, "(")
-        If iParen > 0 Then
-            sTmp = Left(sTmp, iParen - 1)
-        End If
-        sTmp = RemoveStuff(LCase(sTmp), ss)
-        sTmp = Replace(sTmp, "-", " ")
-        sTmp = Replace(sTmp, "hertfordshire", "herts")
-        sTmp = Replace(sTmp, "saint ", "st ")
-        sTmp = Replace(sTmp, "&", " and ")
-        sTmp = Trim(Replace(sTmp, "  ", " "))
-        Return sTmp
-    End Function
-    Shared Function RemoveStuff(s As String, x As String()) As String
-        Dim i As Integer
-        Dim sTmp As String
-        sTmp = s
-        For i = LBound(x) To UBound(x)
-            sTmp = Replace(sTmp, x(i), "")
+        Dim s As String = LCase(sName)
+        For Each ns In NormaliseRegexps.Cast(Of NormStuff)
+            s = ns.re.Replace(s, ns.repl)
         Next
-        Return sTmp
+        s = Replace(s, "  ", " ")
+        Return Trim(s)
     End Function
     Private Function IsGSSType(t As BoundaryItem.BoundaryTypes) As Boolean
         Select Case t
@@ -1033,6 +1315,7 @@ Public Class BoundaryDB
         End Select
         Return False
     End Function
+
     Private Structure latlongdata
         Dim GSS As String
         Dim Lat As Double
@@ -1095,7 +1378,7 @@ Public Class BoundaryDB
                     bi.UpdateXML()
                 Else
                     ' MsgBox("Entity " & bi.ONSCode & " not found in latlong data")
-                    Debug.Print("Entity " & bi.ONSCode & " not found in latlong data")
+                    Debug.Print($"Entity {bi.ONSCode} not found in latlong data")
                 End If
             End If
         Next
@@ -1109,7 +1392,7 @@ Public Class BoundaryDB
                 Dim totLat As Double = 0.0
                 Dim totLon As Double = 0.0
                 Dim nMembers As Integer = 0
-                g = GetGroupedParishes(bi)
+                g = bi.GroupMembers
                 If g IsNot Nothing Then
                     For Each gp In g
                         If lld.ContainsKey(gp.ONSCode) Then
@@ -1140,4 +1423,106 @@ Public Class BoundaryDB
         End If
         Return True
     End Function
+
+    Public Function ImportElectoralCycles(Path As String) As Boolean
+        Dim tfp As Microsoft.VisualBasic.FileIO.TextFieldParser
+        Dim fLat As Integer = -1, fLon As Integer = -1, fGSS As Integer = -1, fArea As Integer = -1
+        Dim i As Integer
+        Dim sFields() As String
+        Dim g As List(Of BoundaryItem)
+        Dim re As New System.Text.RegularExpressions.Regex("[a-z]+\d\dcd")
+
+        tfp = New Microsoft.VisualBasic.FileIO.TextFieldParser(Path)
+
+        tfp.Delimiters = {","}
+        tfp.HasFieldsEnclosedInQuotes = True
+        sFields = tfp.ReadFields()
+        For i = 0 To sFields.Count - 1
+            Select Case sFields(i)
+                Case "lat"
+                    fLat = i
+                Case "long"
+                    fLon = i
+                Case "st_areashape"
+                    fArea = i
+                Case Else
+                    If fGSS < 0 AndAlso re.IsMatch(sFields(i)) Then
+                        fGSS = i
+                    End If
+            End Select
+        Next
+        If (fGSS * fLat * fLon * fArea) < 0 Then
+            MsgBox($"Unable to find the required fields in Lat/Lon data, GSS={fGSS} Lat={fLat} Lon={fLon} Area={fArea}")
+            tfp.Close()
+            Return False
+        End If
+
+        Dim lld As New Dictionary(Of String, latlongdata)
+        Dim x As latlongdata
+        While Not tfp.EndOfData
+            sFields = tfp.ReadFields()
+            x = New latlongdata
+            x.GSS = sFields(fGSS)
+            x.Lat = Double.Parse(sFields(fLat))
+            x.Lon = Double.Parse(sFields(fLon))
+            x.Area = Double.Parse(sFields(fArea))
+            lld(x.GSS) = x
+        End While
+        tfp.Close()
+
+        For Each bi As BoundaryItem In Items.Values
+            If IsGSSType(bi.BoundaryType) Then
+                If lld.ContainsKey(bi.ONSCode) Then
+                    x = lld(bi.ONSCode)
+                    bi.Lat = x.Lat
+                    bi.Lon = x.Lon
+                    bi.UpdateXML()
+                Else
+                    ' MsgBox("Entity " & bi.ONSCode & " not found in latlong data")
+                    Debug.Print($"Entity {bi.ONSCode} not found in latlong data")
+                End If
+            End If
+        Next
+
+        For Each bi As BoundaryItem In Items.Values
+            If bi.BoundaryType = BoundaryItem.BoundaryTypes.BT_ParishGroup Then
+                Dim baseLat As Double = 0.0
+                Dim baseLon As Double = 0.0
+                Dim totArea As Double = 0.0
+                Dim totCoG As Double = 0.0
+                Dim totLat As Double = 0.0
+                Dim totLon As Double = 0.0
+                Dim nMembers As Integer = 0
+                g = bi.GroupMembers
+                If g IsNot Nothing Then
+                    For Each gp In g
+                        If lld.ContainsKey(gp.ONSCode) Then
+                            x = lld(gp.ONSCode)
+                            If x.Lat < baseLat Then baseLat = x.Lat
+                            If x.Lon < baseLon Then baseLon = x.Lon
+                            totArea += x.Area
+                            nMembers += 1
+                        End If
+                        If nMembers = 0 Then Continue For
+                    Next
+                    For Each gp In g
+                        If lld.ContainsKey(gp.ONSCode) Then
+                            x = lld(gp.ONSCode)
+                            totLat += (x.Lat - baseLat) * x.Area
+                            totLon += (x.Lon - baseLon) * x.Area
+                        End If
+                        bi.Lat = (totLat / totArea) + baseLat
+                        bi.Lon = (totLon / totArea) + baseLon
+                        bi.UpdateXML()
+                    Next
+                End If
+            End If
+        Next
+
+        If bChanges Then
+            Save()
+        End If
+        Return True
+    End Function
+
 End Class

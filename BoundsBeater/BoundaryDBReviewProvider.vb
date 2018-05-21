@@ -20,6 +20,7 @@ Public Class BoundaryDBReviewProvider
     Private Const COUNCIL_NAME_WELSH As String = "council_name:cy"
     Private Const COUNCIL_NAME_GAELIC As String = "council_name:gd"
     Private Const COUNCIL_STYLE As String = "council_style"
+    Private Const COUNTY As String = "county"
     Private Const DESIGNATION As String = "designation"
     Private Const EMPTY As String = ""
     Private Const LONDON_BOROUGH As String = "london_borough"
@@ -148,6 +149,7 @@ Public Class BoundaryDBReviewProvider
             Case BoundaryDB.BoundaryItem.CouncilStyles.CS_Town : Add(COUNCIL_STYLE, TOWN)
             Case BoundaryDB.BoundaryItem.CouncilStyles.CS_Village : Add(COUNCIL_STYLE, VILLAGE)
             Case BoundaryDB.BoundaryItem.CouncilStyles.CS_Borough : Add(COUNCIL_STYLE, BOROUGH)
+            Case BoundaryDB.BoundaryItem.CouncilStyles.CS_County : Add(COUNCIL_STYLE, COUNTY)
             Case BoundaryDB.BoundaryItem.CouncilStyles.CS_CityAndCounty : Add(COUNCIL_STYLE, CITY_AND_COUNTY)
             Case BoundaryDB.BoundaryItem.CouncilStyles.CS_CityAndDistrict : Add(COUNCIL_STYLE, CITY_AND_DISTRICT)
         End Select
@@ -205,7 +207,7 @@ Public Class BoundaryDBReviewProvider
         Return OSMReviewResult.OK
     End Function
     Private Function ProcessMetroDistrict() As OSMReviewResult
-        Add(ADMIN_LEVEL, "6")
+        Add(ADMIN_LEVEL, "8")
         Add(DESIGNATION, METRO_DISTRICT)
         If dbi.IsBorough Then Add(BOROUGH, YES)
         DoCouncilStyle()
