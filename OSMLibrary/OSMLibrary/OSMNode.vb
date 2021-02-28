@@ -28,13 +28,18 @@ Public Class OSMNode
                 Return sJSON.ToString
             End Get
         End Property
-        Public Overrides Function Clone() As OSMObject
-            Dim xNew As OSMNode = DirectCast(MyBase.Clone(), OSMNode)
-            xNew.UsedByWays.AddRange(UsedByWays)
-            xNew.UsedByRelations.AddRange(UsedByRelations)
-            Return xNew
-        End Function
-        Public Overrides ReadOnly Property GeoJSON As String
+    Public Overrides Function Clone() As OSMObject
+        Dim xNew As OSMNode = DirectCast(MyBase.Clone(), OSMNode)
+        xNew.UsedByWays.AddRange(UsedByWays)
+        xNew.UsedByRelations.AddRange(UsedByRelations)
+        Return xNew
+    End Function
+    Public Shadows ReadOnly Property VersionByNumber(v As Long) As OSMNode
+        Get
+            Return DirectCast(MyBase.VersionByNumber(v), OSMNode)
+        End Get
+    End Property
+    Public Overrides ReadOnly Property GeoJSON As String
             Get
                 If IsPlaceholder Then
                     Return ""
@@ -56,12 +61,14 @@ Public Class OSMNode
             End Get
         End Property
         Public Async Sub LoadXML(x As Xml.XmlNode)
-            MyBase.LoadGenericXML(x)
-            Try
-                Lat = CDbl(x.Attributes("lat").InnerText)
-                Lon = CDbl(x.Attributes("lon").InnerText)
-            Catch
-            End Try
+        MyBase.LoadGenericXML(x)
+
+        Try
+            If x.Attributes("visible").InnerText = "false" Then Return
+            Lat = CDbl(x.Attributes("lat").InnerText)
+            Lon = CDbl(x.Attributes("lon").InnerText)
+        Catch
+        End Try
             __Bbox = Nothing
         End Sub
         Public Sub New()

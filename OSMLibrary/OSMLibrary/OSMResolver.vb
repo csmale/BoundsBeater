@@ -152,34 +152,37 @@ Public Class DPoint
                 Return PointInPoly(NodeList(), inner.Head)
             End Function
             Public ReadOnly Property NodeList() As LinkedList(Of OSMNode)
-                Get
-                    Dim h As OSMNode = Head
-                    Dim t As OSMNode = Tail
-                    Dim nlist As New LinkedList(Of OSMNode)
-                    ' ways are in a linked list, in order - but the points may need reversing
-                    nlist.AddFirst(h)
-                    'Dim wnodes As LinkedList(Of OSMNode)
-                    Dim wnodes() As OSMNode
-                    Dim wn As LinkedListNode(Of OSMWay) = Ways.First
-                    Dim w As OSMWay
-                    While Not IsNothing(wn)
-                        w = wn.Value
-                        If w.Nodes.Count > 1 Then
-                            wnodes = w.Nodes.ToArray
+            Get
+                Dim h As OSMNode = Head
+                Dim t As OSMNode = Tail
+                Dim nlist As New LinkedList(Of OSMNode)
+                ' ways are in a linked list, in order - but the points may need reversing
+                nlist.AddFirst(h)
+                'Dim wnodes As LinkedList(Of OSMNode)
+                Dim wnodes() As OSMNode
+                Dim wn As LinkedListNode(Of OSMWay) = Ways.First
+                Dim w As OSMWay
+                While Not IsNothing(wn)
+                    w = wn.Value
+                    If w.Nodes.Count > 1 Then
+                        wnodes = w.Nodes.ToArray
+                        If h.ID <> wnodes(0).ID Then
+                            Array.Reverse(wnodes)
                             If h.ID <> wnodes(0).ID Then
-                                Array.Reverse(wnodes)
-                                Debug.Assert(h.ID = wnodes(0).ID, "problem with way list after reversing way")
+                                Debug.Assert(h.ID = wnodes(0).ID,
+                                $"problem with way list after reversing way #{w.ID} ({w.Nodes.Count} nodes), head={h.ID} first={wnodes(0).ID}")
                             End If
-                            h = wnodes(UBound(wnodes))
-                            For i As Integer = 1 To UBound(wnodes)
-                                nlist.AddLast(wnodes(i))
-                            Next
                         End If
-                        wn = wn.Next
-                    End While
-                    Return nlist
-                End Get
-            End Property
+                        h = wnodes(UBound(wnodes))
+                        For i As Integer = 1 To UBound(wnodes)
+                            nlist.AddLast(wnodes(i))
+                        Next
+                    End If
+                    wn = wn.Next
+                End While
+                Return nlist
+            End Get
+        End Property
 
             Public Function checkGeometry() As Boolean
                 If Not isClosed() Then
@@ -705,9 +708,8 @@ Public Class DPoint
         Public Function GeoJSON() As String
             Dim sJSON As New StringBuilder(10000)
             Dim xMem As OSMRelationMember
-            Dim bFirst As Boolean = True
-            Dim rIn As Ring
-            Dim RingList As New List(Of Ring)
+        Dim bFirst As Boolean = True
+        Dim RingList As New List(Of Ring)
             Dim b As New BBox
             If _relation.Members.Count = 0 Then
                 Return ""

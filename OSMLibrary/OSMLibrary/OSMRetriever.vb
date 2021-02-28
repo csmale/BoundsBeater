@@ -81,6 +81,7 @@ Public Class OSMRetriever
         Dim xObj As OSMObject = Nothing
         Dim xDoc As OSMDoc
         ' this just gets the history of the object itself, not the referenced ways and nodes
+
         xDoc = API.GetOSMObjectHistory(xType, lRef)
         If xDoc Is Nothing Then Return Nothing
         Select Case xType
@@ -163,13 +164,15 @@ Public Class OSMRetriever
                 Next
             Next
 
-            ' now fetch the node histories
-            For Each xNode In listNodes.Values
+        ' now fetch the node histories - don't bother if still at V1
+        For Each xNode In listNodes.Values
+            If xNode.Version > 1 Then
                 xDoc2 = API.GetOSMObjectHistory(OSMObject.ObjectType.Node, xNode.ID)
                 xDoc.Merge(xDoc2)
-            Next
+            End If
+        Next
 
-            Return xDoc
+        Return xDoc
         End Function
         Public Function GetOSMObjectByTimestamp(d As DateTime) As OSMObject
 
@@ -178,120 +181,120 @@ Public Class OSMRetriever
 
         End Function
 
-        ' this uses xDoc as a cache and only fetches what is missing
-        ' or stale?
-        Public Function GetOSMObject(xDoc As OSMDoc, xType As OSMObject.ObjectType, lRef As Long) As OSMObject
-            Dim xRel As OSMRelation, xWay As OSMWay, xNode As OSMNode
-            Dim tmpDoc As OSMDoc
-            Dim dCutoff As Date = Now - New TimeSpan(0, 0, MaxAge)
-            Dim alNodes As New ArrayList()
-            Dim alWays As New ArrayList()
+    ' this uses xDoc as a cache and only fetches what is missing
+    ' or stale?
+    Public Function GetOSMObject(xDoc As OSMDoc, xType As OSMObject.ObjectType, lRef As Long, Optional bFull As Boolean = False) As OSMObject
+        Dim xRel As OSMRelation, xWay As OSMWay, xNode As OSMNode
+        Dim tmpDoc As OSMDoc
+        Dim dCutoff As Date = Now - New TimeSpan(0, 0, MaxAge)
+        Dim alNodes As New ArrayList()
+        Dim alWays As New ArrayList()
 
-            Select Case xType
-                Case OSMObject.ObjectType.Node
-                    If Not xDoc.Nodes.Contains(lRef) Then
+        Select Case xType
+            Case OSMObject.ObjectType.Node
+                If Not xDoc.Nodes.Contains(lRef) Then
+                    Try
+                        tmpDoc = API.GetOSMDoc(xType, lRef, True)
+                        xDoc.Merge(tmpDoc)
+                    Catch e As OSMWebException
+                    End Try
+                Else
+                    xNode = xDoc.Nodes(lRef)
+                    If xNode.IsPlaceholder Or xNode.Cached < dCutoff Then
                         Try
                             tmpDoc = API.GetOSMDoc(xType, lRef, True)
                             xDoc.Merge(tmpDoc)
                         Catch e As OSMWebException
                         End Try
-                    Else
-                        xNode = xDoc.Nodes(lRef)
-                        If xNode.IsPlaceholder Or xNode.Cached < dCutoff Then
-                            Try
-                                tmpDoc = API.GetOSMDoc(xType, lRef, True)
-                                xDoc.Merge(tmpDoc)
-                            Catch e As OSMWebException
-                            End Try
-                        End If
                     End If
-                    Return xDoc.Nodes(lRef)
-                Case OSMObject.ObjectType.Way
-                    If Not xDoc.Ways.Contains(lRef) Then
+                End If
+                Return xDoc.Nodes(lRef)
+            Case OSMObject.ObjectType.Way
+                If Not xDoc.Ways.Contains(lRef) Then
+                    Try
+                        tmpDoc = API.GetOSMDoc(xType, lRef, True)
+                        xDoc.Merge(tmpDoc)
+                    Catch e As OSMWebException
+                        MsgBox($"Error retrieving way {lRef}: {e.Message}")
+                    End Try
+                Else
+                    xWay = xDoc.Ways(lRef)
+                    If xWay.IsPlaceholder Or xWay.Cached < dCutoff Then
                         Try
                             tmpDoc = API.GetOSMDoc(xType, lRef, True)
-                            xDoc.Merge(tmpDoc)
+                            If Not IsNothing(tmpDoc) Then
+                                xDoc.Merge(tmpDoc)
+                                xWay = xDoc.Ways(lRef)
+                            End If
                         Catch e As OSMWebException
                             MsgBox($"Error retrieving way {lRef}: {e.Message}")
                         End Try
-                    Else
-                        xWay = xDoc.Ways(lRef)
-                        If xWay.IsPlaceholder Or xWay.Cached < dCutoff Then
-                            Try
-                                tmpDoc = API.GetOSMDoc(xType, lRef, True)
-                                If Not IsNothing(tmpDoc) Then
-                                    xDoc.Merge(tmpDoc)
-                                    xWay = xDoc.Ways(lRef)
-                                End If
-                            Catch e As OSMWebException
-                                MsgBox($"Error retrieving way {lRef}: {e.Message}")
-                            End Try
-                        End If
                     End If
-                    Return xDoc.Ways(lRef)
-                Case OSMObject.ObjectType.Relation
-                    If Not xDoc.Relations.Contains(lRef) Then
+                End If
+                Return xDoc.Ways(lRef)
+            Case OSMObject.ObjectType.Relation
+                If Not xDoc.Relations.Contains(lRef) Then
+                    Try
+                        tmpDoc = API.GetOSMDoc(xType, lRef, False)
+                        If Not IsNothing(tmpDoc) Then xDoc.Merge(tmpDoc)
+                        xRel = xDoc.Relations(lRef)
+                    Catch e As OSMWebException
+                    End Try
+                Else
+                    xRel = xDoc.Relations(lRef)
+                    If xRel.IsPlaceholder Or xRel.Cached < dCutoff Then
                         Try
                             tmpDoc = API.GetOSMDoc(xType, lRef, False)
                             If Not IsNothing(tmpDoc) Then xDoc.Merge(tmpDoc)
                             xRel = xDoc.Relations(lRef)
                         Catch e As OSMWebException
                         End Try
-                    Else
-                        xRel = xDoc.Relations(lRef)
-                        If xRel.IsPlaceholder Or xRel.Cached < dCutoff Then
-                            Try
-                                tmpDoc = API.GetOSMDoc(xType, lRef, False)
-                                If Not IsNothing(tmpDoc) Then xDoc.Merge(tmpDoc)
-                                xRel = xDoc.Relations(lRef)
-                            Catch e As OSMWebException
-                            End Try
-                        End If
                     End If
-                    ' Collect lists of the members to be fetched
-                    If Not xRel Is Nothing Then
-                        For Each xMbr As OSMRelationMember In xRel.Members
-                            Select Case xMbr.Type
-                                Case OSMObject.ObjectType.Node
-                                    If xMbr.IsPlaceholder Then
-                                        alNodes.Add(xMbr.Member.ID)
-                                    End If
-                                Case OSMObject.ObjectType.Way
-                                    If xMbr.IsPlaceholder Then
-                                        alWays.Add(xMbr.Member.ID)
-                                    End If
-                            End Select
-                        Next
-                        ' now use multifetch on the ways
-                        For Each xMbr As OSMRelationMember In xRel.Members
-                            Select Case xMbr.Type
-                                Case OSMObject.ObjectType.Relation
+                End If
+                ' Collect lists of the members to be fetched
+                If Not xRel Is Nothing Then
+                    For Each xMbr As OSMRelationMember In xRel.Members
+                        Select Case xMbr.Type
+                            Case OSMObject.ObjectType.Node
+                                If xMbr.IsPlaceholder Then
+                                    alNodes.Add(xMbr.Member.ID)
+                                End If
+                            Case OSMObject.ObjectType.Way
+                                If xMbr.IsPlaceholder Then
+                                    alWays.Add(xMbr.Member.ID)
+                                End If
+                        End Select
+                    Next
+                    ' now use multifetch on the ways
+                    For Each xMbr As OSMRelationMember In xRel.Members
+                        Select Case xMbr.Type
+                            Case OSMObject.ObjectType.Relation
                             ' don't fetch nested relations
-                                Case OSMObject.ObjectType.Way
-                                    If xMbr.IsPlaceholder Then
-                                        ' if this fails, keep it as a placeholder?
-                                        ' if the way has been deleted, we need to refetch the relation and try again
-                                        xMbr.Member = GetOSMObject(xDoc, xMbr.Type, xMbr.Member.ID)
-                                    End If
-                                Case OSMObject.ObjectType.Node
-                                    If xMbr.IsPlaceholder Then
-                                        ' if this fails, keep it as a placeholder?
-                                        ' if the node has been deleted, we need to refetch the enclosing way or relation and try again
-                                        xMbr.Member = GetOSMObject(xDoc, xMbr.Type, xMbr.Member.ID)
-                                    End If
-                            End Select
+                            Case OSMObject.ObjectType.Way
+                                If xMbr.IsPlaceholder Then
+                                    ' if this fails, keep it as a placeholder?
+                                    ' if the way has been deleted, we need to refetch the relation and try again
+                                    xMbr.Member = GetOSMObject(xDoc, xMbr.Type, xMbr.Member.ID)
+                                End If
+                            Case OSMObject.ObjectType.Node
+                                If xMbr.IsPlaceholder Then
+                                    ' if this fails, keep it as a placeholder?
+                                    ' if the node has been deleted, we need to refetch the enclosing way or relation and try again
+                                    xMbr.Member = GetOSMObject(xDoc, xMbr.Type, xMbr.Member.ID)
+                                End If
+                        End Select
 
-                        Next
-                    End If
-                    Return xDoc.Relations(lRef)
-                Case Else
-                    Return Nothing
-            End Select
-        End Function
+                    Next
+                End If
+                Return xDoc.Relations(lRef)
+            Case Else
+                Return Nothing
+        End Select
+    End Function
 
-        Public Function GetNeighbours(xDoc As OSMDoc, xType As OSMObject.ObjectType, lRef As Long) As OSMDoc
+    Public Function GetNeighbours(xDoc As OSMDoc, xType As OSMObject.ObjectType, lRef As Long) As OSMDoc
             Dim sUrl As String = API.GetUrl(xType, lRef, False)
-            sUrl = sUrl & "/relations"
-            Return API.GetOSM(sUrl)
+        sUrl &= "/relations"
+        Return API.GetOSM(sUrl)
         End Function
     End Class

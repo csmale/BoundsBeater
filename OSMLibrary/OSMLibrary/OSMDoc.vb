@@ -136,8 +136,18 @@ Public Class OSMDoc
         Private Function ParseRel(xDoc As XmlReader) As Boolean
             Return True
         End Function
-
-        Public Function LoadXML(sXML As String) As Boolean
+    Public Function GetOSMObject(Type As OSMObject.ObjectType, ID As Long) As OSMObject
+        Select Case Type
+            Case OSMObject.ObjectType.Node
+                Return Nodes(ID)
+            Case OSMObject.ObjectType.Way
+                Return Ways(ID)
+            Case OSMObject.ObjectType.Relation
+                Return Relations(ID)
+        End Select
+        Return Nothing
+    End Function
+    Public Function LoadXML(sXML As String) As Boolean
             Try
                 xDoc.LoadXml(sXML)
             Catch
@@ -159,74 +169,56 @@ Public Class OSMDoc
         End Sub
         Public Sub New()
         End Sub
-        Public Sub Merge(xOther As OSMDoc)
-            Dim xNode As OSMNode
-            Dim xWay As OSMWay
-            Dim xRel As OSMRelation
-            Dim lRef As Long
-            Debug.Assert(xOther IsNot Nothing)
-            If xOther Is Nothing Then Return
+    Public Sub Merge(xOther As OSMDoc)
+        Dim xNode As OSMNode
+        Dim xWay As OSMWay
+        Dim xRel As OSMRelation
+        Dim lRef As Long
+        ' Debug.Assert(xOther IsNot Nothing)
+        If xOther Is Nothing Then Return
 
-            For Each lRef In xOther.Nodes.Keys
-                xNode = xOther.Nodes(lRef)
-                If Not Nodes.Contains(lRef) Then
-                    Nodes.Add(lRef, xNode)
-                ElseIf Nodes(lRef).IsPlaceholder OrElse xNode.Version > Nodes(lRef).Version Then
-                    Nodes(lRef) = xNode
-                End If
-                xNode.Doc = Me
-            Next
-            For Each lRef In xOther.Ways.Keys
-                xWay = xOther.Ways(lRef)
-                If Not Ways.Contains(lRef) Then
-                    Ways.Add(lRef, xWay)
-                ElseIf Ways(lRef).IsPlaceholder OrElse xWay.Version > Ways(lRef).Version Then
-                    Ways(lRef) = xWay
-                End If
-                xWay.Doc = Me
-            Next
-            For Each lRef In xOther.Relations.Keys
-                xRel = xOther.Relations(lRef)
-                If Not Relations.Contains(lRef) Then
-                    Relations.Add(lRef, xRel)
-                ElseIf Relations(lRef).IsPlaceholder OrElse xRel.Version > Relations(lRef).Version Then
-                    Relations(lRef) = xRel
-                End If
-                xRel.Doc = Me
-            Next
-            For Each UID As ULong In xOther.Users.Keys
-                If Not Users.ContainsKey(UID) Then
-                    Users.Add(UID, New OSMUser(UID, xOther.Users(UID).Name))
-                End If
-            Next
-        End Sub
-        Public Function LoadPBF(sFile As String) As Boolean
-            ' run external osmconvert command on the given file which streams the xml output to stdout
-            Dim myPath As String = New System.Uri(System.Reflection.Assembly.GetExecutingAssembly().CodeBase).AbsolutePath
-            myPath = Uri.UnescapeDataString(myPath)
-            myPath = System.IO.Path.GetDirectoryName(myPath)
-            Dim oProcess As New Process()
-            Dim sProg As String = Path.Combine(myPath, My.Settings.OSMConvert)
-            Dim oStartInfo As New ProcessStartInfo(sProg, """" & sFile & """") With {
-            .UseShellExecute = False,
-            .RedirectStandardOutput = True,
-            .CreateNoWindow = True
-        }
-            oProcess.StartInfo = oStartInfo
-            oProcess.Start()
-
-            Dim oStreamReader As System.IO.StreamReader = oProcess.StandardOutput
-            Dim xRdr As New XmlTextReader(oStreamReader)
-            Dim bRet As Boolean = LoadXMLStream(xRdr)
-
-            If Not oProcess.HasExited Then
-                oProcess.Kill()
+        For Each lRef In xOther.Nodes.Keys
+            xNode = xOther.Nodes(lRef)
+            If Not Nodes.Contains(lRef) Then
+                Nodes.Add(lRef, xNode)
+            ElseIf Nodes(lRef).IsPlaceholder OrElse xNode.Version > Nodes(lRef).Version _
+                    OrElse (xNode.HistoryLoaded AndAlso Not Nodes(lRef).HistoryLoaded) Then
+                Nodes(lRef) = xNode
             End If
+            xNode.Doc = Me
+        Next
+        For Each lRef In xOther.Ways.Keys
+            xWay = xOther.Ways(lRef)
+            If Not Ways.Contains(lRef) Then
+                Ways.Add(lRef, xWay)
+            ElseIf Ways(lRef).IsPlaceholder OrElse xWay.Version > Ways(lRef).Version _
+                    OrElse (xway.HistoryLoaded AndAlso Not ways(lRef).HistoryLoaded) Then
+                Ways(lRef) = xWay
+            End If
+            xWay.Doc = Me
+        Next
+        For Each lRef In xOther.Relations.Keys
+            xRel = xOther.Relations(lRef)
+            If Not Relations.Contains(lRef) Then
+                Relations.Add(lRef, xRel)
+            ElseIf Relations(lRef).IsPlaceholder OrElse xRel.Version > Relations(lRef).Version _
+                    OrElse (xrel.HistoryLoaded AndAlso Not Relations(lRef).HistoryLoaded) Then
+                Relations(lRef) = xRel
+            End If
+            xRel.Doc = Me
+        Next
+        For Each UID As ULong In xOther.Users.Keys
+            If Not Users.ContainsKey(UID) Then
+                Users.Add(UID, New OSMUser(UID, xOther.Users(UID).Name))
+            End If
+        Next
+    End Sub
 
-            If oProcess.ExitCode <> 0 Then bRet = False
-            Return bRet
-        End Function
-        Public Function LoadBigXML(sFile As String) As Boolean
+    Public Function LoadPBF(sFile As String) As Boolean
+        Return Utilities.LoadPBFAsXML(sFile, AddressOf LoadXMLStream)
+    End Function
+
+    Public Function LoadBigXML(sFile As String) As Boolean
             Dim xRdr As XmlTextReader
             Try
                 xRdr = New XmlTextReader(sFile)

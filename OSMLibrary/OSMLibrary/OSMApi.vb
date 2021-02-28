@@ -103,9 +103,9 @@ Public Class OSMApi
             Dim sType As String = OSMObject.ObjectTypeString(xType) & "s"
             sTmp = BaseURL & sType & "?" & sType & "="
             For Each l As Long In lRef
-                If Not bFirst Then sTmp = sTmp & ","
-                sTmp = sTmp & l.ToString
-                bFirst = False
+            If Not bFirst Then sTmp &= ","
+            sTmp &= l.ToString
+            bFirst = False
             Next
             Return sTmp
         End Function
@@ -136,17 +136,18 @@ Public Class OSMApi
             Return l
         End Function
 
-        Private Function GetNewRequest(sURL As String) As WebRequest
-            Dim req As HttpWebRequest = DirectCast(HttpWebRequest.Create(sURL), HttpWebRequest)
-            req.CookieContainer = CookieContainer
-            req.UserAgent = UserAgent
-            req.Credentials = CredentialCache
-            req.Timeout = Timeout
-            req.AutomaticDecompression = DecompressionMethods.Deflate Or DecompressionMethods.GZip
-            req.AllowAutoRedirect = False
-            Return req
-        End Function
-        Private Sub AddAuthHeader(req As WebRequest)
+    Private Function GetNewRequest(sURL As String) As WebRequest
+        Dim req As HttpWebRequest = DirectCast(HttpWebRequest.Create(sURL), HttpWebRequest)
+        req.CookieContainer = CookieContainer
+        req.UserAgent = UserAgent
+        req.Credentials = CredentialCache
+        req.Timeout = Timeout
+        req.AutomaticDecompression = DecompressionMethods.Deflate Or DecompressionMethods.GZip
+        req.AllowAutoRedirect = False
+        System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12 Or System.Net.SecurityProtocolType.Tls11
+        Return req
+    End Function
+    Private Sub AddAuthHeader(req As WebRequest)
             Dim cre As String
             Dim bytes As Byte()
             Dim base64 As String
@@ -189,8 +190,8 @@ Public Class OSMApi
                 OSMLibraryLogger.WriteEntry($"Accessing {sMethod} {sURL}", TraceEventType.Information)
                 Try
                     If Credentials IsNot Nothing Then
-                        AddAuthHeader(req)
-                        req.PreAuthenticate = True
+                    AddAuthHeader(req)
+                    req.PreAuthenticate = True
                     End If
                     req.Method = sMethod
                     If Len(sPayload) > 0 Then
@@ -235,7 +236,7 @@ Public Class OSMApi
                 OSMLibraryLogger.WriteEntry($"HTTP status {CInt(resp.StatusCode)} ({resp.StatusDescription}) in {(iEndTime - iStartTime)}ms from {sURL}")
 
                 If resp.StatusCode = HttpStatusCode.Moved Or resp.StatusCode = HttpStatusCode.MovedPermanently Then
-                    nRedirect = nRedirect + 1
+                nRedirect += 1
                 If nRedirect >= MaxRedirect Then
                     _LastError = "Too many redirects"
                     Throw New WebException("Too many redirects")
@@ -312,10 +313,14 @@ Public Class OSMApi
             Return GetOSM(sURL)
         End Function
         Public Function GetOSMObjectHistory(xType As OSMObject.ObjectType, lRef As Long) As OSMDoc
-            Dim sURL As String, xDoc As OSMDoc
-            sURL = GetURLHistory(xType, lRef)
-            xDoc = GetOSM(sURL)
-            Return xDoc
+        Dim sURL As String, xDoc As OSMDoc
+        sURL = GetURLHistory(xType, lRef)
+        xDoc = GetOSM(sURL)
+        If xDoc IsNot Nothing Then
+            Dim x As OSMObject = xDoc.GetOSMObject(xType, lRef)
+            If x IsNot Nothing Then x.HistoryLoaded = True
+        End If
+        Return xDoc
         End Function
 
         'changeset functions

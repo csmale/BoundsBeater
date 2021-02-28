@@ -38,6 +38,7 @@ Public Class BoundaryDBReviewProvider
     Private Const PRINCIPAL_AREA As String = "principal_area"
     Private Const REF_GSS As String = "ref:gss"
     Private Const ROYAL As String = "royal"
+    Private Const SCOTTISH_COUNCIL As String = "scottish_council"
     Private Const TOWN As String = "town"
     Private Const TYPE As String = "type"
     Private Const UNITARY_AUTHORITY As String = "unitary_authority"
@@ -50,8 +51,9 @@ Public Class BoundaryDBReviewProvider
     Private dict As Dictionary(Of String, String)
     Private rel As OSMRelation
 
-    Public Function Process(o As OSMObject, d As Dictionary(Of String, String)) As OSMReviewResult Implements IOSMReviewProvider.Process
-        If dbi Is Nothing Then Return OSMReviewResult.NoData
+    Public Function Process(o As OSMObject, Item As Object, d As Dictionary(Of String, String)) As OSMReviewResult Implements IOSMReviewProvider.Process
+        If Item Is Nothing Then Return OSMReviewResult.NoData
+        dbi = DirectCast(Item, BoundaryDB.BoundaryItem)
         If o.Type <> OSMObject.ObjectType.Relation Then Return OSMReviewResult.WrongType
         If d Is Nothing Then Throw New ArgumentNullException()
         dict = d
@@ -100,9 +102,9 @@ Public Class BoundaryDBReviewProvider
             Case BoundaryDB.BoundaryItem.BoundaryTypes.BT_Region
                 Return ProcessCivilParish()
             Case BoundaryDB.BoundaryItem.BoundaryTypes.BT_ScotCouncil
-                Return ProcessCivilParish()
+                Return ProcessScotCouncil()
             Case BoundaryDB.BoundaryItem.BoundaryTypes.BT_SuiGeneris
-                Return ProcessCivilParish()
+                Return OSMReviewResult.WrongType
             Case BoundaryDB.BoundaryItem.BoundaryTypes.BT_Unitary
                 Return ProcessUnitary()
             Case BoundaryDB.BoundaryItem.BoundaryTypes.BT_Unknown
@@ -174,11 +176,20 @@ Public Class BoundaryDBReviewProvider
         UpdateGSS("E04")
         Return OSMReviewResult.OK
     End Function
+    Private Function ProcessScotCouncil() As OSMReviewResult
+        Add(ADMIN_LEVEL, "6")
+        Add(DESIGNATION, SCOTTISH_COUNCIL)
+        AddNonEmpty(NAME_GAELIC, dbi.Name2)
+        AddNonEmpty(COUNCIL_NAME_GAELIC, dbi.CouncilName2)
+        UpdateGSS("S12")
+        Return OSMReviewResult.OK
+    End Function
     Private Function ProcessCommunity() As OSMReviewResult
         Add(ADMIN_LEVEL, "10")
         Add(DESIGNATION, COMMUNITY)
         AddNonEmpty(NAME_WELSH, dbi.Name2)
         AddNonEmpty(COUNCIL_NAME_WELSH, dbi.CouncilName2)
+        DoCouncilStyle()
         UpdateGSS("W04")
         Return OSMReviewResult.OK
     End Function

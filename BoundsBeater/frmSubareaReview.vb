@@ -2,7 +2,7 @@
 Imports BoundsBeater.BoundaryDB
 Imports System.Net
 
-Public Class frmReview
+Public Class frmSubareaReview
     Private sBaseTitle As String
     Private sSubTitle As String
     Private iRel As Long
@@ -10,14 +10,15 @@ Public Class frmReview
     Private CurrentItem As Integer = 0
     Private CurrentHasChanges As Boolean
     Private xDbRelation As BoundaryItem
-    Private TagList As List(Of String)
+    Private MemberList As List(Of OSMRelationMember)
+    ' Private TagList As List(Of String)
     Private xRetriever As New OSMRetriever
     Private xDoc As OSMDoc
-    Private xObj As OSMObject
-    Private tagsOSM As Dictionary(Of String, String)
-    Private tagsBDB As Dictionary(Of String, String)
-    Private newOSM As Dictionary(Of String, String)
-    Private rev As IOSMReviewProvider
+    Private xObj As OSMRelation
+    Private mbrsOSM As List(Of OSMRelationReviewItem)
+    ' Private mbrsBDB As List(Of OSMRelationReviewItem)
+    Private newOSM As List(Of OSMRelationReviewItem)
+    Private rev As IOSMRelationReviewProvider
     Private cred As NetworkCredential
     Private u As OSMUpdater
     Public ChangesetComment As String
@@ -30,7 +31,7 @@ Public Class frmReview
     Private Shared colourLeave As Color = Color.White
     Const FinalSubitem As Integer = 3
 
-    Public Sub New(Provider As IOSMReviewProvider, db As BoundaryDB.BoundaryItem, Optional sTitle As String = "")
+    Public Sub New(Provider As IOSMRelationReviewProvider, db As BoundaryDB.BoundaryItem, Optional sTitle As String = "")
 
         ' This call is required by the designer.
         InitializeComponent()
@@ -42,7 +43,7 @@ Public Class frmReview
         sSubTitle = sTitle
         NextItem()
     End Sub
-    Public Sub New(Provider As IOSMReviewProvider, dblist() As BoundaryItem, Optional sTitle As String = "")
+    Public Sub New(Provider As IOSMRelationReviewProvider, dblist() As BoundaryItem, Optional sTitle As String = "")
         ' This call is required by the designer.
         InitializeComponent()
 
@@ -53,7 +54,7 @@ Public Class frmReview
         sSubTitle = sTitle
         NextItem()
     End Sub
-    Public Sub New(Provider As IOSMReviewProvider, dblist As List(Of BoundaryItem), Optional sTitle As String = "")
+    Public Sub New(Provider As IOSMRelationReviewProvider, dblist As List(Of BoundaryItem), Optional sTitle As String = "")
         ' This call is required by the designer.
         InitializeComponent()
 
@@ -72,7 +73,6 @@ Public Class frmReview
     Private Sub NextItem()
         xDbRelation = ItemList(CurrentItem)
         populate()
-        btnNext.Enabled = CurrentItem < (ItemList.Length - 1)
         Me.Text = $"{sBaseTitle} - Object {CurrentItem + 1} of {ItemList.Length}{sSubTitle}"
     End Sub
     Private Sub btnClose_Click(sender As Object, e As EventArgs) Handles btnClose.Click
@@ -81,8 +81,8 @@ Public Class frmReview
         End If
         Me.Close()
     End Sub
-    Private Sub AddTag(tag As String)
-        If Not TagList.Contains(tag) Then TagList.Add(tag)
+    Private Sub AddMember(x As OSMRelationMember)
+        If Not MemberList.Contains(x) Then MemberList.Add(x)
     End Sub
 
     Private Sub populate()
@@ -92,10 +92,9 @@ Public Class frmReview
         iRel = xDbRelation.OSMRelation
         ' iRel = 4302675228
 
-        tagsOSM = New Dictionary(Of String, String)
-        tagsBDB = New Dictionary(Of String, String)
-        newOSM = New Dictionary(Of String, String)
-        TagList = New List(Of String)
+        mbrsOSM = New List(Of OSMRelationReviewItem)
+        newOSM = New List(Of OSMRelationReviewItem)
+        MemberList = New List(Of OSMRelationMember)
         CurrentHasChanges = False
 
         Try
@@ -108,128 +107,124 @@ Public Class frmReview
         ' header
         lblTitle.Text = $"Reviewing: {xObj.ID} {xObj.Name} Version {xObj.Version} dated {xObj.Timestamp} by {xObj.User}"
 
-        ' tags from the current OSM relation
-        If Not IsNothing(xObj) Then
-            For Each t In xObj.Tags.Keys
-                AddTag(t)
-            Next
-        End If
-
-        ' tags from osm
-        tagsOSM.Clear()
-        For Each t In xObj.Tags.Keys
-            tagsOSM.Add(t, xObj.Tag(t))
+        ' collect existing roles from osm
+        mbrsOSM.Clear()
+        Dim iSeq As Integer = 0
+        For Each t In xObj.Members
+            iSeq = iSeq + 1
+            Dim n As New OSMRelationReviewItem With {
+                .Seq = iSeq,
+                .ID = t.ID,
+                .Type = t.Type,
+                .Obj = t.Member,
+                .OSMRole = t.Role,
+                .SourceRole = OSMRelationReviewItem.OSMROLE_NA,
+                .NewRole = t.Role
+            }
+            mbrsOSM.Add(n)
         Next
 
-        ' tags derived from source db
-        Select Case rev.Process(xObj, xDbRelation, tagsBDB)
+        ' entries derived from source db go into SourceRole etc
+        ' new entries may be added, and existing entries may be marked for deletion
+        Select Case rev.Process(xObj, xDbRelation, mbrsOSM)
             Case OSMReviewResult.OK
             Case OSMReviewResult.NoData
+                MsgBox("No database entry for Subarea Review")
+                Return
             Case OSMReviewResult.WrongType
+                MsgBox("Wrong object type for Subarea Review")
+                Return
         End Select
 
-        ' merge in tags from the source db
-        For Each t In tagsBDB.Keys
-            AddTag(t)
-        Next
-
         ' here be magic - merge the osm data with the source data
-        For Each sTag In TagList
+        For Each mbr In mbrsOSM
             ' start with current data
-            If tagsOSM.Keys.Contains(sTag) Then
-                newOSM(sTag) = tagsOSM(sTag)
-            End If
+            mbr.NewRole = mbr.OSMRole
             ' merge in data from source DB
-            If tagsBDB.Keys.Contains(sTag) Then
-                newOSM(sTag) = tagsBDB(sTag)
+            If mbr.SourceRole <> OSMRelationReviewItem.OSMROLE_NA Then
+                mbr.NewRole = mbr.SourceRole
             End If
         Next
 
-        TagList.Sort()
+        ' TagList.Sort()
 
         ' add a row for each tag
         With lvTagList.Items
             .Clear()
-            For Each sTag In TagList
-                With .Add(sTag)
-                    .UseItemStyleForSubItems = False
-                End With
+            For Each mbr In mbrsOSM
+                LoadItem(.Add(""), mbr)
             Next
         End With
-
-        ' fill in the current, database, and suggested value
-        For Each lvi As ListViewItem In lvTagList.Items
-            sTag = lvi.Text
-            If tagsOSM.ContainsKey(sTag) Then
-                lvi.SubItems.Add(tagsOSM(sTag))
-            Else
-                lvi.SubItems.Add("")
-            End If
-            If tagsBDB.ContainsKey(sTag) Then
-                lvi.SubItems.Add(tagsBDB(sTag))
-            Else
-                lvi.SubItems.Add("")
-            End If
-            If newOSM.ContainsKey(sTag) Then
-                With lvi.SubItems.Add(newOSM(sTag))
-                    If tagsOSM.Keys.Contains(sTag) Then
-                        If .Text <> tagsOSM(sTag) Then
-                            If .Text = "" Then
-                                .BackColor = colourDeleted
-                            Else
-                                .BackColor = colourChanged
-                            End If
-                            CurrentHasChanges = True
-                        End If
-                    Else
-                        If Len(newOSM(sTag)) > 0 Then
-                            lvi.Checked = True
-                            CurrentHasChanges = True
-                            .BackColor = colourAdded
-                        End If
-                    End If
-                End With
-            Else
-                lvi.SubItems.Add("")
-            End If
-        Next
     End Sub
 
-    Private Sub frmReview_Load(sender As Object, e As EventArgs) Handles Me.Load
+    Private Sub LoadItem(lvi As ListViewItem, mbr As OSMRelationReviewItem)
+        With lvi
+            .Text = mbr.Seq.ToString()
+            .Tag = mbr
+            .Checked = False
+            .UseItemStyleForSubItems = False
+            If .SubItems.Count = 0 Then
+                For i = 1 To .ListView.Columns.Count
+                    .SubItems.Add("")
+                Next
+            End If
+            .SubItems(colType.Index).Text = OSMObject.ObjectTypeChar(mbr.Type)
+            .SubItems(colID.Index).Text = mbr.ID.ToString
+            .SubItems(colOSM.Index).Text = mbr.OSMRole
+            .SubItems(colSource.Index).Text = mbr.SourceRole
+            With .SubItems(colOSMNew.Index)
+                .Text = mbr.NewRole
+                If mbr.OSMRole = OSMRelationReviewItem.OSMROLE_NA Then
+                    .BackColor = colourAdded
+                ElseIf mbr.SourceRole = OSMRelationReviewItem.OSMROLE_DELETE Then
+                    .BackColor = colourDeleted
+                ElseIf mbr.NewRole <> mbr.OSMRole Then
+                    .BackColor = colourChanged
+                Else
+                    .BackColor = colourLeave
+                End If
+            End With
+            .SubItems(colComments.Index).Text = ""
+        End With
+    End Sub
+    Private Sub frmSubareaReview_Load(sender As Object, e As EventArgs) Handles Me.Load
         txtChangesetComment.Text = ChangesetComment
-        btnNewChangeset.Enabled = False
-        chkSkipNoChange.Checked = True
         NextItem()
     End Sub
 
     Private Function GetNewVersion() As OSMObject
         Dim xNew As OSMObject = xObj.Clone()
         Dim sTag As String, sValue As String
+        Dim xMbr As OSMRelationMember
+        Dim xNewObj As OSMObject
+        Dim xItem As OSMRelationReviewItem
         Dim bChanges As Boolean = False
-        ' now update the tags from the listview
+        ' now update the members from the listview
         For Each li As ListViewItem In lvTagList.Items
             If Not li.Checked Then Continue For
-            sTag = li.Text
-            If newOSM.ContainsKey(sTag) Then
-                sValue = newOSM(sTag)
-                If Len(sValue) > 0 Then
-                    If xNew.Tags.ContainsKey(sTag) Then
-                        If xNew.Tags(sTag).Value <> sValue Then
-                            xNew.Tags(sTag).Value = sValue
-                            bChanges = True
-                        End If
-                    Else
-                        xNew.Tags.Add(sTag, New OSMTag(sTag, sValue))
-                        bChanges = True
-                    End If
-                Else
-                    If xNew.Tags.ContainsKey(sTag) Then
-                        xNew.Tags.Remove(sTag)
-                        bChanges = True
-                    End If
+            If li.Tag Is Nothing Then Continue For
+            xItem = DirectCast(li.Tag, OSMRelationReviewItem)
+            If xItem.ID < 0 Then
+                xNewObj = xDoc.GetOSMObject(xItem.Type, xItem.ID)
+                xMbr = New OSMRelationMember(xNewObj, xItem.NewRole)
+                xObj.Members.Add(xMbr)
+                bChanges = True
+            Else
+                xMbr = xObj.Members(xItem.Seq)
+                If xItem.NewRole <> xItem.OSMRole Then
+                    xMbr.Role = xItem.NewRole
+                    bChanges = True
                 End If
             End If
         Next
+        ' second scan for deleting so as not to upset the sequence numbers
+        For Each li As ListViewItem In lvTagList.Items
+            If Not li.Checked Then Continue For
+            If li.Tag Is Nothing Then Continue For
+            xItem = DirectCast(li.Tag, OSMRelationReviewItem)
+
+        Next
+
         If bChanges Then
             Return xNew
         Else
@@ -264,7 +259,6 @@ Public Class frmReview
                 Return
             End If
             Debug.Print($"Changeset {u.ChangesetID} opened")
-            btnNewChangeset.Enabled = True
             txtChangesetComment.Enabled = False
         End If
 
@@ -273,32 +267,8 @@ Public Class frmReview
         bSuccess = u.Update(xNew)
 
         If bSuccess Then
-            If btnNext.Enabled Then
-                Do
-                    CurrentItem = CurrentItem + 1
-                    NextItem()
-                    If (Not btnNext.Enabled) Then Exit Do
-                Loop Until (Not chkSkipNoChange.Checked) OrElse CurrentHasChanges
-            Else
-                u.Close()
-                Me.Close()
-            End If
-        End If
-    End Sub
-
-    Private Sub btnNext_Click(sender As Object, e As EventArgs) Handles btnNext.Click
-        Do
-            CurrentItem = CurrentItem + 1
-            NextItem()
-            If (Not btnNext.Enabled) Then Exit Do
-        Loop Until (Not chkSkipNoChange.Checked) OrElse CurrentHasChanges
-    End Sub
-
-    Private Sub btnNewChangeset_Click(sender As Object, e As EventArgs) Handles btnNewChangeset.Click
-        txtChangesetComment.Enabled = True
-        If u IsNot Nothing AndAlso u.ChangesetID > 0 Then
-            btnNewChangeset.Enabled = False
             u.Close()
+            Me.Close()
         End If
     End Sub
 
@@ -320,8 +290,9 @@ Public Class frmReview
         If Len(sTmp) = 0 Then Return
         Dim sTag As String = lviCurrent.Text
         Dim sVal As String
-        If tagsOSM.ContainsKey(sTag) Then
-            sVal = tagsOSM(sTag)
+#If False Then
+        If mbrsOSM.ContainsKey(sTag) Then
+            sVal = mbrsOSM(sTag)
         Else
             sVal = ""
         End If
@@ -338,14 +309,16 @@ Public Class frmReview
                 lviCurrent.Checked = True
             End If
             .Text = sTmp
-            newOSM(sTag) = sTmp
+            newOSM(sTag).Role = sTmp
         End With
+#End If
     End Sub
 
     Private Sub cmsiDeleteTag_Click(sender As Object, e As EventArgs) Handles cmsiDeleteTag.Click
         If lviCurrent Is Nothing Then Return
         Dim sTag As String = lviCurrent.Text
         Dim sVal As String
+#If False Then
         If tagsOSM.ContainsKey(sTag) Then
             sVal = tagsOSM(sTag)
         Else
@@ -360,22 +333,18 @@ Public Class frmReview
                 lviCurrent.Checked = True
             End If
             .Text = ""
-            newOSM(sTag) = ""
+            newOSM(sTag).Role = ""
         End With
+#End If
     End Sub
 
     Private Sub cmsiKeepOsm_Click(sender As Object, e As EventArgs) Handles cmsiKeepOsm.Click
         If lviCurrent Is Nothing Then Return
-        Dim sTag As String = lviCurrent.Text
-        Dim sVal As String
-        If tagsOSM.ContainsKey(sTag) Then
-            sVal = tagsOSM(sTag)
-        Else
-            sVal = ""
-        End If
-        With lviCurrent.SubItems(FinalSubitem)
-            .Text = tagsOSM(sTag)
-            newOSM(sTag) = tagsOSM(sTag)
+        Debug.Assert(lviCurrent IsNot Nothing)
+        Dim xItem = DirectCast(lviCurrent.Tag, OSMRelationReviewItem)
+        With lviCurrent.SubItems(colOSMNew.Index)
+            xItem.NewRole = xItem.OSMRole
+            .Text = lviCurrent.SubItems(colOSM.Index).Text
             .BackColor = colourLeave
         End With
         lviCurrent.Checked = False
@@ -383,29 +352,17 @@ Public Class frmReview
 
     Private Sub cmsiTakeSource_Click(sender As Object, e As EventArgs) Handles cmsiTakeSource.Click
         If lviCurrent Is Nothing Then Return
-        Dim sTag As String = lviCurrent.Text
-        Dim sVal As String
-        If tagsOSM.ContainsKey(sTag) Then
-            sVal = tagsOSM(sTag)
-        Else
-            sVal = ""
-        End If
-        Dim sNew As String
-        If tagsBDB.ContainsKey(sTag) Then
-            sNew = tagsBDB(sTag)
-        Else
-            sNew = ""
-        End If
-        With lviCurrent.SubItems(FinalSubitem)
-            If sVal <> sNew Then
-                .BackColor = colourChanged
-                lviCurrent.Checked = True
-            Else
+        Debug.Assert(lviCurrent IsNot Nothing)
+        Dim xItem = DirectCast(lviCurrent.Tag, OSMRelationReviewItem)
+        With lviCurrent.SubItems(colOSMNew.Index)
+            .Text = lviCurrent.SubItems(colSource.Index).Text
+            If .Text <> lviCurrent.SubItems(colSource.Index).Text Then
                 .BackColor = colourLeave
-                lviCurrent.Checked = False
             End If
-            .Text = sNew
-            newOSM(sTag) = sNew
         End With
+        lviCurrent.Checked = False
     End Sub
+    Private Function MKey(obj As OSMObject) As String
+        Return obj.ObjectTypeChar() & obj.ID.ToString()
+    End Function
 End Class

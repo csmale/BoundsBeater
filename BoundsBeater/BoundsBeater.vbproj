@@ -71,10 +71,10 @@
     <ApplicationManifest>My Project\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>E544CC41188F55A6C33C6A9B1F031B3DA0157F20</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>CBFA1B006D9030282DB7379AF54FD57A5FEC3CB1</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>BoundsBeater_5_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>BoundsBeater_7_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -102,6 +102,29 @@
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DocumentationFile>BoundsBeater.xml</DocumentationFile>
+    <NoWarn>42017,42018,42019,42032,42036</NoWarn>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DocumentationFile>BoundsBeater.xml</DocumentationFile>
+    <Optimize>true</Optimize>
+    <NoWarn>42017,42018,42019,42032,42036</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="adodb, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -143,6 +166,11 @@
   <ItemGroup>
     <Compile Include="BoundaryDBReviewProvider.vb" />
     <Compile Include="BoundsListComparer.vb" />
+    <Compile Include="CodeHistoryDatabase_AUG2018DataSet.Designer.vb">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>CodeHistoryDatabase_AUG2018DataSet.xsd</DependentUpon>
+    </Compile>
     <Compile Include="CSVWriter.vb" />
     <Compile Include="FileLogger.vb" />
     <Compile Include="frmAnalyze1.Designer.vb">
@@ -169,6 +197,12 @@
     <Compile Include="frmEdit.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="frmEntityDoc.Designer.vb">
+      <DependentUpon>frmEntityDoc.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmEntityDoc.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="frmMain.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -192,6 +226,12 @@
       <DependentUpon>frmRelMgr.vb</DependentUpon>
     </Compile>
     <Compile Include="frmRelMgr.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmSubareaReview.Designer.vb">
+      <DependentUpon>frmSubareaReview.vb</DependentUpon>
+    </Compile>
+    <Compile Include="frmSubareaReview.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="frmReview.Designer.vb">
@@ -222,8 +262,10 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="myLogger.vb" />
+    <Compile Include="OSMFileReporter.vb" />
     <Compile Include="RelationReport.vb" />
     <Compile Include="RadixTree.vb" />
+    <Compile Include="SubareaReviewProvider.vb" />
     <Compile Include="Utils.vb" />
   </ItemGroup>
   <ItemGroup>
@@ -240,6 +282,9 @@
     <EmbeddedResource Include="frmEdit.resx">
       <DependentUpon>frmEdit.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="frmEntityDoc.resx">
+      <DependentUpon>frmEntityDoc.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="frmMain.resx">
       <DependentUpon>frmMain.vb</DependentUpon>
     </EmbeddedResource>
@@ -251,6 +296,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmRelMgr.resx">
       <DependentUpon>frmRelMgr.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmSubareaReview.resx">
+      <DependentUpon>frmSubareaReview.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="frmReview.resx">
       <DependentUpon>frmReview.vb</DependentUpon>
@@ -272,7 +320,20 @@
     <None Include="BoundsBeater_3_TemporaryKey.pfx" />
     <None Include="BoundsBeater_4_TemporaryKey.pfx" />
     <None Include="BoundsBeater_5_TemporaryKey.pfx" />
+    <None Include="BoundsBeater_6_TemporaryKey.pfx" />
+    <None Include="BoundsBeater_7_TemporaryKey.pfx" />
     <None Include="BoundsBeater_TemporaryKey.pfx" />
+    <None Include="CodeHistoryDatabase_AUG2018DataSet.xsc">
+      <DependentUpon>CodeHistoryDatabase_AUG2018DataSet.xsd</DependentUpon>
+    </None>
+    <None Include="CodeHistoryDatabase_AUG2018DataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>CodeHistoryDatabase_AUG2018DataSet.Designer.vb</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="CodeHistoryDatabase_AUG2018DataSet.xss">
+      <DependentUpon>CodeHistoryDatabase_AUG2018DataSet.xsd</DependentUpon>
+    </None>
     <None Include="My Project\app.manifest" />
     <None Include="My Project\Application.myapp">
       <Generator>MyApplicationCodeGenerator</Generator>

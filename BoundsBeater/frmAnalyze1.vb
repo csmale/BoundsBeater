@@ -6,6 +6,7 @@ Imports Microsoft.VisualBasic.FileIO
 Imports System.ComponentModel
 Imports System.Text
 Imports System.Threading.Tasks
+Imports BoundsBeater.BoundaryDB
 
 Public Class frmAnalyze
     Private m_SortingColumn As ColumnHeader
@@ -123,17 +124,17 @@ Public Class frmAnalyze
         For i As Integer = 0 To xRes.Rings.Count - 1
             Dim xRing As OSMResolver.Ring = xRes.Rings(i)
             sLine = "Ring #" & i & " (" & xRing.Ways.Count & " ways): "
-            sLine = sLine & xRing.Role
+            sLine &= xRing.Role
             If xRing.isClosed Then
-                sLine = sLine & " (closed)"
+                sLine &= " (closed)"
             Else
                 If xRing.Head.ExtremelyCloseTo(xRing.Tail) Then
-                    sLine = sLine & " (NOT closed - head/tail node not shared)"
+                    sLine &= " (NOT closed - head/tail node not shared)"
                 Else
-                    sLine = sLine & " (NOT closed - missing segment)"
+                    sLine &= " (NOT closed - missing segment)"
                 End If
             End If
-            sTmp = sTmp & vbCrLf & sLine
+            sTmp &= vbCrLf & sLine
         Next
         txtReport.Text = txtReport.Text & sTmp
         Dim b As BBox = xRel.BBox
@@ -276,14 +277,14 @@ Public Class frmAnalyze
     ''' </summary>
     ''' <param name="xItem">The BoundaryItem</param>
     ''' <returns>The generated display string</returns>
-    Private Function DisplayString(xItem As BoundaryDB.BoundaryItem) As String
+    Private Function DisplayString(xItem As BoundaryItem) As String
         Dim sName As String
         sName = xItem.TypeCode & " " & xItem.Name
         If Len(xItem.Name2) > 0 And xItem.Name2 <> xItem.Name Then
             sName = $"{sName} ({xItem.Name2})"
             ' sName = sName & " (" & xItem.Name2 & ")"
         End If
-        If xItem.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish Then
+        If xItem.BoundaryType = BoundaryItem.BoundaryTypes.BT_CivilParish Then
             If xItem.LandsCommon.Count > 0 Then sName &= "*"
             If xItem.DetachedAreas.Count > 0 Then sName &= "+"
         End If
@@ -375,7 +376,7 @@ Public Class frmAnalyze
     ''' </summary>
     ''' <param name="x">The BoundaryDB to be loaded</param>
     Public Sub ReloadTV(x As BoundaryDB)
-        Dim xItem As BoundaryDB.BoundaryItem
+        Dim xItem As BoundaryItem
 
         tvList.Nodes.Clear()
 
@@ -388,7 +389,7 @@ Public Class frmAnalyze
         Dim i As Integer = 0
         Dim iCount As Integer = 0, iTotal As Integer = 0
         For Each xItem In x.Root.Children
-            i = i + 1
+            i += 1
             tsProgress.Value = i
             Application.DoEvents()
             LoadTreeNode(tvList, Nothing, xItem)
@@ -415,11 +416,11 @@ Public Class frmAnalyze
     ''' </summary>
     ''' <param name="n"></param>
     Private Sub ShowChildren(n As TreeNode)
-        Dim p As BoundaryDB.BoundaryItem
-        biListViewParent = DirectCast(n.Tag, BoundaryDB.BoundaryItem)
+        Dim p As BoundaryItem
+        biListViewParent = DirectCast(n.Tag, BoundaryItem)
         lvChildren.Items.Clear()
         For Each x As TreeNode In n.Nodes
-            p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+            p = DirectCast(x.Tag, BoundaryItem)
             If Not p Is Nothing Then
                 If Not chkShowDeleted.Checked AndAlso p.IsDeleted Then Continue For
                 Dim lvi As ListViewItem = lvChildren.Items.Add("")
@@ -436,7 +437,7 @@ Public Class frmAnalyze
     ''' </summary>
     ''' <param name="lvi">ListViewItem to be populated</param>
     ''' <param name="p">BoundaryItem to use</param>
-    Private Sub LoadChildListItem(lv As ListView, lvi As ListViewItem, p As BoundaryDB.BoundaryItem)
+    Private Sub LoadChildListItem(lv As ListView, lvi As ListViewItem, p As BoundaryItem)
         With lvi
             If p.IsDeleted Then .ForeColor = Color.Red Else .ForeColor = Color.Black
             .Text = p.Name
@@ -448,8 +449,8 @@ Public Class frmAnalyze
             .SubItems(colOSMID.Index).Text = p.OSMRelation.ToString
             .SubItems(colType.Index).Text = p.TypeCode
             .SubItems(colGSS.Index).Text = p.ONSCode
-            .SubItems(colCouncilStyle.Index).Text = BoundaryDB.BoundaryItem.CouncilStyle_ToString(p.CouncilStyle)
-            .SubItems(colParishType.Index).Text = BoundaryDB.BoundaryItem.ParishType_ToString(p.ParishType)
+            .SubItems(colCouncilStyle.Index).Text = BoundaryItem.CouncilStyle_ToString(p.CouncilStyle)
+            .SubItems(colParishType.Index).Text = BoundaryItem.ParishType_ToString(p.ParishType)
             .SubItems(colCouncilName.Index).Text = p.CouncilName.ToString
             .SubItems(colWebsite.Index).Text = p.Website
         End With
@@ -520,14 +521,14 @@ Public Class frmAnalyze
         My.Settings.frmAnalyze_MinMax = Me.WindowState
         My.Settings.Save()
     End Sub
-    Private Sub CollectExpanded(tvn As TreeNode, l As List(Of BoundaryDB.BoundaryItem))
-        If tvn.IsExpanded Then l.Add(DirectCast(tvn.Tag, BoundaryDB.BoundaryItem))
+    Private Sub CollectExpanded(tvn As TreeNode, l As List(Of BoundaryItem))
+        If tvn.IsExpanded Then l.Add(DirectCast(tvn.Tag, BoundaryItem))
         For Each xNode As TreeNode In tvn.Nodes
             CollectExpanded(xNode, l)
         Next
     End Sub
-    Private Sub RestoreExpanded(tvn As TreeNode, l As List(Of BoundaryDB.BoundaryItem))
-        If l.Contains(DirectCast(tvn.Tag, BoundaryDB.BoundaryItem)) Then tvn.Expand()
+    Private Sub RestoreExpanded(tvn As TreeNode, l As List(Of BoundaryItem))
+        If l.Contains(DirectCast(tvn.Tag, BoundaryItem)) Then tvn.Expand()
         For Each xnode As TreeNode In tvn.Nodes
             RestoreExpanded(xnode, l)
         Next
@@ -597,8 +598,8 @@ Public Class frmAnalyze
         If IsNothing(lvi) Then Return
         Dim x As TreeNode = DirectCast(lvi.Tag, TreeNode)
         If IsNothing(x) Then Return
-        Dim bi As BoundaryDB.BoundaryItem
-        bi = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        Dim bi As BoundaryItem
+        bi = DirectCast(x.Tag, BoundaryItem)
         If IsNothing(bi) Then Exit Sub
         Dim wasDeleted As Boolean = bi.IsDeleted
         If bi.Edit(xRetriever) Then
@@ -623,8 +624,8 @@ Public Class frmAnalyze
     Private Sub tsmiEdit_Click(sender As Object, e As EventArgs) Handles tsmiEdit.Click
         Dim xNode As TreeNode = tvList.SelectedNode
         If IsNothing(xNode) Then Return
-        Dim bi As BoundaryDB.BoundaryItem
-        bi = DirectCast(xNode.Tag, BoundaryDB.BoundaryItem)
+        Dim bi As BoundaryItem
+        bi = DirectCast(xNode.Tag, BoundaryItem)
         If bi.Edit(xRetriever) Then
             ' reload current tv item name possibly - no, definitely!
             Do Until xNode Is Nothing
@@ -642,22 +643,21 @@ Public Class frmAnalyze
 
     Private Sub tsmiShowAll_Click(sender As Object, e As EventArgs) Handles tsmiShowAll.Click
         Dim x As TreeNode = tvList.SelectedNode
-        Dim p As BoundaryDB.BoundaryItem
-        p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        Dim p As BoundaryItem
+        p = DirectCast(x.Tag, BoundaryItem)
         Dim iPar As Long = p.OSMRelation
         Dim iChild As Long
         For Each xChild As TreeNode In x.Nodes
             If xChild.Tag Is Nothing Then Continue For
-            p = DirectCast(xChild.Tag, BoundaryDB.BoundaryItem)
+            p = DirectCast(xChild.Tag, BoundaryItem)
             If p.IsDeleted Then Continue For
-            If p.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish _
-                AndAlso (p.ParishType = BoundaryDB.BoundaryItem.ParishTypes.PT_DetachedArea _
-                OrElse p.ParishType = BoundaryDB.BoundaryItem.ParishTypes.PT_LandsCommon) Then Continue For
+            If p.BoundaryType = BoundaryItem.BoundaryTypes.BT_CivilParish _
+                AndAlso (p.ParishType = BoundaryItem.ParishTypes.PT_DetachedArea) Then Continue For
             iChild = p.OSMRelation
             If iChild > 0 Then
                 ShowRelation(iChild)
                 Application.DoEvents()
-            ElseIf p.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_ParishGroup Then
+            ElseIf p.BoundaryType = BoundaryItem.BoundaryTypes.BT_ParishGroup Then
                 ShowParishGroup(p)
             ElseIf p.ONSCode <> "" AndAlso p.Lat <> 0.0 AndAlso p.Lon <> 0.0 Then
                 ShowPlaceHolder(p)
@@ -669,7 +669,7 @@ Public Class frmAnalyze
     End Sub
 
 
-    Private Sub ShowPlaceHolder(p As BoundaryDB.BoundaryItem)
+    Private Sub ShowPlaceHolder(p As BoundaryItem)
         Dim sJSON As String
         Dim xNode As New OSMNode
         Dim xName As New OSMTag("name", p.Name)
@@ -686,10 +686,10 @@ Public Class frmAnalyze
     End Sub
     Private Sub tsmiJSON_Click(sender As Object, e As EventArgs) Handles tsmiJSON.Click
         Dim x As TreeNode = tvList.SelectedNode
-        Dim p As BoundaryDB.BoundaryItem
+        Dim p As BoundaryItem
         Dim xRel As OSMRelation
         Dim sJSON As String
-        p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        p = DirectCast(x.Tag, BoundaryItem)
         Dim iPar As Long = p.OSMRelation
         If iPar > 0 Then
             xRel = TryCast(xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, iPar), OSMRelation)
@@ -772,15 +772,15 @@ Public Class frmAnalyze
         If IsNothing(lvi) Then Return
         Dim x As TreeNode = DirectCast(lvi.Tag, TreeNode)
         If IsNothing(x) Then Return
-        Dim p As BoundaryDB.BoundaryItem
+        Dim p As BoundaryItem
         Dim xRel As OSMRelation
         Dim sFile As String
-        p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        p = DirectCast(x.Tag, BoundaryItem)
         Dim iRel As Long = p.OSMRelation
         If iRel > 0 Then
             sFile = SpecialDirectories.Temp & "\r" & iRel & ".htm"
             xRel = TryCast(xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, iRel), OSMRelation)
-            Dim rep As New RelationReport(tmpDoc)
+            Dim rep As New RelationReport(tmpDoc, xRetriever)
             rep.RelationReport(sFile, xRel)
             OpenBrowserAt(sFile)
         End If
@@ -788,16 +788,16 @@ Public Class frmAnalyze
 
     Private Sub tsmiReport_Click(sender As Object, e As EventArgs) Handles tsmiReport.Click
         Dim x As TreeNode = tvList.SelectedNode
-        Dim p As BoundaryDB.BoundaryItem
+        Dim p As BoundaryItem
         Dim xRel As OSMRelation
         Dim sFile As String
-        p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        p = DirectCast(x.Tag, BoundaryItem)
         Dim iRel As Long = p.OSMRelation
 
         If iRel > 0 Then
             sFile = SpecialDirectories.Temp & "\r" & iRel & ".htm"
             xRel = TryCast(xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, iRel), OSMRelation)
-            Dim rep As New RelationReport(tmpDoc)
+            Dim rep As New RelationReport(tmpDoc, xRetriever)
             rep.RelationReport(sFile, xRel)
             OpenBrowserAt(sFile)
         End If
@@ -805,22 +805,25 @@ Public Class frmAnalyze
 
     Private Sub tsmiAddChild_Click(sender As Object, e As EventArgs) Handles tsmiAddChild.Click
         Dim x As TreeNode = tvList.SelectedNode
-        Dim p As BoundaryDB.BoundaryItem
-        p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        Dim p As BoundaryItem
+        p = DirectCast(x.Tag, BoundaryItem)
         Dim iRel As Long = p.OSMRelation
         Dim tvn As TreeNode
 
-        Dim xItem As New BoundaryDB.BoundaryItem(xDB)
+        Dim xItem As New BoundaryItem(xDB)
         xItem.Parent = p
         xItem.ParentCode = p.ONSCode
         Select Case p.BoundaryType
-            Case BoundaryDB.BoundaryItem.BoundaryTypes.BT_Unitary,
-                 BoundaryDB.BoundaryItem.BoundaryTypes.BT_MetroDistrict,
-                 BoundaryDB.BoundaryItem.BoundaryTypes.BT_NonMetroDistrict
-                xItem.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish
+            Case BoundaryItem.BoundaryTypes.BT_Unitary,
+                 BoundaryItem.BoundaryTypes.BT_MetroDistrict,
+                 BoundaryItem.BoundaryTypes.BT_NonMetroDistrict
+                xItem.BoundaryType = BoundaryItem.BoundaryTypes.BT_CivilParish
+            Case BoundaryItem.BoundaryTypes.BT_PrincipalArea
+                xItem.BoundaryType = BoundaryItem.BoundaryTypes.BT_Community
         End Select
         If xItem.Edit() Then
-            xDB.Items.Add(xItem.ONSCode, xItem)
+            ' frmEdit adds it to the DB already
+            ' xDB.Items.Add(xItem.ONSCode, xItem)
             tvn = x.Nodes.Add(xItem.ONSCode, "")
             tvn.Tag = xItem
             tvn.ContextMenuStrip = cmsNode
@@ -831,23 +834,23 @@ Public Class frmAnalyze
 
     Private Sub SetParishGroup(ByVal sender As Object, ByVal e As EventArgs)
         Dim myItem As ToolStripMenuItem
-        Dim xGroupItem As BoundaryDB.BoundaryItem
-        Dim xParishItem As BoundaryDB.BoundaryItem
+        Dim xGroupItem As BoundaryItem
+        Dim xParishItem As BoundaryItem
 
         ' Extract the tag value from the item received.
         myItem = CType(sender, ToolStripMenuItem)
-        xGroupItem = CType(myItem.Tag, BoundaryDB.BoundaryItem)
+        xGroupItem = CType(myItem.Tag, BoundaryItem)
 
         ' get the node to operate on
         Dim x As TreeNode = tvList.SelectedNode
-        xParishItem = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        xParishItem = DirectCast(x.Tag, BoundaryItem)
 
         ' set its parish group name into CouncilName
-        If xParishItem.BoundaryType <> BoundaryDB.BoundaryItem.BoundaryTypes.BT_CivilParish Then
+        If xParishItem.BoundaryType <> BoundaryItem.BoundaryTypes.BT_CivilParish Then
             Return
         End If
-        If xParishItem.ParishType <> BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishCouncil AndAlso
-            xParishItem.ParishType <> BoundaryDB.BoundaryItem.ParishTypes.PT_JointParishMeeting Then
+        If xParishItem.ParishType <> BoundaryItem.ParishTypes.PT_JointParishCouncil AndAlso
+            xParishItem.ParishType <> BoundaryItem.ParishTypes.PT_JointParishMeeting Then
             Return
         End If
         xParishItem.CouncilName = xGroupItem.Name
@@ -862,9 +865,9 @@ Public Class frmAnalyze
         Dim x As TreeNode = tvList.SelectedNode
         If x Is Nothing Then Return
         If x.Tag Is Nothing Then Return
-        Dim p As BoundaryDB.BoundaryItem
-        p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
-        Dim f As New frmReview(p, "")
+        Dim p As BoundaryItem
+        p = DirectCast(x.Tag, BoundaryItem)
+        Dim f As New frmReview(New BoundaryDBReviewProvider, p, "")
         f.ShowDialog(Me)
     End Sub
 
@@ -872,8 +875,8 @@ Public Class frmAnalyze
         Dim x As TreeNode = tvList.SelectedNode
         If x Is Nothing Then Return
         If x.Tag Is Nothing Then Return
-        Dim p As BoundaryDB.BoundaryItem
-        p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        Dim p As BoundaryItem
+        p = DirectCast(x.Tag, BoundaryItem)
         DoChildOverviewReport(p, False)
     End Sub
 
@@ -896,7 +899,7 @@ Public Class frmAnalyze
             End If
         End With
     End Sub
-    Private Sub DoChildOverviewReportEx(hdrs() As String, csv As CSVWriter, p As BoundaryDB.BoundaryItem, bDeep As Boolean)
+    Private Sub DoChildOverviewReportEx(hdrs() As String, csv As CSVWriter, p As BoundaryItem, bDeep As Boolean)
         Dim cols(hdrs.Length) As String
         Dim r As OSMRelation
         Dim i As Integer
@@ -920,7 +923,7 @@ Public Class frmAnalyze
                         Case "+status"
                             cols(i) = status
                         Case "+dbtype"
-                            cols(i) = BoundaryDB.BoundaryItem.BoundaryType_ToString(pr.BoundaryType)
+                            cols(i) = BoundaryItem.BoundaryType_ToString(pr.BoundaryType)
                         Case "+osmid"
                             cols(i) = pr.OSMRelation.ToString()
                         Case "+dbname"
@@ -955,8 +958,8 @@ Public Class frmAnalyze
         Dim x As TreeNode = tvList.SelectedNode
         If x Is Nothing Then Return
         If x.Tag Is Nothing Then Return
-        Dim p As BoundaryDB.BoundaryItem
-        p = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        Dim p As BoundaryItem
+        p = DirectCast(x.Tag, BoundaryItem)
         DoChildOverviewReport(p, True)
     End Sub
 
@@ -970,7 +973,7 @@ Public Class frmAnalyze
     End Sub
 
     Private Sub ExpandNode(n As TreeNode)
-        Dim xItem As BoundaryDB.BoundaryItem = DirectCast(n.Tag, BoundaryDB.BoundaryItem)
+        Dim xItem As BoundaryItem = DirectCast(n.Tag, BoundaryItem)
         If n.Nodes.Count <> 1 Then Return
         If n.Nodes(0).Text <> DUMMY_MARKER Then Return
         n.Nodes(0).Remove()
@@ -982,7 +985,7 @@ Public Class frmAnalyze
         Dim sName As String
         Dim colRequired As Color
         If tvn Is Nothing OrElse tvn.Tag Is Nothing Then Exit Sub
-        Dim xItem As BoundaryDB.BoundaryItem = DirectCast(tvn.Tag, BoundaryDB.BoundaryItem)
+        Dim xItem As BoundaryItem = DirectCast(tvn.Tag, BoundaryItem)
         iCount = xItem.NumChildren
         iCountOSM = xItem.NumKnownChildren
         sName = DisplayString(xItem)
@@ -998,7 +1001,7 @@ Public Class frmAnalyze
         If xItem.OSMRelation > 0 Then
             tvn.NodeFont = fntBold
         Else
-            If xItem.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_ParishGroup Then
+            If xItem.BoundaryType = BoundaryItem.BoundaryTypes.BT_ParishGroup Then
                 Dim parts = xItem.GroupMembers
                 If parts Is Nothing Then
                     tvn.NodeFont = fntNormal
@@ -1028,10 +1031,10 @@ Public Class frmAnalyze
     ''' <param name="tv">The TreeView control</param>
     ''' <param name="n">The TreeNode whose children are to be loaded</param>
     ''' <param name="xItem">The BoundaryItem corresponding to the TreeNode</param>
-    Private Sub LoadTreeNode(tv As TreeView, n As TreeNode, xItem As BoundaryDB.BoundaryItem)
+    Private Sub LoadTreeNode(tv As TreeView, n As TreeNode, xItem As BoundaryItem)
         Dim tvn As TreeNode
         ' ensure the nodes are sorted by name
-        Dim xList As New SortedList(Of String, BoundaryDB.BoundaryItem)
+        Dim xList As New SortedList(Of String, BoundaryItem)
         Dim sName As String
         For Each xChild In xItem.Children
             If (Not chkShowDeleted.Checked) AndAlso xChild.IsDeleted Then Continue For
@@ -1042,10 +1045,10 @@ Public Class frmAnalyze
                 xList.Add(sName, xChild)
             End If
         Next
-        Dim xEntry As BoundaryDB.BoundaryItem
+        Dim xEntry As BoundaryItem
         tv.Sorted = False
         tv.BeginUpdate()
-        For Each xKVP As KeyValuePair(Of String, BoundaryDB.BoundaryItem) In xList
+        For Each xKVP As KeyValuePair(Of String, BoundaryItem) In xList
             xEntry = xKVP.Value
 
             If n Is Nothing Then
@@ -1068,15 +1071,15 @@ Public Class frmAnalyze
 
     Private Sub tvList_DoubleClick(sender As Object, e As EventArgs) Handles tvList.DoubleClick
         Dim iRel As Long
-        Dim xItem As BoundaryDB.BoundaryItem
+        Dim xItem As BoundaryItem
 
         xRetriever.MaxAge = My.Settings.MaxCacheAge
 
         If tvList.SelectedNode Is Nothing Then Exit Sub
         If tvList.SelectedNode.Tag Is Nothing Then Exit Sub
-        xItem = DirectCast(tvList.SelectedNode.Tag, BoundaryDB.BoundaryItem)
+        xItem = DirectCast(tvList.SelectedNode.Tag, BoundaryItem)
         If Not IsNothing(xItem) Then
-            If xItem.BoundaryType = BoundaryDB.BoundaryItem.BoundaryTypes.BT_ParishGroup Then
+            If xItem.BoundaryType = BoundaryItem.BoundaryTypes.BT_ParishGroup Then
                 ShowParishGroup(xItem)
             Else
                 iRel = xItem.OSMRelation
@@ -1092,11 +1095,11 @@ Public Class frmAnalyze
             End If
         End If
     End Sub
-    Private Function ShowParishGroup(xItem As BoundaryDB.BoundaryItem) As OSMRelation
+    Private Function ShowParishGroup(xItem As BoundaryItem) As OSMRelation
         Dim rTemp As OSMRelation = Nothing
         Dim xRel As OSMRelation
         Dim xResolver As OSMResolver = Nothing
-        Dim parts As List(Of BoundaryDB.BoundaryItem)
+        Dim parts As List(Of BoundaryItem)
 
         parts = xItem.GroupMembers
         If parts Is Nothing Then Return Nothing
@@ -1106,11 +1109,12 @@ Public Class frmAnalyze
             xRel = DirectCast(xRetriever.GetOSMObject(tmpDoc, OSMObject.ObjectType.Relation, d.OSMRelation), OSMRelation)
             If xRel Is Nothing Then
                 MsgBox($"Unable to retrieve relation #{d.OSMRelation} ({d.Name})")
-            End If
-            If rTemp Is Nothing Then
-                rTemp = DirectCast(xRel.Clone(), OSMRelation)
             Else
-                rTemp = rTemp.Combine(xRel)
+                If rTemp Is Nothing Then
+                    rTemp = DirectCast(xRel.Clone(), OSMRelation)
+                Else
+                    rTemp = rTemp.Combine(xRel)
+                End If
             End If
         Next
 
@@ -1322,7 +1326,7 @@ Public Class frmAnalyze
     Private Sub tsmiOpenWebsite_Click(sender As Object, e As EventArgs) Handles tsmiOpenWebsite.Click
         Dim x As TreeNode = tvList.SelectedNode
         If x Is Nothing Then Exit Sub
-        Dim p As BoundaryDB.BoundaryItem = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        Dim p As BoundaryItem = DirectCast(x.Tag, BoundaryItem)
         If p Is Nothing Then Exit Sub
         If Len(p.Website) > 0 Then OpenBrowserAt(p.Website)
     End Sub
@@ -1333,24 +1337,24 @@ Public Class frmAnalyze
         If IsNothing(lvi) Then Return
         Dim x As TreeNode = DirectCast(lvi.Tag, TreeNode)
         If IsNothing(x) Then Return
-        Dim bi As BoundaryDB.BoundaryItem
-        bi = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        Dim bi As BoundaryItem
+        bi = DirectCast(x.Tag, BoundaryItem)
         If bi Is Nothing Then Exit Sub
         If Len(bi.Website) > 0 Then OpenBrowserAt(bi.Website)
     End Sub
 
     Private Sub tsmiChildReview_Click(sender As Object, e As EventArgs) Handles tsmiChildReview.Click
         If lvChildren.SelectedItems.Count < 1 Then Return
-        Dim items As New List(Of BoundaryDB.BoundaryItem)
+        Dim items As New List(Of BoundaryItem)
         Dim x As TreeNode
-        Dim bi As BoundaryDB.BoundaryItem
+        Dim bi As BoundaryItem
         Dim sTitle As String
 
         sTitle = " in " & biListViewParent.Name
         For Each lvi As ListViewItem In lvChildren.SelectedItems
             x = DirectCast(lvi.Tag, TreeNode)
             If x IsNot Nothing Then
-                bi = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+                bi = DirectCast(x.Tag, BoundaryItem)
                 If bi IsNot Nothing Then
                     If bi.IsDeleted Then Continue For
                     If bi.OSMRelation > 0 Then
@@ -1359,7 +1363,7 @@ Public Class frmAnalyze
                 End If
             End If
         Next
-        Dim f As New frmReview(items, sTitle)
+        Dim f As New frmReview(New BoundaryDBReviewProvider, items, sTitle)
         f.ShowDialog()
     End Sub
 
@@ -1371,6 +1375,7 @@ Public Class frmAnalyze
         tsmiChildShowInOsm.Enabled = (lvChildren.SelectedItems.Count = 1)
         tsmiChildReport.Enabled = (lvChildren.SelectedItems.Count = 1)
         tsmiChildReview.Enabled = (lvChildren.SelectedItems.Count >= 1)
+        tsmiChildSubareaReview.Enabled = (lvChildren.SelectedItems.Count >= 1)
     End Sub
 
     Private Sub cmsNode_Opening(sender As Object, e As CancelEventArgs) Handles cmsNode.Opening
@@ -1383,6 +1388,7 @@ Public Class frmAnalyze
         tsmiShowInOsm.Enabled = (tvList.SelectedNode IsNot Nothing)
         tsmiReport.Enabled = (tvList.SelectedNode IsNot Nothing)
         tsmiReview.Enabled = (tvList.SelectedNode IsNot Nothing)
+        tsmiSubareaReview.Enabled = (tvList.SelectedNode IsNot Nothing)
         tsmiSearchNom.Enabled = (tvList.SelectedNode IsNot Nothing)
         tsmiShowAll.Enabled = (tvList.SelectedNode IsNot Nothing)
     End Sub
@@ -1416,7 +1422,7 @@ Public Class frmAnalyze
     Private Sub tsmiShowInOsm_Click(sender As Object, e As EventArgs) Handles tsmiShowInOsm.Click
         Dim x As TreeNode = tvList.SelectedNode
         If x Is Nothing Then Return
-        Dim p As BoundaryDB.BoundaryItem = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        Dim p As BoundaryItem = DirectCast(x.Tag, BoundaryItem)
         If p Is Nothing Then Return
         Dim sUrl As String = ""
         If p.OSMRelation > 0 Then
@@ -1430,7 +1436,7 @@ Public Class frmAnalyze
     Private Sub tsmiAnalyze_Click(sender As Object, e As EventArgs) Handles tsmiAnalyze.Click
         Dim x As TreeNode = tvList.SelectedNode
         If x Is Nothing Then Return
-        Dim p As BoundaryDB.BoundaryItem = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        Dim p As BoundaryItem = DirectCast(x.Tag, BoundaryItem)
         If p Is Nothing Then Return
         If p.OSMRelation = 0 Then Return
         Dim sUrl As String = AnalyzeUrl(p.OSMRelation)
@@ -1449,8 +1455,7 @@ Public Class frmAnalyze
         If IsNothing(lvi) Then Return
         Dim x As TreeNode = DirectCast(lvi.Tag, TreeNode)
         If IsNothing(x) Then Return
-        Dim bi As BoundaryDB.BoundaryItem
-        bi = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        Dim bi As BoundaryItem = DirectCast(x.Tag, BoundaryItem)
         If bi Is Nothing Then Exit Sub
         If bi.OSMRelation = 0 Then Return
         Dim sUrl As String = AnalyzeUrl(bi.OSMRelation)
@@ -1463,8 +1468,7 @@ Public Class frmAnalyze
         If IsNothing(lvi) Then Return
         Dim x As TreeNode = DirectCast(lvi.Tag, TreeNode)
         If IsNothing(x) Then Return
-        Dim bi As BoundaryDB.BoundaryItem
-        bi = DirectCast(x.Tag, BoundaryDB.BoundaryItem)
+        Dim bi As BoundaryItem = DirectCast(x.Tag, BoundaryItem)
         If bi Is Nothing Then Exit Sub
         Dim sUrl As String
         If bi.OSMRelation > 0 Then
@@ -1550,7 +1554,7 @@ Public Class frmAnalyze
         Dim oDoc As OSMDoc
         Dim bBox As New BBox
         Dim iRel As Long
-        Dim x As BoundaryDB.BoundaryItem
+        Dim x As BoundaryItem
         Dim xNode As TreeNode
         Dim sURL As String
         Dim sAdminLevel As String = ""
@@ -1560,7 +1564,7 @@ Public Class frmAnalyze
             If IsNothing(xNode) Then
                 Exit Sub
             End If
-            x = DirectCast(xNode.Tag, BoundaryDB.BoundaryItem)
+            x = DirectCast(xNode.Tag, BoundaryItem)
             If IsNothing(x) Then
                 Exit Sub
             End If
@@ -1602,16 +1606,16 @@ Public Class frmAnalyze
         xDB.MergeOSM(oDoc, bUpdateAll)
         If xDB.ChangedItems.Count > 0 Then
 
-            Dim xExpanded As New List(Of BoundaryDB.BoundaryItem)
-            Dim xSelected As BoundaryDB.BoundaryItem = TryCast(tvList.SelectedNode?.Tag, BoundaryDB.BoundaryItem)
+            Dim xExpanded As New List(Of BoundaryItem)
+            Dim xSelected As BoundaryItem = TryCast(tvList.SelectedNode?.Tag, BoundaryItem)
             Dim selectedNodes(10) As String
-            Dim xTmp As BoundaryDB.BoundaryItem = xSelected
+            Dim xTmp As BoundaryItem = xSelected
             Dim i As Integer = 0
             Do
                 If xTmp Is Nothing Then Exit Do
                 selectedNodes(i) = xTmp.ONSCode
                 xTmp = xTmp.Parent
-                i = i + 1
+                i += 1
             Loop
 
             ' For Each xNode In tvList.Nodes
@@ -1630,7 +1634,7 @@ Public Class frmAnalyze
                     bAllowExpandCollapse = True ' otherwise the expand gets cancelled
                     xNode.Expand()
                     If j <= 0 Then Exit Do
-                    j = j - 1
+                    j -= 1
                     If xNode.Nodes.IndexOfKey(selectedNodes(j)) >= 0 Then
                         xNode = xNode.Nodes(xNode.Nodes.IndexOfKey(selectedNodes(j)))
                     End If
@@ -1711,7 +1715,7 @@ Public Class frmAnalyze
         If i Is Nothing Then Return
         Dim p As TreeNode = i.Parent
         If p Is Nothing Then Return
-        Dim bnd As BoundaryDB.BoundaryItem = DirectCast(p.Tag, BoundaryDB.BoundaryItem)
+        Dim bnd As BoundaryItem = DirectCast(p.Tag, BoundaryItem)
         If bnd Is Nothing Then Return
         tvList.SelectedNode = p
     End Sub
@@ -1725,11 +1729,16 @@ Public Class frmAnalyze
     Private Sub InstantSearch(s As String)
         Dim maxHits As Integer = My.Settings.InstantSearchCount
         If maxHits < 1 Or maxHits > 1000 Then maxHits = 10
+        s = Replace(s, "(", "\(")
+        s = Replace(s, ")", "\)")
+        s = Trim(s)
+        If Len(s) = 0 Then Return
         Dim re As New RegularExpressions.Regex(s, RegularExpressions.RegexOptions.IgnoreCase)
         lvSearchResults.Items.Clear()
         For Each b In xDB.Items.Values
+            If b.IsDeleted Then Continue For
             If re.IsMatch(b.Name) Then
-                Dim p As BoundaryDB.BoundaryItem = b.Parent
+                Dim p As BoundaryItem = b.Parent
                 With lvSearchResults.Items.Add(b.TypeCode)
                     .SubItems.Add(b.Name)
                     .SubItems.Add(p.Name)
@@ -1755,18 +1764,18 @@ Public Class frmAnalyze
 
     Private Sub lvSearchResults_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lvSearchResults.SelectedIndexChanged
         If lvSearchResults.SelectedItems.Count = 1 Then
-            Dim b As BoundaryDB.BoundaryItem = DirectCast(lvSearchResults.SelectedItems(0).Tag, BoundaryDB.BoundaryItem)
+            Dim b As BoundaryItem = DirectCast(lvSearchResults.SelectedItems(0).Tag, BoundaryItem)
             Dim s As String = b.Name
             lvSearchResults.Visible = False
             ' MsgBox($"Selected {s}")
             ShowBoundaryItem(b)
         End If
     End Sub
-    Private Sub ShowBoundaryItem(bi As BoundaryDB.BoundaryItem)
-        Dim lvls As New List(Of BoundaryDB.BoundaryItem)
-        Dim b As BoundaryDB.BoundaryItem = bi
+    Private Sub ShowBoundaryItem(bi As BoundaryItem)
+        Dim lvls As New List(Of BoundaryItem)
+        Dim b As BoundaryItem = bi
         Do
-            If b.BoundaryType <> BoundaryDB.BoundaryItem.BoundaryTypes.BT_Country Then
+            If b.BoundaryType <> BoundaryItem.BoundaryTypes.BT_Country Then
                 lvls.Add(b)
             End If
             b = b.Parent
@@ -1778,10 +1787,10 @@ Public Class frmAnalyze
             tn = tn.Parent
         End While
         ' select nation node
-        Dim tbi As BoundaryDB.BoundaryItem
+        Dim tbi As BoundaryItem
         For Each n As TreeNode In tvList.Nodes
             If n.Level = 0 Then
-                tbi = DirectCast(n.Tag, BoundaryDB.BoundaryItem)
+                tbi = DirectCast(n.Tag, BoundaryItem)
                 If tbi Is lvls(0) Then
                     tn = n
                     lvls.Remove(lvls(0))
@@ -1789,11 +1798,11 @@ Public Class frmAnalyze
             End If
         Next
         ' unless we were looking for the nation node, drill down
-        If DirectCast(tn.Tag, BoundaryDB.BoundaryItem) IsNot bi Then
+        If DirectCast(tn.Tag, BoundaryItem) IsNot bi Then
             For Each b In lvls
                 ExpandNode(tn)
                 For Each t As TreeNode In tn.Nodes
-                    tbi = DirectCast(t.Tag, BoundaryDB.BoundaryItem)
+                    tbi = DirectCast(t.Tag, BoundaryItem)
                     If tbi Is Nothing Then Continue For
                     If tbi Is b Then
                         bAllowExpandCollapse = True
@@ -1807,6 +1816,33 @@ Public Class frmAnalyze
         If tn IsNot Nothing Then
             tn.EnsureVisible()
             tvList.SelectedNode = tn
+        End If
+    End Sub
+
+    Private Sub tsmiChildSubareaReview_Click(sender As Object, e As EventArgs) Handles tsmiChildSubareaReview.Click
+        MsgBox("child / subarea review")
+    End Sub
+
+    Private Sub tsmiSubareaReview_Click(sender As Object, e As EventArgs) Handles tsmiSubareaReview.Click
+        MsgBox("subarea review")
+    End Sub
+
+    Private Sub tsmiOsmBoundaries_Click(sender As Object, e As EventArgs) Handles tsmiOsmBoundaries.Click
+        Dim sIn As String = "C:\VMShare\mkgmap\work\uk\great-britain-latest.osm.pbf"
+        '        Dim sIn As String = "C:\VMShare\mkgmap\work\uk\gbb.osm"
+        Dim sOut As String = "C:\Temp\boundsrpt.csv"
+        If Not System.IO.File.Exists(sIn) Then
+            MsgBox($"{sIn} not found")
+            Return
+        End If
+        Dim fOut As New IO.StreamWriter(sOut, False, Encoding.UTF8)
+        Dim rpt = New OSMFileReporter(sIn, fOut)
+        Dim bRet As Boolean = rpt.Run()
+        fOut.Close()
+        If bRet Then
+            MsgBox($"CSV created in {sOut}")
+        Else
+            MsgBox("Error writing output file")
         End If
     End Sub
 End Class

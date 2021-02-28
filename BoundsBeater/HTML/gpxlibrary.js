@@ -346,7 +346,7 @@ function drawJSON(j, id) {
     isParishGroup = false;
     var opts;
     if (arg && arg.properties && arg.properties.admin_level) {
-        adminLevel = arg.properties.admin_level;
+        adminLevel = parseInt(arg.properties.admin_level);
         // alert("admin level " + adminLevel + " style " + arg.properties.council_style);
         if (isNaN(parseInt(adminLevel))
             || adminLevel < 0
@@ -355,8 +355,8 @@ function drawJSON(j, id) {
         }
         // adminLevel += 0; // ensure integer
         opts = levelOptions[adminLevel];
-        if (adminLevel == 10) {
-            if (arg.properties.council_style == "town") {
+        if (adminLevel === 10) {
+            if (arg.properties.council_style === "town") {
                 opts = townOptions;
             } else if (arg.properties.council_style === "city" || arg.properties.council_style === "city_and_county" || arg.properties.council_style === "city_and_district") {
                 opts = cityOptions;
@@ -366,8 +366,8 @@ function drawJSON(j, id) {
                 opts = groupOptions;
                 isParishGroup = true;
             }
-        } else if (adminLevel == 8 || adminLevel == 6) {
-            if (arg.properties.council_style == "city" || arg.properties.council_style == "city_and_county" || arg.properties.council_style == "city_and_district") {
+        } else if (adminLevel === 8 || adminLevel === 6) {
+            if (arg.properties.council_style === "city" || arg.properties.council_style === "city_and_county" || arg.properties.council_style === "city_and_district") {
                 opts = cityOptions;
             }
         }

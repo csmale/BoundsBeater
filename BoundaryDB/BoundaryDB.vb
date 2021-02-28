@@ -123,11 +123,36 @@ Public Class BoundaryDB
                     xItem.Parent = Items(xItem.ParentCode)
                 Else
                     If xItem.ParentCode <> "0" Then
-                        MsgBox("undefined parent referenced: " & xItem.ParentCode)
+                        MsgBox($"Item {xItem.ONSCode} ({xItem.Name}) referenced undefined parent: {xItem.ParentCode}")
                     End If
                 End If
             End If
         Next
+
+#If True Then
+        ' hack to move dorset parishes
+        MergeStuff("E06000059", {"E07000049", "E07000050", "E07000051", "E07000052", "E07000053", "E06000059"})
+
+        ' bournemouth, christchurch and poole
+        MergeStuff("E06000058", {"E06000028", "E07000048", "E06000029"})
+
+        ' east suffolk
+        MergeStuff("E07000244", {"E07000205", "E07000206"})
+
+        ' west suffolk
+        MergeStuff("E07000245", {"E07000201", "E07000204"})
+
+        ' somerset west and taunton
+        MergeStuff("E07000246", {"E07000190", "E07000191"})
+
+        ' glasgow city
+        MergeStuff("S12000049", {"S12000046"})
+
+        ' north lanarkshire
+        MergeStuff("S12000050", {"S12000044"})
+
+        Me.Save()
+#End If
 
         Dim itmp As Integer
         For Each xItem In Items.Values
@@ -142,6 +167,21 @@ Public Class BoundaryDB
         End If
         bFromXML = True
         Return True
+    End Function
+
+    Public Function MergeStuff(sTarget As String, sFrom() As String) As Integer
+        Dim xitem As BoundaryItem
+        Dim iCount As Integer = 0
+        Dim xTarget As BoundaryItem = Items(sTarget)
+        If IsNothing(xTarget) Then Return iCount
+        For Each sSource In sFrom
+            If Items.ContainsKey(sSource) Then
+                xitem = Items(sSource)
+                xTarget.MergeFrom(xitem)
+                iCount += 1
+            End If
+        Next
+        Return icount
     End Function
     Public Function LoadCSV(sFile As String) As Boolean
 
@@ -168,6 +208,7 @@ Public Class BoundaryDB
 
     End Function
     Private Shared Function MakePrefix(sName As String) As String
+        If Len(sName) = 0 Then Return sName
         Dim sTmp As String = LCase(Replace(sName, " ", ""))
 
         If sTmp.StartsWith("northeast") OrElse sTmp.StartsWith("northwest") _
@@ -220,7 +261,7 @@ Public Class BoundaryDB
                                 Continue While
                             End If
                             sBndType = GetTag(xEl, "boundary")
-                            If sBndType = "administrative" Or sBndType = "ceremonial" Then
+                            If BoundaryItem.CanHandleBoundaryType(sBndType) Then
                                 ID = CLng(xEl.Attributes("id").InnerText)
                                 If OSMIndex.Keys.Contains(ID) Then
                                     bi = OSMIndex(ID)
@@ -349,6 +390,8 @@ Public Class BoundaryDB
             BT_ScotCouncil
             BT_NIreDistrict
             BT_ParishGroup
+            BT_HistoricCounty
+            BT_ViceCounty
         End Enum
         Public Enum CouncilStyles
             CS_Default
@@ -372,6 +415,7 @@ Public Class BoundaryDB
             PT_JointParishMeeting
             PT_LandsCommon
             PT_CommunityCouncil
+            PT_JointCommunityCouncil
             PT_DetachedArea
             PT_NA
         End Enum
@@ -413,75 +457,70 @@ Public Class BoundaryDB
         Private Shared _mapStringBT As Dictionary(Of String, BoundaryTypes)
         Private Shared _mapBTtoGSSPrefix As Dictionary(Of BoundaryTypes, String)
 
+        Shared Sub New()
+            _mapBTString = New Dictionary(Of BoundaryTypes, String) From {
+                {BoundaryTypes.BT_Region, "RGN"},
+                {BoundaryTypes.BT_Unitary, "UA"},
+                {BoundaryTypes.BT_CivilParish, "PAR"},
+                {BoundaryTypes.BT_NonMetroCounty, "CTY"},
+                {BoundaryTypes.BT_NonMetroDistrict, "NMD"},
+                {BoundaryTypes.BT_MetroCounty, "MCTY"},
+                {BoundaryTypes.BT_MetroDistrict, "MD"},
+                {BoundaryTypes.BT_Nation, "CTRY"},
+                {BoundaryTypes.BT_CeremonialCounty, "CCTY"},
+                {BoundaryTypes.BT_SuiGeneris, "SGEN"},
+                {BoundaryTypes.BT_Liberty, "LBTY"},
+                {BoundaryTypes.BT_LondonBorough, "LONB"},
+                {BoundaryTypes.BT_PreservedCounty, "PCTY"},
+                {BoundaryTypes.BT_PrincipalArea, "WPA"},
+                {BoundaryTypes.BT_ScotCouncil, "SCA"},
+                {BoundaryTypes.BT_Country, "UK"},
+                {BoundaryTypes.BT_Community, "COM"},
+                {BoundaryTypes.BT_NIreDistrict, "NID"},
+                {BoundaryTypes.BT_ParishGroup, "PGRP"},
+                {BoundaryTypes.BT_HistoricCounty, "HCTY"},
+                {BoundaryTypes.BT_ViceCounty, "VCTY"}
+            }
+            _mapStringBT = New Dictionary(Of String, BoundaryTypes) From {
+                {"region", BoundaryTypes.BT_Region},
+                {"unitary", BoundaryTypes.BT_Unitary},
+                {"civil_parish", BoundaryTypes.BT_CivilParish},
+                {"adm_county", BoundaryTypes.BT_NonMetroCounty},
+                {"non_metro_district", BoundaryTypes.BT_NonMetroDistrict},
+                {"metro_county", BoundaryTypes.BT_MetroCounty},
+                {"metro_district", BoundaryTypes.BT_MetroDistrict},
+                {"nation", BoundaryTypes.BT_Nation},
+                {"ceremonial_county", BoundaryTypes.BT_CeremonialCounty},
+                {"sui_generis", BoundaryTypes.BT_SuiGeneris},
+                {"liberty", BoundaryTypes.BT_Liberty},
+                {"london_borough", BoundaryTypes.BT_LondonBorough},
+                {"preserved_county", BoundaryTypes.BT_PreservedCounty},
+                {"wales_district", BoundaryTypes.BT_PrincipalArea},
+                {"scotland_district", BoundaryTypes.BT_ScotCouncil},
+                {"country", BoundaryTypes.BT_Country},
+                {"community", BoundaryTypes.BT_Community},
+                {"n_ireland_district", BoundaryTypes.BT_NIreDistrict},
+                {"parish_group", BoundaryTypes.BT_ParishGroup},
+                {"historic_county", BoundaryTypes.BT_HistoricCounty},
+                {"vice_county", BoundaryTypes.BT_ViceCounty}
+            }
+            _mapBTtoGSSPrefix = New Dictionary(Of BoundaryTypes, String) From {
+                {BoundaryTypes.BT_Region, "E12"},
+                {BoundaryTypes.BT_Unitary, "E06"},
+                {BoundaryTypes.BT_CivilParish, "E04"},
+                {BoundaryTypes.BT_NonMetroCounty, "E10"},
+                {BoundaryTypes.BT_NonMetroDistrict, "E07"},
+                {BoundaryTypes.BT_MetroCounty, "E11"},
+                {BoundaryTypes.BT_MetroDistrict, "E08"},
+                {BoundaryTypes.BT_LondonBorough, "E09"},
+                {BoundaryTypes.BT_PrincipalArea, "W06"},
+                {BoundaryTypes.BT_ScotCouncil, "S12"},
+                {BoundaryTypes.BT_Community, "W04"},
+                {BoundaryTypes.BT_NIreDistrict, "N09"}
+            }
+        End Sub
         Public Sub New()
-            If _mapBTString Is Nothing Then
-                _mapBTString = New Dictionary(Of BoundaryTypes, String)
-                With _mapBTString
-                    .Add(BoundaryTypes.BT_Region, "RGN")
-                    .Add(BoundaryTypes.BT_Unitary, "UA")
-                    .Add(BoundaryTypes.BT_CivilParish, "PAR")
-                    .Add(BoundaryTypes.BT_NonMetroCounty, "CTY")
-                    .Add(BoundaryTypes.BT_NonMetroDistrict, "NMD")
-                    .Add(BoundaryTypes.BT_MetroCounty, "MCTY")
-                    .Add(BoundaryTypes.BT_MetroDistrict, "MD")
-                    .Add(BoundaryTypes.BT_Nation, "CTRY")
-                    .Add(BoundaryTypes.BT_CeremonialCounty, "CCTY")
-                    .Add(BoundaryTypes.BT_SuiGeneris, "SGEN")
-                    .Add(BoundaryTypes.BT_Liberty, "LBTY")
-                    .Add(BoundaryTypes.BT_LondonBorough, "LONB")
-                    .Add(BoundaryTypes.BT_PreservedCounty, "PCTY")
-                    .Add(BoundaryTypes.BT_PrincipalArea, "WPA")
-                    .Add(BoundaryTypes.BT_ScotCouncil, "SCA")
-                    .Add(BoundaryTypes.BT_Country, "UK")
-                    .Add(BoundaryTypes.BT_Community, "COM")
-                    .Add(BoundaryTypes.BT_NIreDistrict, "NID")
-                    .Add(BoundaryTypes.BT_ParishGroup, "PGRP")
-                End With
-                _mapStringBT = New Dictionary(Of String, BoundaryTypes)
-                With _mapStringBT
-                    .Add("region", BoundaryTypes.BT_Region)
-                    .Add("unitary", BoundaryTypes.BT_Unitary)
-                    .Add("civil_parish", BoundaryTypes.BT_CivilParish)
-                    .Add("adm_county", BoundaryTypes.BT_NonMetroCounty)
-                    .Add("non_metro_district", BoundaryTypes.BT_NonMetroDistrict)
-                    .Add("metro_county", BoundaryTypes.BT_MetroCounty)
-                    .Add("metro_district", BoundaryTypes.BT_MetroDistrict)
-                    .Add("nation", BoundaryTypes.BT_Nation)
-                    .Add("ceremonial_county", BoundaryTypes.BT_CeremonialCounty)
-                    .Add("sui_generis", BoundaryTypes.BT_SuiGeneris)
-                    .Add("liberty", BoundaryTypes.BT_Liberty)
-                    .Add("london_borough", BoundaryTypes.BT_LondonBorough)
-                    .Add("preserved_county", BoundaryTypes.BT_PreservedCounty)
-                    .Add("wales_district", BoundaryTypes.BT_PrincipalArea)
-                    .Add("scotland_district", BoundaryTypes.BT_ScotCouncil)
-                    .Add("country", BoundaryTypes.BT_Country)
-                    .Add("community", BoundaryTypes.BT_Community)
-                    .Add("n_ireland_district", BoundaryTypes.BT_NIreDistrict)
-                    .Add("parish_group", BoundaryTypes.BT_ParishGroup)
-                End With
-                _mapBTtoGSSPrefix = New Dictionary(Of BoundaryTypes, String)
-                With _mapBTtoGSSPrefix
-                    .Add(BoundaryTypes.BT_Region, "E12")
-                    .Add(BoundaryTypes.BT_Unitary, "E06")
-                    .Add(BoundaryTypes.BT_CivilParish, "E04")
-                    .Add(BoundaryTypes.BT_NonMetroCounty, "E10")
-                    .Add(BoundaryTypes.BT_NonMetroDistrict, "E07")
-                    .Add(BoundaryTypes.BT_MetroCounty, "E11")
-                    .Add(BoundaryTypes.BT_MetroDistrict, "E08")
-                    ' .Add(BoundaryTypes.BT_Nation, "")
-                    ' .Add(BoundaryTypes.BT_CeremonialCounty, "")
-                    ' .Add(BoundaryTypes.BT_SuiGeneris, "")
-                    ' .Add(BoundaryTypes.BT_Liberty, "")
-                    .Add(BoundaryTypes.BT_LondonBorough, "E09")
-                    ' .Add(BoundaryTypes.BT_PreservedCounty, "")
-                    .Add(BoundaryTypes.BT_PrincipalArea, "W06")
-                    .Add(BoundaryTypes.BT_ScotCouncil, "S12")
-                    ' .Add(BoundaryTypes.BT_Country, "")
-                    .Add(BoundaryTypes.BT_Community, "W04")
-                    .Add(BoundaryTypes.BT_NIreDistrict, "N09")
-                    ' .Add(BoundaryTypes.BT_ParishGroup, "")
-                End With
-            End If
+
         End Sub
         Public Property BoundaryType As BoundaryTypes
             Get
@@ -504,6 +543,9 @@ Public Class BoundaryDB
                 End If
             End Set
         End Property
+        Public Shared Function CanHandleBoundaryType(sType As String) As Boolean
+            Return sType = "administrative" OrElse sType = "ceremonial" OrElse sType = "historic" OrElse sType = "traditional"
+        End Function
         Public ReadOnly Property GSSPrefix As String
             Get
                 Return GSSPrefixForBoundaryType(_BoundaryType)
@@ -674,7 +716,7 @@ Public Class BoundaryDB
                         Return False
                 End Select
                 If BoundaryType = BoundaryTypes.BT_CivilParish OrElse BoundaryType = BoundaryTypes.BT_ParishGroup Then
-                    If ParishType = ParishTypes.PT_ParishCouncil Then
+                    If ParishType = ParishTypes.PT_ParishCouncil OrElse ParishType = ParishTypes.PT_CommunityCouncil Then
                         Return True
                     End If
                     Return False
@@ -751,7 +793,7 @@ Public Class BoundaryDB
                 _btcode = "?"
             End If
 
-            If BoundaryType = BoundaryTypes.BT_CivilParish Then
+            If BoundaryType = BoundaryTypes.BT_CivilParish OrElse BoundaryType = BoundaryTypes.BT_Community Then
                 ParishType = ParishType_FromString(NodeText(xBnd.SelectSingleNode("parish_type")))
             Else
                 ParishType = ParishTypes.PT_NA
@@ -868,6 +910,8 @@ Public Class BoundaryDB
                 Case "community" : BoundaryType = BoundaryTypes.BT_Community
                 Case "n_ireland_district" : BoundaryType = BoundaryTypes.BT_NIreDistrict
                 Case "parish_group" : BoundaryType = BoundaryTypes.BT_ParishGroup
+                Case "historic_county" : BoundaryType = BoundaryTypes.BT_HistoricCounty
+                Case "vice_county" : BoundaryType = BoundaryTypes.BT_ViceCounty
                 Case Else
                     MsgBox("unrecognised boundary type " & s)
                     BoundaryType = BoundaryTypes.BT_Unknown
@@ -952,6 +996,8 @@ Public Class BoundaryDB
                 Case BoundaryTypes.BT_ScotCouncil : sTmp = "scotland_district"
                 Case BoundaryTypes.BT_NIreDistrict : sTmp = "n_ireland_district"
                 Case BoundaryTypes.BT_ParishGroup : sTmp = "parish_group"
+                Case BoundaryTypes.BT_HistoricCounty : sTmp = "historic_county"
+                Case BoundaryTypes.BT_ViceCounty : sTmp = "vice_county"
                 Case Else
                     sTmp = ""
             End Select
@@ -979,6 +1025,8 @@ Public Class BoundaryDB
                 Case "country" : BoundaryType = BoundaryTypes.BT_Country
                 Case "community" : BoundaryType = BoundaryTypes.BT_Community
                 Case "n_ireland_district" : BoundaryType = BoundaryTypes.BT_NIreDistrict
+                Case "historic_county" : BoundaryType = BoundaryTypes.BT_HistoricCounty
+                Case "vice_county" : BoundaryType = BoundaryTypes.BT_ViceCounty
                 Case Else
                     ' MsgBox("unrecognised boundary designation " & s)
                     BoundaryType = BoundaryTypes.BT_Unknown
@@ -994,6 +1042,7 @@ Public Class BoundaryDB
                 Case ParishTypes.PT_JointParishMeeting : sTmp = "joint_parish_meeting"
                 Case ParishTypes.PT_LandsCommon : sTmp = "lands_common"
                 Case ParishTypes.PT_CommunityCouncil : sTmp = "community_council"
+                Case ParishTypes.PT_JointCommunityCouncil : sTmp = "joint_community_council"
                 Case ParishTypes.PT_DetachedArea : sTmp = "detached_area"
                 Case ParishTypes.PT_NA : sTmp = ""
                 Case Else
@@ -1016,6 +1065,8 @@ Public Class BoundaryDB
                     xRet = ParishTypes.PT_LandsCommon
                 Case "community_council"
                     xRet = ParishTypes.PT_CommunityCouncil
+                Case "joint_community_council"
+                    xRet = ParishTypes.PT_JointCommunityCouncil
                 Case "detached_area"
                     xRet = ParishTypes.PT_DetachedArea
                 Case ""
@@ -1032,6 +1083,17 @@ Public Class BoundaryDB
             Else
                 SetValue(xNode, "osmid", "r" & OSMRelation.ToString())
             End If
+        End Sub
+        ' move children of donor node to become children of this node
+        Public Sub MergeFrom(xFrom As BoundaryItem)
+            If xFrom.Children.Count = 0 Then Return
+            Dim xChildren(xFrom.Children.Count - 1) As BoundaryItem
+            xFrom.Children.CopyTo(xChildren)
+            For Each x In xChildren
+                x.Parent = Me
+                x.ParentCode = ParentCode
+                UpdateXML()
+            Next
         End Sub
         Public Function Edit(Optional Retriever As OSMRetriever = Nothing) As Boolean
             Dim f As New frmEdit
@@ -1060,13 +1122,16 @@ Public Class BoundaryDB
             If IsDeleted Then _xNode.SetAttribute(DeletedAttribute, "1") Else _xNode.RemoveAttribute(DeletedAttribute)
             SetValue(_xNode, "name", Name)
             SetValue(_xNode, "name2", Name2)
+            SetValue(_xNode, "par_new", Parent.ONSCode)
+            SetValue(_xNode, "par_name", Parent.Name)
+            SetValue(_xNode, "par_ons", Nothing)
             SetValue(_xNode, "council_name", CouncilName)
             SetValue(_xNode, "council_name2", CouncilName2)
             SetIDinXML()
             SetValue(_xNode, "newcode", ONSCode)
             SetValue(_xNode, "type", BoundaryType_ToString(BoundaryType))
             SetValue(_xNode, "council_style", CouncilStyle_ToString(CouncilStyle))
-            SetValue(_xNode, "parish_type", If(BoundaryType = BoundaryTypes.BT_CivilParish, ParishType_ToString(ParishType), ""))
+            SetValue(_xNode, "parish_type", If(BoundaryType = BoundaryTypes.BT_CivilParish OrElse BoundaryType = BoundaryTypes.BT_Community, ParishType_ToString(ParishType), ""))
             SetValue(_xNode, "norm_name", NormName)
             SetValue(_xNode, "prefix", Prefix)
             SetValue(_xNode, "is_borough", If(IsBorough, "1", "0"))
@@ -1141,13 +1206,15 @@ Public Class BoundaryDB
             ' how to insert a missing element?
             If IsNothing(xChild) Then
                 ' don't *add* element that doesn't already exist if the value is blank or boolean "false"
-                If Len(sValue) = 0 Then Exit Sub
+                If IsNothing(sValue) OrElse Len(sValue) = 0 Then Exit Sub
                 If Left(sKey, 3) = "is_" AndAlso sValue = "0" Then Exit Sub
                 xChild = xNode.OwnerDocument.CreateElement(sKey)
                 xNode.AppendChild(xChild)
             End If
             If xChild.InnerText <> sValue Then
-                If sValue = "" Then
+                If IsNothing(sValue) Then
+                    xChild.ParentNode.RemoveChild(xChild)
+                ElseIf sValue = "" Then
                     xChild.IsEmpty = True
                 Else
                     xChild.InnerText = sValue
@@ -1160,8 +1227,13 @@ Public Class BoundaryDB
                 If Me.BoundaryType <> BoundaryItem.BoundaryTypes.BT_ParishGroup Then Return Nothing
                 Dim a As New List(Of BoundaryItem)
                 For Each x As BoundaryItem In _bdb.Items.Values
-                    If x.BoundaryType <> BoundaryItem.BoundaryTypes.BT_CivilParish Then Continue For
-                    If x.ParishType <> BoundaryItem.ParishTypes.PT_JointParishCouncil AndAlso x.ParishType <> BoundaryItem.ParishTypes.PT_JointParishMeeting Then Continue For
+                    If (x.BoundaryType <> BoundaryTypes.BT_CivilParish) _
+                        AndAlso (x.BoundaryType <> BoundaryTypes.BT_Community) _
+                            Then Continue For
+                    If (x.ParishType <> ParishTypes.PT_JointParishCouncil) _
+                        AndAlso (x.ParishType <> ParishTypes.PT_JointParishMeeting) _
+                        AndAlso (x.ParishType <> ParishTypes.PT_JointCommunityCouncil) _
+                            Then Continue For
                     If x.CouncilName = CouncilName Then a.Add(x)
                 Next
                 Return a
@@ -1180,12 +1252,12 @@ Public Class BoundaryDB
     Public Function MergeOSM(xOSMDoc As OSMDoc, Optional bUpdateAll As Boolean = False) As Boolean
         Dim xRel As OSMRelation
         Dim iLevel As Integer
-        Dim sLevel As String
-        Dim sName As String
-        Dim sNorm As String
-        Dim sType As String
-        Dim sBType As String
-        Dim sONS As String
+        Dim sLevel As String = String.Empty
+        Dim sName As String = String.Empty
+        Dim sNorm As String = String.Empty
+        Dim sType As String = String.Empty
+        Dim sBType As String = String.Empty
+        Dim sONS As String = String.Empty
         Dim oMatches As New List(Of BoundaryItem)
         Dim xMatch As BoundaryItem
         Dim xBnd As BoundaryItem
@@ -1200,7 +1272,7 @@ Public Class BoundaryDB
             sType = xRel.Tag("type")
             If sType = "boundary" Then
                 sBType = xRel.Tag("boundary")
-                If sBType <> "administrative" And sBType <> "ceremonial" Then
+                If Not BoundaryItem.CanHandleBoundaryType(sBType) Then
                     Continue For
                 End If
                 sName = xRel.Tag("name")

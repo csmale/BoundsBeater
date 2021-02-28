@@ -6,8 +6,8 @@ Imports System.Windows.Input
 Public Class frmEdit
     Public xItem As BoundaryItem
     Public xDB As BoundaryDB
-    Public sOriginalGSS As String
-    Public GssPrefix As String
+    Public sOriginalGSS As String = String.Empty
+    Public GssPrefix As String = String.Empty
     Private iOriginalRel As Long
     Public Retriever As OSMRetriever
     Public RelChangeAllowed As Boolean = True
@@ -52,6 +52,7 @@ Public Class frmEdit
             .Add(New GenericListItem(Of ParishTypes)("Lands Common", ParishTypes.PT_LandsCommon))
             .Add(New GenericListItem(Of ParishTypes)("Detached Area", ParishTypes.PT_DetachedArea))
             .Add(New GenericListItem(Of ParishTypes)("Welsh Community Council", ParishTypes.PT_CommunityCouncil))
+            .Add(New GenericListItem(Of ParishTypes)("Welsh Joint Community Council", ParishTypes.PT_JointCommunityCouncil))
             .Add(New GenericListItem(Of ParishTypes)("N/A", ParishTypes.PT_NA))
         End With
         With cbType.Items
@@ -75,6 +76,8 @@ Public Class frmEdit
             .Add(New GenericListItem(Of BoundaryTypes)("Scottish Council", BoundaryTypes.BT_ScotCouncil))
             .Add(New GenericListItem(Of BoundaryTypes)("Northern Ireland District", BoundaryTypes.BT_NIreDistrict))
             .Add(New GenericListItem(Of BoundaryTypes)("Parish Group", BoundaryTypes.BT_ParishGroup))
+            .Add(New GenericListItem(Of BoundaryTypes)("Historical County", BoundaryTypes.BT_HistoricCounty))
+            .Add(New GenericListItem(Of BoundaryTypes)("Vice County", BoundaryTypes.BT_ViceCounty))
         End With
         With cbStyle.Items
             .Clear()
@@ -101,8 +104,8 @@ Public Class frmEdit
             End If
         Next
         If xSelected Is Nothing _
-            AndAlso xItem.BoundaryType = BoundaryTypes.BT_CivilParish _
-            AndAlso (xItem.ParishType = ParishTypes.PT_JointParishCouncil OrElse xItem.ParishType = ParishTypes.PT_JointParishMeeting) Then
+            AndAlso (xItem.BoundaryType = BoundaryTypes.BT_CivilParish OrElse xItem.BoundaryType = BoundaryTypes.BT_Community) _
+            AndAlso (xItem.ParishType = ParishTypes.PT_JointParishCouncil OrElse xItem.ParishType = ParishTypes.PT_JointParishMeeting OrElse xItem.ParishType = ParishTypes.PT_JointCommunityCouncil) Then
             Dim x As New BoundaryItem(xDB)
             x.Name = xItem.CouncilName
             x.BoundaryType = BoundaryTypes.BT_ParishGroup
@@ -153,7 +156,7 @@ Public Class frmEdit
                 txtElecFraction.Text = .ElectionFraction.ToString
                 txtElecMod.Enabled = True
                 txtElecMod.Text = .ElectionCycleStartMod.ToString
-                lblNextElection.Text = $"Next election cycke starts in { .NextElectionCycleYear.ToString}"
+                lblNextElection.Text = $"Next election cycle starts in { .NextElectionCycleYear.ToString}"
             Else
                 txtElecCycle.Text = ""
                 txtElecCycle.Enabled = False
@@ -232,9 +235,16 @@ Public Class frmEdit
         If bt = BoundaryTypes.BT_CivilParish _
             AndAlso (pt = ParishTypes.PT_JointParishCouncil OrElse pt = ParishTypes.PT_JointParishMeeting) Then
             cbGroup.Visible = True
+            txtCouncilName2.Enabled = False
+            txtCouncilName.Visible = False
+        ElseIf bt = BoundaryTypes.BT_Community _
+            AndAlso (pt = ParishTypes.PT_JointCommunityCouncil) Then
+            cbGroup.Visible = True
+            txtCouncilName2.Enabled = False
             txtCouncilName.Visible = False
         Else
             cbGroup.Visible = False
+            txtCouncilName2.Enabled = True
             txtCouncilName.Visible = True
             If bt = BoundaryTypes.BT_ParishGroup Then
                 If txtGSS.Text = "" Then txtGSS.Text = CreateGroupID()
@@ -301,6 +311,11 @@ Public Class frmEdit
                     (.ParishType = ParishTypes.PT_JointParishCouncil OrElse .ParishType = ParishTypes.PT_JointParishMeeting) Then
                 .CouncilName = Trim(cbGroup.Text)
                 .CouncilName2 = ""
+            ElseIf .BoundaryType = BoundaryTypes.BT_Community AndAlso
+                    (.ParishType = ParishTypes.PT_JointCommunityCouncil) Then
+                ' problem here: doesnt handle welsh joint council names
+                .CouncilName = Trim(cbGroup.Text)
+                .CouncilName2 = Trim(txtCouncilName2.Text)
             Else
                 .CouncilName = Trim(txtCouncilName.Text)
                 .CouncilName2 = Trim(txtCouncilName2.Text)
@@ -326,6 +341,10 @@ Public Class frmEdit
                 Else
                     .SetDetachedAreas(a)
                 End If
+            End If
+            If sGSS <> sOriginalGSS Then
+                xDB.Items.Add(sGSS, xItem)
+                If Not String.IsNullOrEmpty(sOriginalGSS) Then xDB.Items.Remove(sOriginalGSS)
             End If
         End With
     End Sub
@@ -387,8 +406,8 @@ Public Class frmEdit
                 txtRelID.Focus()
                 Return
             End If
-            If xNewRel.Tag("boundary") <> "administrative" AndAlso xNewRel.Tag("boundary") <> "ceremonial" Then
-                MsgBox($"Boundary relation {iRel} is not administrative or ceremonial")
+            If xNewRel.Tag("boundary") <> "administrative" AndAlso xNewRel.Tag("boundary") <> "ceremonial" AndAlso xNewRel.Tag("boundary") <> "vice_county" Then
+                MsgBox($"Boundary relation {iRel} is not administrative, ceremonial or vice_county")
                 txtRelID.Focus()
                 Return
             End If
@@ -560,4 +579,24 @@ Public Class frmEdit
         If Len(sTmp) > 0 Then OpenBrowserAt(sTmp)
     End Sub
 
+    Private Sub cbGroup_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cbGroup.SelectedIndexChanged
+        If xItem.BoundaryType <> BoundaryTypes.BT_Community Then Return
+        Dim ons As String
+        Dim x As BoundaryItem
+        If TypeOf cbGroup.SelectedValue Is String Then
+            ons = CType(cbGroup.SelectedValue, String)
+            x = xDB.Items(ons)
+        ElseIf TypeOf cbGroup.Selectedvalue Is BoundaryItem Then
+            x = CType(cbGroup.SelectedValue, BoundaryItem)
+            ' ons = x.ONSCode
+        Else
+            Return
+        End If
+
+        If x Is Nothing Then
+            txtCouncilName2.Text = ""
+        Else
+            txtCouncilName2.Text = x.CouncilName2
+        End If
+    End Sub
 End Class

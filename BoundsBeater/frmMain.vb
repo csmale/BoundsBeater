@@ -239,8 +239,9 @@ Public Class frmMain
         xRel = DirectCast(lvBounds.SelectedItems(0).Tag, OSMRelation)
         xNew = New XmlDocument()
 
-        Dim xtw As New XmlTextWriter(strMstream, System.Text.Encoding.UTF8)
-        xtw.Formatting = Formatting.Indented
+        Dim xtw As New XmlTextWriter(strMstream, System.Text.Encoding.UTF8) With {
+            .Formatting = Formatting.Indented
+        }
         xtw.WriteStartDocument()
         xtw.WriteStartElement("osm")
         xRel.Serialize(xtw)
@@ -367,15 +368,15 @@ Public Class frmMain
             My.Settings.MaxCacheAge = 86400
             bChanged = True
         End If
-        If My.Settings.xapiAPI = "" Then
+        If My.Settings.xapiAPI.Length = 0 Then
             My.Settings.xapiAPI = "http://overpass-api.de/api/xapi"
             bChanged = True
         End If
-        If My.Settings.OSMCache = "" Then
+        If My.Settings.OSMCache.Length = 0 Then
             My.Settings.OSMCache = "%APPDATA%\BoundsBeater\OSMCache.osm"
             bChanged = True
         End If
-        If My.Settings.BoundaryXML = "" Then
+        If My.Settings.BoundaryXML.Length = 0 Then
             My.Settings.BoundaryXML = "%APPDATA%\BoundsBeater\UKBoundaries.xml"
             bChanged = True
         End If

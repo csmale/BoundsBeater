@@ -6,9 +6,14 @@ Imports System.Text
 Public Class RelationReport
     Dim myLog As myLogger
     Dim oDoc As OSMDoc
+    Dim xRet As OSMRetriever
 
     Sub New(doc As OSMDoc)
         oDoc = doc
+    End Sub
+    Sub New(doc As OSMDoc, ret As OSMRetriever)
+        oDoc = doc
+        xRet = ret
     End Sub
 
     Public Sub MakeReports(sFolder As String)
@@ -42,7 +47,7 @@ Public Class RelationReport
                     sName = xRel.ID.ToString
                 End If
                 While xLevelLists(iLvl).ContainsKey(sName)
-                    sName = sName & "*"
+                    sName &= "*"
                 End While
                 xLevelLists(iLvl).Add(sName, xRel)
                 xFile = New XmlTextWriter(sFolder & "\r" & xRelID & ".htm", Nothing)
@@ -59,10 +64,12 @@ Public Class RelationReport
                 MakeLevelIndex(i, xLevelLists(i), sFolder & "\level_" & i & ".htm")
             End If
         Next
-        xFile = New XmlTextWriter(sFolder & "\index.htm", Nothing)
-        xFile.Formatting = Formatting.Indented
-        xFile.Indentation = 1
-        xFile.IndentChar = Chr(9) ' vbTab
+
+        xFile = New XmlTextWriter(sFolder & "\index.htm", Nothing) With {
+            .Formatting = Formatting.Indented,
+            .Indentation = 1,
+            .IndentChar = Chr(9) ' vbTab
+            }
         xFile.WriteDocType("html", Nothing, Nothing, Nothing)
         xFile.WriteStartElement("html")
         xFile.WriteStartElement("meta")
@@ -95,10 +102,11 @@ Public Class RelationReport
     Private Sub MakeLevelIndex(Level As Integer, RelList As SortedDictionary(Of String, OSMRelation), sFile As String)
         Dim xRel As OSMRelation
         Dim xFile As XmlTextWriter
-        xFile = New XmlTextWriter(sFile, Nothing)
-        xFile.Formatting = Formatting.Indented
-        xFile.Indentation = 1
-        xFile.IndentChar = Chr(9) ' vbTab
+        xFile = New XmlTextWriter(sFile, Nothing) With {
+            .Formatting = Formatting.Indented,
+            .Indentation = 1,
+            .IndentChar = Chr(9) ' vbTab
+            }
         xFile.WriteDocType("html", Nothing, Nothing, Nothing)
         xFile.WriteStartElement("html")
         xFile.WriteStartElement("meta")
@@ -145,10 +153,11 @@ Public Class RelationReport
 
     Public Sub RelationReport(sFile As String, xRel As OSMRelation)
         Dim xFile As XmlTextWriter
-        xFile = New XmlTextWriter(sFile, Encoding.UTF8)
-        xFile.Formatting = Formatting.Indented
-        xFile.Indentation = 1
-        xFile.IndentChar = Chr(9) ' vbTab
+        xFile = New XmlTextWriter(sFile, Encoding.UTF8) With {
+            .Formatting = Formatting.Indented,
+            .Indentation = 1,
+            .IndentChar = Chr(9) ' vbTab
+            }
         Dim sFolder As String
         sFolder = System.IO.Path.GetDirectoryName(sFile)
         myLog = New myLogger(sFolder & "\issues.txt")
@@ -170,6 +179,7 @@ Public Class RelationReport
         Dim bCheckLevels As Boolean
         Dim bIsDuplicate As Boolean
         Dim xResolver As OSMResolver
+        ' Dim xRet As OSMRetriever
 
         If xFile Is Nothing Then
             Exit Sub
@@ -194,8 +204,10 @@ Public Class RelationReport
                     bCheckLevels = True
                 Case "political"
                 Case "ceremonial"
+                Case "historical"
+                Case "traditional"
                 Case Else
-                    myLog.Write(xRel, Nothing, "boundary type not administrative, political or ceremonial")
+                    myLog.Write(xRel, Nothing, "boundary type not administrative, political, traditional, historical or ceremonial")
             End Select
         End If
 
@@ -213,16 +225,21 @@ Public Class RelationReport
 
         xFile.WriteDocType("html", Nothing, Nothing, Nothing)
         xFile.WriteStartElement("html")
-        xFile.WriteStartElement("meta")
-        xFile.WriteAttributeString("http-equiv", "Content-Type")
-        xFile.WriteAttributeString("content", "text/html; charset=UTF-8")
-        xFile.WriteEndElement()
-        xFile.WriteStartElement("head")
-        sName = xRel.Tag("name")
-        If Len(sName) = 0 Then sName = $"Unnamed relation {xRel.ID}"
-        xFile.WriteElementString("title", sName)
+        With xFile
+            .WriteStartElement("meta")
+            .WriteAttributeString("http-equiv", "Content-Type")
+            .WriteAttributeString("content", "text/html; charset=UTF-8")
+            .WriteEndElement()
+        End With
 
-        xFile.WriteEndElement() ' head
+        With xFile
+            .WriteStartElement("head")
+            sName = xRel.Tag("name")
+            If Len(sName) = 0 Then sName = $"Unnamed relation {xRel.ID}"
+            .WriteElementString("title", sName)
+            .WriteEndElement() ' head
+        End With
+
         xFile.WriteStartElement("body")
 
         xFile.WriteStartElement("h1")
@@ -454,7 +471,26 @@ Public Class RelationReport
                 xFile.WriteElementString("td", xWay("ref"))
                 xFile.WriteElementString("td", xWay("name"))
                 xFile.WriteElementString("td", xRing.Role)
-                xFile.WriteElementString("td", xWay.Nodes.Count.ToString)
+                Dim iModifiedNodes As Integer = 0
+                For Each xn In xWay.Nodes
+                    If xn.Version > 1 Then
+                        If Not xn.HistoryLoaded And xRet IsNot Nothing Then
+                            Dim aNode As OSMNode = CType(xRet.GetOSMObjectHistory(OSMObject.ObjectType.Node, xn.ID), OSMNode)
+
+                        End If
+                        If xn.HistoryLoaded Then
+                            Dim xOrig As OSMNode = DirectCast(xn.Versions.First.Value, OSMNode)
+                            If xn.Lat <> xOrig.Lat Or xn.Lon <> xOrig.Lon Then
+                                iModifiedNodes += 1
+                            End If
+                        End If
+                    End If
+                Next
+                If iModifiedNodes = 0 Then
+                    xFile.WriteElementString("td", xWay.Nodes.Count.ToString)
+                Else
+                    xFile.WriteElementString("td", $"{xWay.Nodes.Count.ToString} (${iModifiedNodes} modified)")
+                End If
                 xFile.WriteElementString("td", xWay.Length.ToString("0"))
                 xFile.WriteElementString("td", xWay("source"))
                 xFile.WriteStartElement("td")
@@ -482,15 +518,79 @@ Public Class RelationReport
             Next
         Next
 
-        For Each xMbr In xRel.Members
-            If xMbr.Type = OSMObject.ObjectType.Way Then
-                xWay = DirectCast(xMbr.Member, OSMWay)
+        xFile.WriteEndElement() ' tbody
+        xFile.WriteEndElement() ' table
 
+        Dim lModified As New List(Of OSMNode)
+        Dim lMoved As New List(Of OSMNode)
+
+        For Each xRing In xResolver.Rings
+            lModified.Clear()
+            lMoved.Clear()
+            Dim xFirst As OSMNode
+            For Each xNode In xRing.NodeList
+                If xNode.Version > 1 Then
+                    If Not xNode.EnsureHistoryLoaded(xRet) Then Continue For
+                    xFirst = DirectCast(xNode.VersionByNumber(1), OSMNode)
+                    If xNode.Lat <> xFirst.Lat Or xNode.Lon <> xFirst.Lon Then
+                        lMoved.Add(xNode)
+                    End If
+                    lModified.Add(xNode)
+                End If
+            Next
+            xFile.WriteString($"Ring {xRing.Index}: {lModified.Count} nodes ({100 * (lModified.Count / xRing.NodeList.Count)}%) with version>1 and {lMoved.Count} ({100 * (lMoved.Count / xRing.NodeList.Count)}%) moved nodes")
+            xFile.WriteElementString("br", Nothing)
+            If lModified.Count > 0 Then
+                xFile.WriteElementString("h2", $"Modified nodes for ring #{xRing.Index}")
+                xFile.WriteStartElement("table")
+                xFile.WriteAttributeString("border", "1")
+                xFile.WriteStartElement("thead")
+                xFile.WriteStartElement("tr")
+                xFile.WriteElementString("th", "ID")
+                xFile.WriteElementString("th", "Ver")
+                xFile.WriteElementString("th", "Orig pos")
+                xFile.WriteElementString("th", "Creator")
+                xFile.WriteElementString("th", "Created")
+                xFile.WriteElementString("th", "Curr pos")
+                xFile.WriteElementString("th", "Last changer")
+                xFile.WriteElementString("th", "Changed")
+                xFile.WriteElementString("th", "Moved by")
+                xFile.WriteEndElement() ' tr
+                xFile.WriteEndElement() ' thead
+                xFile.WriteStartElement("tbody")
+                For Each xNode In lModified
+                    xFile.WriteStartElement("tr")
+                    xFile.WriteStartElement("td")
+                    PutAnchor(xFile, xNode.BrowseURL, xNode.ID.ToString, "bbeater_osm")
+                    xFile.WriteEndElement()
+                    xFile.WriteElementString("td", xNode.Version.ToString())
+                    xFirst = xNode.VersionByNumber(1)
+                    xFile.WriteElementString("td", LatLonString(xFirst.Lat, xFirst.Lon))
+                    xFile.WriteElementString("td", xFirst.User)
+                    xFile.WriteElementString("td", xFirst.Timestamp.ToString())
+                    xFile.WriteElementString("td", LatLonString(xNode.Lat, xNode.Lon))
+                    xFile.WriteElementString("td", xNode.User)
+                    xFile.WriteElementString("td", xNode.Timestamp.ToString())
+                    xFile.WriteElementString("td", xNode.DistanceTo(xFirst).ToString)
+                    xFile.WriteEndElement() ' tr
+                Next
+                xFile.WriteEndElement() ' tbody
+                xFile.WriteEndElement() ' table
             End If
         Next
 
-        xFile.WriteEndElement() ' tbody
-        xFile.WriteEndElement() ' table
+        For Each xMbr In xRel.Members
+            If xMbr.Type = OSMObject.ObjectType.Way Then
+                xWay = DirectCast(xMbr.Member, OSMWay)
+                For Each xNode In xWay.Nodes
+                    If xNode.Version > 1 Then
+                        If Not xNode.HistoryLoaded Then
+                            ' xRet.GetOSMObjectHistory()
+                        End If
+                    End If
+                Next
+            End If
+        Next
 
         xFile.WriteEndElement() ' body
         xFile.WriteEndElement() ' html
@@ -508,4 +608,7 @@ Public Class RelationReport
         End If
         xFile.WriteEndElement()
     End Sub
+    Private Function LatLonString(lat As Double, lon As Double) As String
+        Return $"({lat.ToString},{lon.ToString})"
+    End Function
 End Class

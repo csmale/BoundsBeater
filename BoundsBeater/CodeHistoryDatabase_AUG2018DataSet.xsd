@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="CodeHistoryDatabase_AUG2018DataSet" targetNamespace="http://tempuri.org/CodeHistoryDatabase_AUG2018DataSet.xsd" xmlns:mstns="http://tempuri.org/CodeHistoryDatabase_AUG2018DataSet.xsd" xmlns="http://tempuri.org/CodeHistoryDatabase_AUG2018DataSet.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections>
+          <Connection AppSettingsObjectName="MySettings" AppSettingsPropertyName="CHDConnectionString" ConnectionStringObject="" IsAppSettingsProperty="true" Modifier="Assembly" Name="CHDConnectionString (MySettings)" PropertyReference="ApplicationSettings.BoundsBeater.My.MySettings.GlobalReference.Default.CHDConnectionString" Provider="System.Data.OleDb" />
+        </Connections>
+        <Tables>
+          <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="QryChangesbyEntityTableAdapter" GeneratorDataComponentClassName="QryChangesbyEntityTableAdapter" Name="QryChangesbyEntity" UserDataComponentName="QryChangesbyEntityTableAdapter">
+            <MainSource>
+              <DbSource ConnectionRef="CHDConnectionString (MySettings)" DbObjectName="QryChangesbyEntity" DbObjectType="View" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="false" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="true" UserGetMethodName="GetData" UserSourceName="Fill">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="false">
+                    <CommandText>SELECT GEOGCD, GEOGNM, GEOGNMW, GEOGCD_P, GEOGNM_P, GEOGNMW_P, SI_ID, SI_TITLE, OPER_DATE, ENTITYCD, [YEAR] FROM QryChangesbyEntity</CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </MainSource>
+            <Mappings>
+              <Mapping SourceColumn="GEOGCD" DataSetColumn="GEOGCD" />
+              <Mapping SourceColumn="GEOGNM" DataSetColumn="GEOGNM" />
+              <Mapping SourceColumn="GEOGNMW" DataSetColumn="GEOGNMW" />
+              <Mapping SourceColumn="GEOGCD_P" DataSetColumn="GEOGCD_P" />
+              <Mapping SourceColumn="GEOGNM_P" DataSetColumn="GEOGNM_P" />
+              <Mapping SourceColumn="GEOGNMW_P" DataSetColumn="GEOGNMW_P" />
+              <Mapping SourceColumn="SI_ID" DataSetColumn="SI_ID" />
+              <Mapping SourceColumn="SI_TITLE" DataSetColumn="SI_TITLE" />
+              <Mapping SourceColumn="OPER_DATE" DataSetColumn="OPER_DATE" />
+              <Mapping SourceColumn="ENTITYCD" DataSetColumn="ENTITYCD" />
+              <Mapping SourceColumn="YEAR" DataSetColumn="YEAR" />
+            </Mappings>
+            <Sources />
+          </TableAdapter>
+        </Tables>
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="CodeHistoryDatabase_AUG2018DataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="True" msprop:Generator_DataSetName="CodeHistoryDatabase_AUG2018DataSet" msprop:Generator_UserDSName="CodeHistoryDatabase_AUG2018DataSet">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="QryChangesbyEntity" msprop:Generator_TableClassName="QryChangesbyEntityDataTable" msprop:Generator_TableVarName="tableQryChangesbyEntity" msprop:Generator_TablePropName="QryChangesbyEntity" msprop:Generator_RowDeletingName="QryChangesbyEntityRowDeleting" msprop:Generator_RowChangingName="QryChangesbyEntityRowChanging" msprop:Generator_RowEvHandlerName="QryChangesbyEntityRowChangeEventHandler" msprop:Generator_RowDeletedName="QryChangesbyEntityRowDeleted" msprop:Generator_UserTableName="QryChangesbyEntity" msprop:Generator_RowChangedName="QryChangesbyEntityRowChanged" msprop:Generator_RowEvArgName="QryChangesbyEntityRowChangeEvent" msprop:Generator_RowClassName="QryChangesbyEntityRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="GEOGCD" msprop:Generator_ColumnVarNameInTable="columnGEOGCD" msprop:Generator_ColumnPropNameInRow="GEOGCD" msprop:Generator_ColumnPropNameInTable="GEOGCDColumn" msprop:Generator_UserColumnName="GEOGCD" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="9" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="GEOGNM" msprop:Generator_ColumnVarNameInTable="columnGEOGNM" msprop:Generator_ColumnPropNameInRow="GEOGNM" msprop:Generator_ColumnPropNameInTable="GEOGNMColumn" msprop:Generator_UserColumnName="GEOGNM" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="255" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="GEOGNMW" msprop:Generator_ColumnVarNameInTable="columnGEOGNMW" msprop:Generator_ColumnPropNameInRow="GEOGNMW" msprop:Generator_ColumnPropNameInTable="GEOGNMWColumn" msprop:Generator_UserColumnName="GEOGNMW" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="254" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="GEOGCD_P" msprop:Generator_ColumnVarNameInTable="columnGEOGCD_P" msprop:Generator_ColumnPropNameInRow="GEOGCD_P" msprop:Generator_ColumnPropNameInTable="GEOGCD_PColumn" msprop:Generator_UserColumnName="GEOGCD_P" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="10" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="GEOGNM_P" msprop:Generator_ColumnVarNameInTable="columnGEOGNM_P" msprop:Generator_ColumnPropNameInRow="GEOGNM_P" msprop:Generator_ColumnPropNameInTable="GEOGNM_PColumn" msprop:Generator_UserColumnName="GEOGNM_P" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="255" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="GEOGNMW_P" msprop:Generator_ColumnVarNameInTable="columnGEOGNMW_P" msprop:Generator_ColumnPropNameInRow="GEOGNMW_P" msprop:Generator_ColumnPropNameInTable="GEOGNMW_PColumn" msprop:Generator_UserColumnName="GEOGNMW_P" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="254" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="SI_ID" msprop:Generator_ColumnVarNameInTable="columnSI_ID" msprop:Generator_ColumnPropNameInRow="SI_ID" msprop:Generator_ColumnPropNameInTable="SI_IDColumn" msprop:Generator_UserColumnName="SI_ID" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="9" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="SI_TITLE" msprop:Generator_ColumnVarNameInTable="columnSI_TITLE" msprop:Generator_ColumnPropNameInRow="SI_TITLE" msprop:Generator_ColumnPropNameInTable="SI_TITLEColumn" msprop:Generator_UserColumnName="SI_TITLE" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="254" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="OPER_DATE" msprop:Generator_ColumnVarNameInTable="columnOPER_DATE" msprop:Generator_ColumnPropNameInRow="OPER_DATE" msprop:Generator_ColumnPropNameInTable="OPER_DATEColumn" msprop:Generator_UserColumnName="OPER_DATE" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="ENTITYCD" msprop:Generator_ColumnVarNameInTable="columnENTITYCD" msprop:Generator_ColumnPropNameInRow="ENTITYCD" msprop:Generator_ColumnPropNameInTable="ENTITYCDColumn" msprop:Generator_UserColumnName="ENTITYCD" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="3" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="YEAR" msprop:Generator_ColumnVarNameInTable="columnYEAR" msprop:Generator_ColumnPropNameInRow="YEAR" msprop:Generator_ColumnPropNameInTable="YEARColumn" msprop:Generator_UserColumnName="YEAR" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="4" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

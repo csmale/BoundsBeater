@@ -51,6 +51,7 @@ Partial Class frmAnalyze
         Me.tsmiChildReview = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiChildShowInOsm = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiChildAnalyze = New System.Windows.Forms.ToolStripMenuItem()
+        Me.tsmiChildSubareaReview = New System.Windows.Forms.ToolStripMenuItem()
         Me.sfdReports = New System.Windows.Forms.SaveFileDialog()
         Me.tvList = New System.Windows.Forms.TreeView()
         Me.Panel1 = New System.Windows.Forms.Panel()
@@ -74,6 +75,7 @@ Partial Class frmAnalyze
         Me.tsmiReview = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsmiOpenWebsite = New System.Windows.Forms.ToolStripMenuItem()
         Me.cmsNode = New System.Windows.Forms.ContextMenuStrip(Me.components)
+        Me.tsmiSubareaReview = New System.Windows.Forms.ToolStripMenuItem()
         Me.tsButtons = New System.Windows.Forms.ToolStrip()
         Me.tsmiOpenDB = New System.Windows.Forms.ToolStripButton()
         Me.tsmiSearchText = New System.Windows.Forms.ToolStripTextBox()
@@ -116,18 +118,16 @@ Partial Class frmAnalyze
         '
         'txtSingle
         '
-        Me.txtSingle.Location = New System.Drawing.Point(171, 56)
-        Me.txtSingle.Margin = New System.Windows.Forms.Padding(4)
+        Me.txtSingle.Location = New System.Drawing.Point(128, 46)
         Me.txtSingle.Name = "txtSingle"
-        Me.txtSingle.Size = New System.Drawing.Size(100, 22)
+        Me.txtSingle.Size = New System.Drawing.Size(76, 20)
         Me.txtSingle.TabIndex = 2
         '
         'btnSingle
         '
-        Me.btnSingle.Location = New System.Drawing.Point(280, 57)
-        Me.btnSingle.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnSingle.Location = New System.Drawing.Point(210, 46)
         Me.btnSingle.Name = "btnSingle"
-        Me.btnSingle.Size = New System.Drawing.Size(49, 23)
+        Me.btnSingle.Size = New System.Drawing.Size(37, 19)
         Me.btnSingle.TabIndex = 3
         Me.btnSingle.Text = "Go"
         Me.btnSingle.UseVisualStyleBackColor = True
@@ -136,11 +136,10 @@ Partial Class frmAnalyze
         '
         Me.txtReport.Dock = System.Windows.Forms.DockStyle.Fill
         Me.txtReport.Location = New System.Drawing.Point(0, 0)
-        Me.txtReport.Margin = New System.Windows.Forms.Padding(4)
         Me.txtReport.Multiline = True
         Me.txtReport.Name = "txtReport"
         Me.txtReport.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.txtReport.Size = New System.Drawing.Size(389, 320)
+        Me.txtReport.Size = New System.Drawing.Size(291, 261)
         Me.txtReport.TabIndex = 6
         '
         'tabDetail
@@ -149,20 +148,18 @@ Partial Class frmAnalyze
         Me.tabDetail.Controls.Add(Me.tbpMap)
         Me.tabDetail.Dock = System.Windows.Forms.DockStyle.Fill
         Me.tabDetail.Location = New System.Drawing.Point(0, 0)
-        Me.tabDetail.Margin = New System.Windows.Forms.Padding(4)
         Me.tabDetail.Name = "tabDetail"
         Me.tabDetail.SelectedIndex = 0
-        Me.tabDetail.Size = New System.Drawing.Size(775, 651)
+        Me.tabDetail.Size = New System.Drawing.Size(582, 529)
         Me.tabDetail.TabIndex = 11
         '
         'tbpChildren
         '
         Me.tbpChildren.Controls.Add(Me.lvChildren)
-        Me.tbpChildren.Location = New System.Drawing.Point(4, 25)
-        Me.tbpChildren.Margin = New System.Windows.Forms.Padding(4)
+        Me.tbpChildren.Location = New System.Drawing.Point(4, 22)
         Me.tbpChildren.Name = "tbpChildren"
-        Me.tbpChildren.Padding = New System.Windows.Forms.Padding(4)
-        Me.tbpChildren.Size = New System.Drawing.Size(767, 622)
+        Me.tbpChildren.Padding = New System.Windows.Forms.Padding(3)
+        Me.tbpChildren.Size = New System.Drawing.Size(574, 503)
         Me.tbpChildren.TabIndex = 0
         Me.tbpChildren.Text = "Children"
         Me.tbpChildren.UseVisualStyleBackColor = True
@@ -174,10 +171,9 @@ Partial Class frmAnalyze
         Me.lvChildren.Dock = System.Windows.Forms.DockStyle.Fill
         Me.lvChildren.FullRowSelect = True
         Me.lvChildren.HideSelection = False
-        Me.lvChildren.Location = New System.Drawing.Point(4, 4)
-        Me.lvChildren.Margin = New System.Windows.Forms.Padding(4)
+        Me.lvChildren.Location = New System.Drawing.Point(3, 3)
         Me.lvChildren.Name = "lvChildren"
-        Me.lvChildren.Size = New System.Drawing.Size(759, 614)
+        Me.lvChildren.Size = New System.Drawing.Size(568, 497)
         Me.lvChildren.TabIndex = 11
         Me.lvChildren.UseCompatibleStateImageBehavior = False
         Me.lvChildren.View = System.Windows.Forms.View.Details
@@ -224,10 +220,9 @@ Partial Class frmAnalyze
         'tbpMap
         '
         Me.tbpMap.Controls.Add(Me.wbMap)
-        Me.tbpMap.Location = New System.Drawing.Point(4, 25)
-        Me.tbpMap.Margin = New System.Windows.Forms.Padding(4)
+        Me.tbpMap.Location = New System.Drawing.Point(4, 22)
         Me.tbpMap.Name = "tbpMap"
-        Me.tbpMap.Size = New System.Drawing.Size(767, 622)
+        Me.tbpMap.Size = New System.Drawing.Size(574, 503)
         Me.tbpMap.TabIndex = 1
         Me.tbpMap.Text = "Map"
         Me.tbpMap.UseVisualStyleBackColor = True
@@ -238,42 +233,40 @@ Partial Class frmAnalyze
         Me.wbMap.Dock = System.Windows.Forms.DockStyle.Fill
         Me.wbMap.Location = New System.Drawing.Point(0, 0)
         Me.wbMap.Margin = New System.Windows.Forms.Padding(0)
-        Me.wbMap.MinimumSize = New System.Drawing.Size(27, 25)
+        Me.wbMap.MinimumSize = New System.Drawing.Size(20, 20)
         Me.wbMap.Name = "wbMap"
         Me.wbMap.ScrollBarsEnabled = False
-        Me.wbMap.Size = New System.Drawing.Size(767, 622)
+        Me.wbMap.Size = New System.Drawing.Size(574, 503)
         Me.wbMap.TabIndex = 0
         '
         'ssStatus
         '
         Me.ssStatus.ImageScalingSize = New System.Drawing.Size(20, 20)
         Me.ssStatus.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsProgress, Me.tsStatus})
-        Me.ssStatus.Location = New System.Drawing.Point(0, 796)
+        Me.ssStatus.Location = New System.Drawing.Point(0, 645)
         Me.ssStatus.Name = "ssStatus"
-        Me.ssStatus.Padding = New System.Windows.Forms.Padding(1, 0, 19, 0)
-        Me.ssStatus.Size = New System.Drawing.Size(1552, 29)
+        Me.ssStatus.Size = New System.Drawing.Size(1164, 25)
         Me.ssStatus.TabIndex = 14
         Me.ssStatus.Text = "StatusStrip1"
         '
         'tsProgress
         '
         Me.tsProgress.Name = "tsProgress"
-        Me.tsProgress.Size = New System.Drawing.Size(133, 23)
+        Me.tsProgress.Size = New System.Drawing.Size(100, 19)
         Me.tsProgress.Step = 1
         Me.tsProgress.Style = System.Windows.Forms.ProgressBarStyle.Continuous
         '
         'tsStatus
         '
         Me.tsStatus.Name = "tsStatus"
-        Me.tsStatus.Size = New System.Drawing.Size(153, 24)
+        Me.tsStatus.Size = New System.Drawing.Size(120, 20)
         Me.tsStatus.Text = "ToolStripStatusLabel1"
         '
         'btnHist
         '
-        Me.btnHist.Location = New System.Drawing.Point(111, 56)
-        Me.btnHist.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnHist.Location = New System.Drawing.Point(83, 46)
         Me.btnHist.Name = "btnHist"
-        Me.btnHist.Size = New System.Drawing.Size(52, 28)
+        Me.btnHist.Size = New System.Drawing.Size(39, 23)
         Me.btnHist.TabIndex = 16
         Me.btnHist.Text = "Hist"
         Me.btnHist.UseVisualStyleBackColor = True
@@ -281,70 +274,73 @@ Partial Class frmAnalyze
         'cmsChild
         '
         Me.cmsChild.ImageScalingSize = New System.Drawing.Size(20, 20)
-        Me.cmsChild.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiChildEdit, Me.tsmiChildReport, Me.tsmiChildOpenWebsite, Me.tsmiChildReview, Me.tsmiChildShowInOsm, Me.tsmiChildAnalyze})
+        Me.cmsChild.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiChildEdit, Me.tsmiChildReport, Me.tsmiChildOpenWebsite, Me.tsmiChildReview, Me.tsmiChildShowInOsm, Me.tsmiChildAnalyze, Me.tsmiChildSubareaReview})
         Me.cmsChild.Name = "cmsChild"
-        Me.cmsChild.Size = New System.Drawing.Size(171, 148)
+        Me.cmsChild.Size = New System.Drawing.Size(157, 158)
         '
         'tsmiChildEdit
         '
         Me.tsmiChildEdit.Name = "tsmiChildEdit"
-        Me.tsmiChildEdit.Size = New System.Drawing.Size(170, 24)
+        Me.tsmiChildEdit.Size = New System.Drawing.Size(156, 22)
         Me.tsmiChildEdit.Text = "Edit"
         '
         'tsmiChildReport
         '
         Me.tsmiChildReport.Name = "tsmiChildReport"
-        Me.tsmiChildReport.Size = New System.Drawing.Size(170, 24)
+        Me.tsmiChildReport.Size = New System.Drawing.Size(156, 22)
         Me.tsmiChildReport.Text = "Report"
         '
         'tsmiChildOpenWebsite
         '
         Me.tsmiChildOpenWebsite.Name = "tsmiChildOpenWebsite"
-        Me.tsmiChildOpenWebsite.Size = New System.Drawing.Size(170, 24)
+        Me.tsmiChildOpenWebsite.Size = New System.Drawing.Size(156, 22)
         Me.tsmiChildOpenWebsite.Text = "Go to website"
         '
         'tsmiChildReview
         '
         Me.tsmiChildReview.Name = "tsmiChildReview"
-        Me.tsmiChildReview.Size = New System.Drawing.Size(170, 24)
+        Me.tsmiChildReview.Size = New System.Drawing.Size(156, 22)
         Me.tsmiChildReview.Text = "OSM Review"
         '
         'tsmiChildShowInOsm
         '
         Me.tsmiChildShowInOsm.Name = "tsmiChildShowInOsm"
-        Me.tsmiChildShowInOsm.Size = New System.Drawing.Size(170, 24)
+        Me.tsmiChildShowInOsm.Size = New System.Drawing.Size(156, 22)
         Me.tsmiChildShowInOsm.Text = "Show in OSM"
         '
         'tsmiChildAnalyze
         '
         Me.tsmiChildAnalyze.Name = "tsmiChildAnalyze"
-        Me.tsmiChildAnalyze.Size = New System.Drawing.Size(170, 24)
+        Me.tsmiChildAnalyze.Size = New System.Drawing.Size(156, 22)
         Me.tsmiChildAnalyze.Text = "Analyze"
+        '
+        'tsmiChildSubareaReview
+        '
+        Me.tsmiChildSubareaReview.Name = "tsmiChildSubareaReview"
+        Me.tsmiChildSubareaReview.Size = New System.Drawing.Size(156, 22)
+        Me.tsmiChildSubareaReview.Text = "Subarea Review"
         '
         'tvList
         '
         Me.tvList.Dock = System.Windows.Forms.DockStyle.Fill
         Me.tvList.HideSelection = False
         Me.tvList.Location = New System.Drawing.Point(0, 0)
-        Me.tvList.Margin = New System.Windows.Forms.Padding(4)
         Me.tvList.Name = "tvList"
-        Me.tvList.Size = New System.Drawing.Size(389, 326)
+        Me.tvList.Size = New System.Drawing.Size(291, 264)
         Me.tvList.TabIndex = 9
         '
         'Panel1
         '
         Me.Panel1.Controls.Add(Me.scon1)
-        Me.Panel1.Location = New System.Drawing.Point(15, 97)
-        Me.Panel1.Margin = New System.Windows.Forms.Padding(4)
+        Me.Panel1.Location = New System.Drawing.Point(11, 79)
         Me.Panel1.Name = "Panel1"
-        Me.Panel1.Size = New System.Drawing.Size(1169, 651)
+        Me.Panel1.Size = New System.Drawing.Size(877, 529)
         Me.Panel1.TabIndex = 19
         '
         'scon1
         '
         Me.scon1.Dock = System.Windows.Forms.DockStyle.Fill
         Me.scon1.Location = New System.Drawing.Point(0, 0)
-        Me.scon1.Margin = New System.Windows.Forms.Padding(4)
         Me.scon1.Name = "scon1"
         '
         'scon1.Panel1
@@ -354,16 +350,14 @@ Partial Class frmAnalyze
         'scon1.Panel2
         '
         Me.scon1.Panel2.Controls.Add(Me.tabDetail)
-        Me.scon1.Size = New System.Drawing.Size(1169, 651)
-        Me.scon1.SplitterDistance = 389
-        Me.scon1.SplitterWidth = 5
+        Me.scon1.Size = New System.Drawing.Size(877, 529)
+        Me.scon1.SplitterDistance = 291
         Me.scon1.TabIndex = 0
         '
         'scon2
         '
         Me.scon2.Dock = System.Windows.Forms.DockStyle.Fill
         Me.scon2.Location = New System.Drawing.Point(0, 0)
-        Me.scon2.Margin = New System.Windows.Forms.Padding(4)
         Me.scon2.Name = "scon2"
         Me.scon2.Orientation = System.Windows.Forms.Orientation.Horizontal
         '
@@ -374,9 +368,8 @@ Partial Class frmAnalyze
         'scon2.Panel2
         '
         Me.scon2.Panel2.Controls.Add(Me.txtReport)
-        Me.scon2.Size = New System.Drawing.Size(389, 651)
-        Me.scon2.SplitterDistance = 326
-        Me.scon2.SplitterWidth = 5
+        Me.scon2.Size = New System.Drawing.Size(291, 529)
+        Me.scon2.SplitterDistance = 264
         Me.scon2.TabIndex = 10
         '
         'ofdBoundaries
@@ -385,10 +378,9 @@ Partial Class frmAnalyze
         '
         'btnUpload
         '
-        Me.btnUpload.Location = New System.Drawing.Point(626, 54)
-        Me.btnUpload.Margin = New System.Windows.Forms.Padding(4)
+        Me.btnUpload.Location = New System.Drawing.Point(470, 44)
         Me.btnUpload.Name = "btnUpload"
-        Me.btnUpload.Size = New System.Drawing.Size(77, 28)
+        Me.btnUpload.Size = New System.Drawing.Size(58, 23)
         Me.btnUpload.TabIndex = 21
         Me.btnUpload.Text = "Upload"
         Me.btnUpload.UseVisualStyleBackColor = True
@@ -396,10 +388,9 @@ Partial Class frmAnalyze
         'chkShowDeleted
         '
         Me.chkShowDeleted.AutoSize = True
-        Me.chkShowDeleted.Location = New System.Drawing.Point(432, 57)
-        Me.chkShowDeleted.Margin = New System.Windows.Forms.Padding(4)
+        Me.chkShowDeleted.Location = New System.Drawing.Point(324, 46)
         Me.chkShowDeleted.Name = "chkShowDeleted"
-        Me.chkShowDeleted.Size = New System.Drawing.Size(154, 21)
+        Me.chkShowDeleted.Size = New System.Drawing.Size(121, 17)
         Me.chkShowDeleted.TabIndex = 22
         Me.chkShowDeleted.Text = "Show Deleted Items"
         Me.chkShowDeleted.UseVisualStyleBackColor = True
@@ -407,87 +398,93 @@ Partial Class frmAnalyze
         'tsmiFlush
         '
         Me.tsmiFlush.Name = "tsmiFlush"
-        Me.tsmiFlush.Size = New System.Drawing.Size(226, 24)
+        Me.tsmiFlush.Size = New System.Drawing.Size(192, 22)
         Me.tsmiFlush.Text = "Flush from cache"
         '
         'tsmiEdit
         '
         Me.tsmiEdit.Name = "tsmiEdit"
-        Me.tsmiEdit.Size = New System.Drawing.Size(226, 24)
+        Me.tsmiEdit.Size = New System.Drawing.Size(192, 22)
         Me.tsmiEdit.Text = "Edit"
         '
         'tsmiSearchNom
         '
         Me.tsmiSearchNom.Name = "tsmiSearchNom"
-        Me.tsmiSearchNom.Size = New System.Drawing.Size(226, 24)
+        Me.tsmiSearchNom.Size = New System.Drawing.Size(192, 22)
         Me.tsmiSearchNom.Text = "Search"
         '
         'tsmiShowAll
         '
         Me.tsmiShowAll.Name = "tsmiShowAll"
-        Me.tsmiShowAll.Size = New System.Drawing.Size(226, 24)
+        Me.tsmiShowAll.Size = New System.Drawing.Size(192, 22)
         Me.tsmiShowAll.Text = "Show all on map"
         '
         'tsmiJSON
         '
         Me.tsmiJSON.Name = "tsmiJSON"
-        Me.tsmiJSON.Size = New System.Drawing.Size(226, 24)
+        Me.tsmiJSON.Size = New System.Drawing.Size(192, 22)
         Me.tsmiJSON.Text = "Show JSON"
         '
         'tsmiReport
         '
         Me.tsmiReport.Name = "tsmiReport"
-        Me.tsmiReport.Size = New System.Drawing.Size(226, 24)
+        Me.tsmiReport.Size = New System.Drawing.Size(192, 22)
         Me.tsmiReport.Text = "Report"
         '
         'tsmiShowInOsm
         '
         Me.tsmiShowInOsm.Name = "tsmiShowInOsm"
-        Me.tsmiShowInOsm.Size = New System.Drawing.Size(226, 24)
+        Me.tsmiShowInOsm.Size = New System.Drawing.Size(192, 22)
         Me.tsmiShowInOsm.Text = "Show in OSM"
         '
         'tsmiAnalyze
         '
         Me.tsmiAnalyze.Name = "tsmiAnalyze"
-        Me.tsmiAnalyze.Size = New System.Drawing.Size(226, 24)
+        Me.tsmiAnalyze.Size = New System.Drawing.Size(192, 22)
         Me.tsmiAnalyze.Text = "Analyze"
         '
         'tsmiChildOverviewReport
         '
         Me.tsmiChildOverviewReport.Name = "tsmiChildOverviewReport"
-        Me.tsmiChildOverviewReport.Size = New System.Drawing.Size(226, 24)
+        Me.tsmiChildOverviewReport.Size = New System.Drawing.Size(192, 22)
         Me.tsmiChildOverviewReport.Text = "Child Overview Report"
         '
         'tsmiDeepChildReport
         '
         Me.tsmiDeepChildReport.Name = "tsmiDeepChildReport"
-        Me.tsmiDeepChildReport.Size = New System.Drawing.Size(226, 24)
+        Me.tsmiDeepChildReport.Size = New System.Drawing.Size(192, 22)
         Me.tsmiDeepChildReport.Text = "Deep Child Report"
         '
         'tsmiAddChild
         '
         Me.tsmiAddChild.Name = "tsmiAddChild"
-        Me.tsmiAddChild.Size = New System.Drawing.Size(226, 24)
+        Me.tsmiAddChild.Size = New System.Drawing.Size(192, 22)
         Me.tsmiAddChild.Text = "Add Child"
         '
         'tsmiReview
         '
         Me.tsmiReview.Name = "tsmiReview"
-        Me.tsmiReview.Size = New System.Drawing.Size(226, 24)
+        Me.tsmiReview.Size = New System.Drawing.Size(192, 22)
         Me.tsmiReview.Text = "Review OSM"
         '
         'tsmiOpenWebsite
         '
         Me.tsmiOpenWebsite.Name = "tsmiOpenWebsite"
-        Me.tsmiOpenWebsite.Size = New System.Drawing.Size(226, 24)
+        Me.tsmiOpenWebsite.Size = New System.Drawing.Size(192, 22)
         Me.tsmiOpenWebsite.Text = "Go to website"
         '
         'cmsNode
         '
         Me.cmsNode.ImageScalingSize = New System.Drawing.Size(20, 20)
-        Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiSearchNom, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiShowInOsm, Me.tsmiAnalyze, Me.tsmiChildOverviewReport, Me.tsmiDeepChildReport, Me.tsmiAddChild, Me.tsmiReview, Me.tsmiOpenWebsite})
+        Me.cmsNode.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiFlush, Me.tsmiEdit, Me.tsmiSearchNom, Me.tsmiShowAll, Me.tsmiJSON, Me.tsmiReport, Me.tsmiShowInOsm, Me.tsmiAnalyze, Me.tsmiChildOverviewReport, Me.tsmiDeepChildReport, Me.tsmiAddChild, Me.tsmiReview, Me.tsmiSubareaReview, Me.tsmiOpenWebsite})
         Me.cmsNode.Name = "ContextMenuStrip1"
-        Me.cmsNode.Size = New System.Drawing.Size(227, 316)
+        Me.cmsNode.Size = New System.Drawing.Size(193, 312)
+        '
+        'tsmiSubareaReview
+        '
+        Me.tsmiSubareaReview.Name = "tsmiSubareaReview"
+        Me.tsmiSubareaReview.Size = New System.Drawing.Size(192, 22)
+        Me.tsmiSubareaReview.Text = "Subarea Review"
         '
         'tsButtons
         '
@@ -495,7 +492,7 @@ Partial Class frmAnalyze
         Me.tsButtons.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsmiOpenDB, Me.tsmiSearchText, Me.tsImport, Me.ToolStripSeparator1, Me.tsmiSearch, Me.ToolStripSeparator2, Me.tsmiBrowseMap, Me.tsmiEditMap, Me.ToolStripSeparator3, Me.tsmiClearMap, Me.ToolStripSeparator4, Me.tsmiClose})
         Me.tsButtons.Location = New System.Drawing.Point(0, 0)
         Me.tsButtons.Name = "tsButtons"
-        Me.tsButtons.Size = New System.Drawing.Size(1552, 39)
+        Me.tsButtons.Size = New System.Drawing.Size(1164, 39)
         Me.tsButtons.TabIndex = 25
         Me.tsButtons.Text = "ToolStrip1"
         '
@@ -504,7 +501,7 @@ Partial Class frmAnalyze
         Me.tsmiOpenDB.Image = CType(resources.GetObject("tsmiOpenDB.Image"), System.Drawing.Image)
         Me.tsmiOpenDB.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.tsmiOpenDB.Name = "tsmiOpenDB"
-        Me.tsmiOpenDB.Size = New System.Drawing.Size(78, 36)
+        Me.tsmiOpenDB.Size = New System.Drawing.Size(69, 36)
         Me.tsmiOpenDB.Text = "Load"
         Me.tsmiOpenDB.ToolTipText = "Load Boundary DB"
         '
@@ -512,7 +509,7 @@ Partial Class frmAnalyze
         '
         Me.tsmiSearchText.CausesValidation = False
         Me.tsmiSearchText.Name = "tsmiSearchText"
-        Me.tsmiSearchText.Size = New System.Drawing.Size(100, 39)
+        Me.tsmiSearchText.Size = New System.Drawing.Size(76, 39)
         '
         'tsImport
         '
@@ -520,20 +517,20 @@ Partial Class frmAnalyze
         Me.tsImport.Image = CType(resources.GetObject("tsImport.Image"), System.Drawing.Image)
         Me.tsImport.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.tsImport.Name = "tsImport"
-        Me.tsImport.Size = New System.Drawing.Size(100, 36)
+        Me.tsImport.Size = New System.Drawing.Size(88, 36)
         Me.tsImport.Text = "Import"
         Me.tsImport.ToolTipText = "Import Stuff"
         '
         'tsmiImportCentroids
         '
         Me.tsmiImportCentroids.Name = "tsmiImportCentroids"
-        Me.tsmiImportCentroids.Size = New System.Drawing.Size(255, 26)
+        Me.tsmiImportCentroids.Size = New System.Drawing.Size(210, 22)
         Me.tsmiImportCentroids.Text = "Centroids"
         '
         'tsmiOsmBoundaries
         '
         Me.tsmiOsmBoundaries.Name = "tsmiOsmBoundaries"
-        Me.tsmiOsmBoundaries.Size = New System.Drawing.Size(255, 26)
+        Me.tsmiOsmBoundaries.Size = New System.Drawing.Size(210, 22)
         Me.tsmiOsmBoundaries.Text = "Boundaries from OSM file"
         Me.tsmiOsmBoundaries.ToolTipText = "Merge boundary data from an OSM file"
         '
@@ -548,20 +545,20 @@ Partial Class frmAnalyze
         Me.tsmiSearch.Image = CType(resources.GetObject("tsmiSearch.Image"), System.Drawing.Image)
         Me.tsmiSearch.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.tsmiSearch.Name = "tsmiSearch"
-        Me.tsmiSearch.Size = New System.Drawing.Size(127, 36)
+        Me.tsmiSearch.Size = New System.Drawing.Size(109, 36)
         Me.tsmiSearch.Text = "Scan OSM"
         '
         'tsmiSearchNew
         '
         Me.tsmiSearchNew.Name = "tsmiSearchNew"
-        Me.tsmiSearchNew.Size = New System.Drawing.Size(149, 26)
+        Me.tsmiSearchNew.Size = New System.Drawing.Size(126, 22)
         Me.tsmiSearchNew.Text = "Scan New"
         Me.tsmiSearchNew.ToolTipText = "Search New"
         '
         'tsmiSearchAll
         '
         Me.tsmiSearchAll.Name = "tsmiSearchAll"
-        Me.tsmiSearchAll.Size = New System.Drawing.Size(149, 26)
+        Me.tsmiSearchAll.Size = New System.Drawing.Size(126, 22)
         Me.tsmiSearchAll.Text = "Scan All"
         Me.tsmiSearchAll.ToolTipText = "Search All"
         '
@@ -575,7 +572,7 @@ Partial Class frmAnalyze
         Me.tsmiBrowseMap.Image = CType(resources.GetObject("tsmiBrowseMap.Image"), System.Drawing.Image)
         Me.tsmiBrowseMap.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.tsmiBrowseMap.Name = "tsmiBrowseMap"
-        Me.tsmiBrowseMap.Size = New System.Drawing.Size(115, 36)
+        Me.tsmiBrowseMap.Size = New System.Drawing.Size(99, 36)
         Me.tsmiBrowseMap.Text = "Open map"
         '
         'tsmiEditMap
@@ -583,7 +580,7 @@ Partial Class frmAnalyze
         Me.tsmiEditMap.Image = CType(resources.GetObject("tsmiEditMap.Image"), System.Drawing.Image)
         Me.tsmiEditMap.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.tsmiEditMap.Name = "tsmiEditMap"
-        Me.tsmiEditMap.Size = New System.Drawing.Size(105, 36)
+        Me.tsmiEditMap.Size = New System.Drawing.Size(90, 36)
         Me.tsmiEditMap.Text = "Edit map"
         Me.tsmiEditMap.ToolTipText = "Edit map in browser"
         '
@@ -597,7 +594,7 @@ Partial Class frmAnalyze
         Me.tsmiClearMap.Image = CType(resources.GetObject("tsmiClearMap.Image"), System.Drawing.Image)
         Me.tsmiClearMap.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.tsmiClearMap.Name = "tsmiClearMap"
-        Me.tsmiClearMap.Size = New System.Drawing.Size(79, 36)
+        Me.tsmiClearMap.Size = New System.Drawing.Size(70, 36)
         Me.tsmiClearMap.Text = "Clear"
         Me.tsmiClearMap.ToolTipText = "Clear map layers"
         '
@@ -611,14 +608,15 @@ Partial Class frmAnalyze
         Me.tsmiClose.Image = CType(resources.GetObject("tsmiClose.Image"), System.Drawing.Image)
         Me.tsmiClose.ImageTransparentColor = System.Drawing.Color.Magenta
         Me.tsmiClose.Name = "tsmiClose"
-        Me.tsmiClose.Size = New System.Drawing.Size(81, 36)
+        Me.tsmiClose.Size = New System.Drawing.Size(72, 36)
         Me.tsmiClose.Text = "Close"
         '
         'btnParent
         '
-        Me.btnParent.Location = New System.Drawing.Point(15, 54)
+        Me.btnParent.Location = New System.Drawing.Point(11, 44)
+        Me.btnParent.Margin = New System.Windows.Forms.Padding(2)
         Me.btnParent.Name = "btnParent"
-        Me.btnParent.Size = New System.Drawing.Size(75, 30)
+        Me.btnParent.Size = New System.Drawing.Size(56, 24)
         Me.btnParent.TabIndex = 26
         Me.btnParent.Text = "Parent"
         Me.btnParent.UseVisualStyleBackColor = True
@@ -629,10 +627,11 @@ Partial Class frmAnalyze
         Me.lvSearchResults.FullRowSelect = True
         Me.lvSearchResults.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable
         Me.lvSearchResults.HideSelection = False
-        Me.lvSearchResults.Location = New System.Drawing.Point(89, 42)
+        Me.lvSearchResults.Location = New System.Drawing.Point(67, 34)
+        Me.lvSearchResults.Margin = New System.Windows.Forms.Padding(2)
         Me.lvSearchResults.MultiSelect = False
         Me.lvSearchResults.Name = "lvSearchResults"
-        Me.lvSearchResults.Size = New System.Drawing.Size(625, 167)
+        Me.lvSearchResults.Size = New System.Drawing.Size(470, 136)
         Me.lvSearchResults.TabIndex = 27
         Me.lvSearchResults.UseCompatibleStateImageBehavior = False
         Me.lvSearchResults.View = System.Windows.Forms.View.Details
@@ -654,9 +653,9 @@ Partial Class frmAnalyze
         '
         'frmAnalyze
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(8.0!, 16.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1552, 825)
+        Me.ClientSize = New System.Drawing.Size(1164, 670)
         Me.Controls.Add(Me.lvSearchResults)
         Me.Controls.Add(Me.btnParent)
         Me.Controls.Add(Me.tsButtons)
@@ -668,7 +667,6 @@ Partial Class frmAnalyze
         Me.Controls.Add(Me.btnSingle)
         Me.Controls.Add(Me.txtSingle)
         Me.KeyPreview = True
-        Me.Margin = New System.Windows.Forms.Padding(4)
         Me.Name = "frmAnalyze"
         Me.Text = "Boundary Analyzer"
         Me.tabDetail.ResumeLayout(False)
@@ -766,4 +764,6 @@ Partial Class frmAnalyze
     Friend WithEvents colBType As ColumnHeader
     Friend WithEvents colBName As ColumnHeader
     Friend WithEvents colBPar As ColumnHeader
+    Friend WithEvents tsmiChildSubareaReview As ToolStripMenuItem
+    Friend WithEvents tsmiSubareaReview As ToolStripMenuItem
 End Class

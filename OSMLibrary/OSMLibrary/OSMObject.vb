@@ -63,20 +63,23 @@ Public MustInherit Class OSMObject
                 __Placeholder = value
             End Set
         End Property
-        ''' <summary>
-        ''' Indicates if the history of the object has been loaded, and not just the latest version.
-        ''' </summary>
-        ''' <returns>True if the object history is available</returns>
-        Public ReadOnly Property HistoryLoaded As Boolean
-            Get
-                Return __HistoryLoaded
-            End Get
-        End Property
-        ''' <summary>
-        ''' Returns a shallow clone of the object
-        ''' </summary>
-        ''' <returns></returns>
-        Public Overridable Function Clone() As OSMObject
+    ''' <summary>
+    ''' Indicates if the history of the object has been loaded, and not just the latest version.
+    ''' </summary>
+    ''' <returns>True if the object history is available</returns>
+    Public Property HistoryLoaded As Boolean
+        Get
+            Return __HistoryLoaded
+        End Get
+        Set(value As Boolean)
+            __HistoryLoaded = value
+        End Set
+    End Property
+    ''' <summary>
+    ''' Returns a shallow clone of the object
+    ''' </summary>
+    ''' <returns></returns>
+    Public Overridable Function Clone() As OSMObject
             Dim xNew As OSMObject = DirectCast(Me.MemberwiseClone(), OSMObject)
             xNew.__Tags = __Tags.Clone()
             Changed = True
@@ -90,8 +93,8 @@ Public MustInherit Class OSMObject
         ''' <param name="s">String to be escaped</param>
         ''' <returns>Escaped string</returns>
         Public Shared Function JSONString(s As String) As String
-            Return """" & Replace(s, """", "\""") & """"
-        End Function
+        Return """" & Replace(Replace(s, "\", "\\"), """", "\""") & """"
+    End Function
         Public ReadOnly Property TagJSON As String
             Get
                 Dim xTag As OSMTag
@@ -185,31 +188,36 @@ Public MustInherit Class OSMObject
                 Return OSMObject.ObjectTypeString(Type)
             End Get
         End Property
-        ''' <summary>
-        ''' Returns a single character string representing the object type
-        ''' </summary>
-        ''' <param name="t">An <c>ObjectType</c> value</param>
-        ''' <returns>A string: w, n, r, c or ?</returns>
-        Public Shared ReadOnly Property ObjectTypeChar(t As ObjectType) As String
-            Get
-                Select Case t
-                    Case OSMObject.ObjectType.Way
-                        Return "w"
-                    Case OSMObject.ObjectType.Node
-                        Return "n"
-                    Case OSMObject.ObjectType.Relation
-                        Return "r"
-                    Case OSMObject.ObjectType.Changeset
-                        Return "c"
-                End Select
-                Return "?"
-            End Get
-        End Property
-        ''' <summary>
-        ''' Loads the generic fields (applicable to all object types) from the given XML
-        ''' </summary>
-        ''' <param name="x">The XML node containing the object data</param>
-        Public Sub LoadGenericXML(x As Xml.XmlNode)
+    ''' <summary>
+    ''' Returns a single character string representing the object type
+    ''' </summary>
+    ''' <param name="t">An <c>ObjectType</c> value</param>
+    ''' <returns>A string: w, n, r, c or ?</returns>
+    Public Shared ReadOnly Property ObjectTypeChar(t As ObjectType) As String
+        Get
+            Select Case t
+                Case OSMObject.ObjectType.Way
+                    Return "w"
+                Case OSMObject.ObjectType.Node
+                    Return "n"
+                Case OSMObject.ObjectType.Relation
+                    Return "r"
+                Case OSMObject.ObjectType.Changeset
+                    Return "c"
+            End Select
+            Return "?"
+        End Get
+    End Property
+    Public ReadOnly Property ObjectTypeChar() As String
+        Get
+            Return ObjectTypeChar(Me.Type)
+        End Get
+    End Property
+    ''' <summary>
+    ''' Loads the generic fields (applicable to all object types) from the given XML
+    ''' </summary>
+    ''' <param name="x">The XML node containing the object data</param>
+    Public Sub LoadGenericXML(x As Xml.XmlNode)
             Dim sTmp As String
             ID = Long.Parse(x.Attributes("id").InnerText)
             UID = ULong.Parse(GetAttr(x, "uid", "0"))
@@ -406,9 +414,19 @@ Public MustInherit Class OSMObject
                 x.WriteEndElement()
             Next
         End Sub
-        Public Overridable Sub SerializeEnd(x As XmlWriter)
-        End Sub
-        Public Overridable ReadOnly Property VersionByNumber(v As Long) As OSMObject
+    Public Function EnsureHistoryLoaded(xRet As OSMRetriever) As Boolean
+        If HistoryLoaded Then Return True
+        Dim xHist As OSMObject = xRet.GetOSMObjectHistory(Type, ID)
+        If xHist Is Nothing Then Return False
+        For Each xVer In xHist.Versions
+            Versions.AddLast(xVer)
+        Next
+        HistoryLoaded = True
+        Return True
+    End Function
+    Public Overridable Sub SerializeEnd(x As XmlWriter)
+    End Sub
+    Public Overridable ReadOnly Property VersionByNumber(v As Long) As OSMObject
             Get
                 Dim vn As LinkedListNode(Of OSMObject)
                 vn = Versions.First
